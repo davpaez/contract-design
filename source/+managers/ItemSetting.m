@@ -23,24 +23,24 @@ classdef ItemSetting < matlab.mixin.Copyable
         FILE_INFO    = 'FILE_INFO'
         
         % Problem
-        TYPE_EXP        = 'TYPE_EXP'
-        TIME_RES        = 'TIME_RES'
-        DISC_RATE       = 'DISC_RATE'
+        TYPE_EXP        = 'TYPE_EXP'    % Type of experiment
+        TIME_RES        = 'TIME_RES'    % Time resolution
+        DISC_RATE       = 'DISC_RATE'   % Annual discount rate
         
         % Optimization
-        NUM_REALIZ      = 'NUM_REALIZ'
-        MAX_ITER        = 'MAX_ITER'
-        TOL             = 'TOL'
+        NUM_REALIZ      = 'NUM_REALIZ'  % Number of realizations
+        MAX_ITER        = 'MAX_ITER'    % Maximum iterations
+        TOL             = 'TOL'         % Tolerance
         
         % Realization
         
         
         % Contract
-        CON_DUR         = 'CON_DUR'
-        PERF_THRESH     = 'PERF_THRESH'
-        REV             = 'REV'
-        INV             = 'INV'
-        CONTRIB         = 'CONTRIB'
+        CON_DUR         = 'CON_DUR'     % Contract duration
+        PERF_THRESH     = 'PERF_THRESH' % Performance threshold
+        REV             = 'REV'         % Revenue rate
+        INV             = 'INV'         % Initial investment
+        CONTRIB         = 'CONTRIB'     % Contributions payment schedule
         MAX_SUM_PEN     = 'MAX_SUM_PEN'
         PEN_POLICY      = 'PEN_POLICY'
         
@@ -58,7 +58,6 @@ classdef ItemSetting < matlab.mixin.Copyable
         PART_CONSTR     = 'PART_CONSTR'
         STRATS_VOL_MAINT    = 'STRATS_VOL_MAINT'
         STRATS_MAND_MAINT   = 'STRATS_MAND_MAINT'
-        FIXED_MAINT_COST    = 'FIXED_MAINT_COST'
         MAINT_COST_FNC      = 'MAINT_COST_FNC'
         AGENT_UTIL_FNC      = 'AGENT_UTIL_FNC'
         

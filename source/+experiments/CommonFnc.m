@@ -2,13 +2,96 @@ classdef CommonFnc
     %SHAREDPARAMS Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
-    end
-    
     methods (Static)
         
+        
+        function force = continuousEnvForce(t)
+        %{
+        * Resembles the rain period in Colombia.
+        
+            Input
+                t:  Time
+                
+            Output
+                f:  Precipitation [mm/year]
+        %}
+            force = (-(51*sin(t*2*pi./0.5 + pi/4))+86)*12;
+        end
+        
+        
+        function r = continuousRespFunction(f, d, v, t)
+        %{
+        * 
+        
+            Input
+                f:  Continuous environmental force
+                d:  Demand
+                v:  Performance
+                t:  Time
+                
+            Output
+                r:  Response
+        %}
+            r = -(f./1000).*20.*(0.5./((v+10)./100));
+            if v <= 0
+                r = 0;
+            end
+            
+        end
+        
+        
+        function d = demandFunction(v, fare)
+        %{
+        * Bilinear demand function
+        
+            Input
+                v:      Performance
+                fare:	Unitary price for infrastructure usage
+            
+            Output
+                d:      Rate of demand
+        %}
+            
+            a = 160000;
+            b = 40000;
+            k = 50;
+            
+            if v <= k
+                d = a*v;
+            else
+                d = a*k + b*(v-k);
+            end
+        end
+        
+        
+        function rate = revenueRate(d, fare)
+        %{
+        * 
+        
+            Input
+                d:      Rate of demand
+                fare:	Price received per unit of demand
+            
+            Output
+                rate:   Rate of revenue
+        %}
+            rate = d*fare;
+        end
+        
+        
         function finalPerf = shockResponseFunction(nullP, maxP, currentPerf, forceValue)
+        %{
+        * 
 
+            Input
+                nullP:          Minimum performance
+                maxP:           Maximum performance
+                currentPerf:    Current performance
+                forceValue:     Instantaneous environmental force
+            
+            Output
+                finalPerf:      Performance after shock
+        %}
         minF = 3;
         maxF = 30;
 
@@ -43,12 +126,31 @@ classdef CommonFnc
         end
         end
         
+        
         function up = principalUtility(thePrincipal)
+        %{
+        * 
+
+            Input
+                thePrincipal:   Principal object
+            
+            Output
+                up:             Principal's utility
+        %}
             up = thePrincipal.observation.getMeanValue();
         end
-
+        
+        
         function ua = agentUtility(theAgent)
+        %{
+        * 
 
+            Input
+                theAgent:   Agent's object
+            
+            Output
+                ua:         Agent's utility
+        %}
             if ~isempty(theAgent.payoff)
                 tm = theAgent.contract.getContractDuration();
                 ua = theAgent.payoff.getNPV(tm);
@@ -57,5 +159,6 @@ classdef CommonFnc
             end
         end
         
-    end    
+    end
+
 end

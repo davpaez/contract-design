@@ -306,15 +306,6 @@ action.setParamsValue_Random();
 
 progSet.add(action);
 
-% 94. Fixed maintenance cost
-fixedMaintCost = InputData();
-
-fixedMaintCost.setIdentifier(InputData.FIXED_MAINT_COST);
-fixedMaintCost.setAsGiven();
-fixedMaintCost.value = 4;
-
-progSet.add(fixedMaintCost);
-
 % 95. Maintenance cost function
 fnc = Function();
 
@@ -323,7 +314,6 @@ fnc.setAsGiven();
 fnc.equation = @(current, goal)maintenanceCostFunction( inv.value, ...
                                                         nullp.value, ...
                                                         maxp.value, ...
-                                                        fixedMaintCost.value, ...
                                                         current, ...
                                                         goal);
 
@@ -351,7 +341,7 @@ end
 
 %% Auxiliar functions
 
-function cost = maintenanceCostFunction(inv, nullP, maxP, fixedCost, currentP, goalP)
+function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
 
     % inv:      Cost of construction: Investment
     % nullP:    Null performance
@@ -361,7 +351,8 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, fixedCost, currentP, g
     % Maintenance cost can be at most epsilon times the value
     % of the construction investment
     epsilon = 0.2;
-
+    fixedCost = 4;
+    
     cost = ((goalP-currentP) / (maxP-nullP))*epsilon*inv + fixedCost;
 
     assert(isreal(cost), 'Cost must be a real number.')
