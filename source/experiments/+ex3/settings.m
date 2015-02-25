@@ -141,7 +141,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.SHOCK_RESP_FNC);
 fnc.setAsGiven();
-fnc.equation = @(currentPerf, forceValue)experiments.CommonFnc.shockResponseFunction( nullp.value, ...
+fnc.equation = @(currentPerf, forceValue)CommonFnc.shockResponseFunction( nullp.value, ...
                                                                 maxp.value, ...
                                                                 currentPerf, ...
                                                                 forceValue);
@@ -271,7 +271,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.PRINCIPAL_UTIL_FNC);
 fnc.setAsGiven();
-fnc.equation = @experiments.CommonFnc.principalUtility;
+fnc.equation = @CommonFnc.principalUtility;
 
 progSet.add(fnc);
 
@@ -324,7 +324,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.AGENT_UTIL_FNC);
 fnc.setAsGiven();
-fnc.equation = @experiments.CommonFnc.agentUtility;
+fnc.equation = @CommonFnc.agentUtility;
 
 progSet.add(fnc);
 
@@ -360,8 +360,8 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
 end
 
 function dydt = deteriorationRate(t,v)
-a = 1.3;
-b = 2.3;
+a = 1.2;
+b = 1.3;
 vi = 100;
 
 dydt = -15;

@@ -141,7 +141,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.SHOCK_RESP_FNC);
 fnc.setAsGiven();
-fnc.equation = @(currentPerf, forceValue)experiments.CommonFnc.shockResponseFunction( nullp.value, ...
+fnc.equation = @(currentPerf, forceValue)CommonFnc.shockResponseFunction( nullp.value, ...
                                                                 maxp.value, ...
                                                                 currentPerf, ...
                                                                 forceValue);
@@ -230,7 +230,7 @@ data = InputData();
 
 data.setIdentifier(ItemSetting.NAT_HAZARD);
 data.setAsGiven();
-data.value = false;
+data.value = true;
 
 progSet.add(data);
 
@@ -240,7 +240,7 @@ action = Action(Action.SHOCK, ItemSetting.NATURE);
 action.setIdentifier(ItemSetting.STRATS_SHOCK)
 action.setAsGiven();
 action.selectStrategy(1);
-action.setParamsValue_Random();
+%action.setParamsValue_Random();
 
 progSet.add(action);
 
@@ -252,7 +252,7 @@ action = Action(Action.INSPECTION, ItemSetting.PRINCIPAL);
 
 action.setIdentifier(ItemSetting.STRATS_INSP);
 action.setAsGiven();
-action.selectStrategy(3);
+action.selectStrategy(2);
 %action.setParamsValue_Random();
 
 progSet.add(action);
@@ -271,7 +271,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.PRINCIPAL_UTIL_FNC);
 fnc.setAsGiven();
-fnc.equation = @experiments.CommonFnc.principalUtility;
+fnc.equation = @CommonFnc.principalUtility;
 
 progSet.add(fnc);
 
@@ -324,7 +324,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.AGENT_UTIL_FNC);
 fnc.setAsGiven();
-fnc.equation = @experiments.CommonFnc.agentUtility;
+fnc.equation = @CommonFnc.agentUtility;
 
 progSet.add(fnc);
 
@@ -352,7 +352,7 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
     % of the construction investment
     epsilon = 0.2;
     fixedCost = 4;
-    
+
     cost = (  sqrt((goalP-nullP) / (maxP-nullP)) - ...
               sqrt((currentP-nullP) / (maxP-nullP)))*epsilon*inv + fixedCost;
 
@@ -364,5 +364,5 @@ a = 1.3;
 b = 2.3;
 vi = 100;
 
-dydt = -15;
+dydt = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t;
 end

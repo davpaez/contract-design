@@ -40,7 +40,7 @@ data = InputData();
 
 data.setIdentifier(ItemSetting.TYPE_EXP);
 data.setAsGiven();
-data.value = Experiment.SING;
+data.value = Experiment.DISP;
 
 progSet.add(data);
 
@@ -69,7 +69,7 @@ data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
 data.setAsGiven();
-data.value = 500;
+data.value = 100;
 
 progSet.add(data);
 
@@ -141,7 +141,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.SHOCK_RESP_FNC);
 fnc.setAsGiven();
-fnc.equation = @(currentPerf, forceValue)experiments.CommonFnc.shockResponseFunction( nullp.value, ...
+fnc.equation = @(currentPerf, forceValue)CommonFnc.shockResponseFunction( nullp.value, ...
                                                                 maxp.value, ...
                                                                 currentPerf, ...
                                                                 forceValue);
@@ -240,7 +240,7 @@ action = Action(Action.SHOCK, ItemSetting.NATURE);
 action.setIdentifier(ItemSetting.STRATS_SHOCK)
 action.setAsGiven();
 action.selectStrategy(1);
-%action.setParamsValue_Random();
+action.setParamsValue_Random();
 
 progSet.add(action);
 
@@ -252,7 +252,7 @@ action = Action(Action.INSPECTION, ItemSetting.PRINCIPAL);
 
 action.setIdentifier(ItemSetting.STRATS_INSP);
 action.setAsGiven();
-action.selectStrategy(2);
+action.selectStrategy(3);
 %action.setParamsValue_Random();
 
 progSet.add(action);
@@ -271,7 +271,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.PRINCIPAL_UTIL_FNC);
 fnc.setAsGiven();
-fnc.equation = @experiments.CommonFnc.principalUtility;
+fnc.equation = @CommonFnc.principalUtility;
 
 progSet.add(fnc);
 
@@ -324,7 +324,7 @@ fnc = Function();
 
 fnc.setIdentifier(ItemSetting.AGENT_UTIL_FNC);
 fnc.setAsGiven();
-fnc.equation = @experiments.CommonFnc.agentUtility;
+fnc.equation = @CommonFnc.agentUtility;
 
 progSet.add(fnc);
 
