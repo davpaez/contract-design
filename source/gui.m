@@ -12,10 +12,6 @@ function varargout = gui()
 close all
 
 gui_State = struct('gui_Name', mfilename, ...
-                   'gui_OpeningFcn', @single_ui_OpeningFcn, ...
-                   'gui_OutputFcn', @single_ui_OutputFcn, ...
-                   'gui_LayoutFcn', [] , ...
-                   'gui_Callback', [], ...
                    'window_props', []);
 
 init(gui_State);
@@ -48,6 +44,8 @@ function init(gui_State)
                           'Position', posVec,...
                           'Visible','off');
     
+    guidata(hMainFigure, gui_State);
+    
     hMainFigure.Visible = 'on';
     
     %% Tabs
@@ -58,10 +56,13 @@ function init(gui_State)
                         (heightWindow-2*margin)];
                     
     tabgp = uitabgroup(hMainFigure, 'Units', 'pixels', ...
-                                    'Position', tabGroup_posVec);
+                                    'Position', tabGroup_posVec, ...
+                                    'Tag', 'tabgroup');
     
-    tab1 = uitab(tabgp,'Title','Experiment');
-    tab2 = uitab(tabgp,'Title','Results');
+    tab1 = uitab(tabgp,'Title','Experiment', ...
+                        'Tag', 'tab1');
+    tab2 = uitab(tabgp,'Title','Results', ...
+                        'Tag', 'tab2');
     
     %% Panels
     
@@ -83,6 +84,10 @@ function init(gui_State)
                             'Position', [20 20 width_panels 80], ...
                             'Tag', 'panel3');
     
+    panel4 = uipanel(tab2,  'Title', 'Overview', ...
+                            'Units', 'pixels', ...
+                            'Position', [20 300 width_panels 120], ...
+                            'Tag', 'panel4');
     % Panels for tab2
     
     %% Buttons
@@ -105,32 +110,48 @@ function init(gui_State)
                         'Style', 'pushbutton', ...
                         'String', 'Run experiment', ...
                         'Position', [20 15 150 30],...
-                        'Callback', [], ...
+                        'Callback', @button3_callback, ...
                         'Tag', 'button3');
-    
-    %% Edit text
-                    
-    edit1 = uicontrol(  panel1,...
-                        'Style','edit',...
-                        'String','Enter directory path...',...
-                        'Position',[120 17 670 28], ...
-                        'Tag', 'edit1');
 
     %% Static text
     
-    static1 = uicontrol(panel2, ...
+    text1 = uicontrol(  panel1,...
                         'Style','text',...
                         'BackgroundColor', 'white', ...
-                        'String','Select a data set.',...
+                        'FontSize', 10, ...
+                        'String','',...
+                        'Position',[120 20 670 18], ...
+                        'Tag', 'text1');
+    
+    text2 = uicontrol(panel2, ...
+                        'Style','text',...
+                        'BackgroundColor', 'white', ...
+                        'FontSize', 10, ...
+                        'String','No experiment has been selected.',...
                         'HorizontalAlignment', 'left', ...
-                        'Position',[350 20 440 180]);
+                        'Position',[350 20 440 180], ...
+                        'Tag', 'text2');
+                    
+    text3 = uicontrol(panel4, ...
+                        'Style','text',...
+                        'BackgroundColor', 'white', ...
+                        'FontSize', 10, ...
+                        'String','No experiment has been selected.',...
+                        'HorizontalAlignment', 'left', ...
+                        'Position',[350 20 440 180], ...
+                        'Tag', 'text3');
+    
+    
+    
     %% Tables
     
     table1 = uitable(   panel2, ...
                         'Data', [],... 
-                        'ColumnName', {'Name', 'Type'},...
+                        'ColumnName', {'Id', 'Type'},...
                         'ColumnEditable', [false false], ...
-                        'Position', [20 60 300 140]);
+                        'Position', [20 60 300 140], ...
+                        'CellSelectionCallback', @table1_callback, ...
+                        'Tag', 'table1');
     
     %% Progress bar
     
@@ -151,6 +172,18 @@ function init(gui_State)
             'EdgeColor', 'none', ...
             'Tag', 'progressPatch');
     
+    %% Axes
+    
+%     ax2 = axes( 'Units', 'pixels', ...
+%                 'Position', [190 20 600 10], ...
+%                 'XLim',[0 1], ...
+%                 'YLim',[0 1],...
+%                 'Color','white',...
+%                 'Box', 'on', ...
+%                 'XColor', [0.4314  0.4314  0.4314],...
+%                 'YColor', [0.4314  0.4314  0.4314],...
+%                 'Parent', panel4);
+    
     %% Finilize window setup
     
     hMainFigure.Visible = 'on';
@@ -166,10 +199,87 @@ end
 function button1_callback(hObject, callbackdata)
 % Browse folder for experiments
     
-    p = uigetdir();
+    folderExperiments = uigetdir();
     
-    h = findobj('Tag','edit1');
-    h.String = p;
+    if ischar(folderExperiments)
+        
+        htext1 = findobj('Tag','text1');
+        htext1.String = folderExperiments;
+        
+        [tableData exp_array] = searchExperiments(folderExperiments);
+        
+        htext2 = findobj('Tag', 'text2');
+        htext2.String = [':::  ', num2str(length(exp_array)), ' experiments successfully loaded.','  :::'];
+        
+        htable1 = findobj('Tag','table1');
+        htable1.Data = tableData;
+        
+        hpanel2 = findobj('Tag', 'panel2');
+        
+        if length(exp_array) > 0
+            setappdata(hpanel2, 'array_progsettings', exp_array);
+        else
+            rmappdata(hpanel2, 'array_progsettings');
+        end
+    end
+end
+
+function table1_callback(hObject, callbackdata)
+% Update description text box for selected experiment
+    
+    hpanel2 = findobj('Tag', 'panel2');
+    htext2 = findobj('Tag','text2');
+    
+    if length(callbackdata.Indices) > 0
+        import managers.ItemSetting
+
+        data = getappdata(hpanel2, 'array_progsettings');
+
+        rowSelected = callbackdata.Indices(1);
+
+        selectedExp = data{rowSelected};
+
+        setappdata(hpanel2, 'current_progsettings', selectedExp);
+        
+        % Information
+        typeExp = selectedExp.returnItemSetting(ItemSetting.TYPE_EXP).value;
+        numRlz = selectedExp.returnItemSetting(ItemSetting.NUM_REALIZ).value;
+        inspectionStrategy = selectedExp.returnItemSetting(ItemSetting.STRATS_INSP);
+        penaltyStrategy = selectedExp.returnItemSetting(ItemSetting.PEN_POLICY);
+        volMaintStrategy = selectedExp.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
+        mandMaintStrategy = selectedExp.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
+        
+        description = cell(1,0);
+        
+        description{end+1} = ['Type of experiment:  ', typeExp];
+        description{end+1} = [''];
+        description{end+1} = ['Realizations per game:  ', num2str(numRlz)];
+        description{end+1} = [''];
+        description{end+1} = ['Inspection strategy: ', num2str(inspectionStrategy.getIndexSelectedStrategy())];
+        description{end+1} = ['Penalty strategy: ', num2str(penaltyStrategy.getIndexSelectedStrategy())];
+        description{end+1} = ['Vol maint strategy: ', num2str(volMaintStrategy.getIndexSelectedStrategy())];
+        description{end+1} = ['Mand maint strategy: ', num2str(mandMaintStrategy.getIndexSelectedStrategy())];
+        
+        htext2.String = description;
+    else
+        rmappdata(hpanel2, 'current_progsettings');
+        htext2.String = 'No experiment has been selected.';
+    end
+end
+
+function button3_callback(hObject, callbackdata)
+% Runs selected experiment
+    
+    import managers.Experiment
+    
+    hpanel2 = findobj('Tag', 'panel2');
+    progSettings = getappdata(hpanel2, 'current_progsettings');
+    
+    experiment = Experiment(progSettings);
+    experiment.run()
+    
+    hpanel3 = findobj('Tag', 'panel3');
+    setappdata(hpanel3, 'experiment', experiment);
 end
 
 %%  Utility functions for MYGUI
@@ -177,7 +287,7 @@ end
 function str = getPathField()
 % Get path string of experiments folder
 
-    h = findobj('Tag','edit1');
+    h = findobj('Tag','text1');
     str = h.String;
 end
 
@@ -185,4 +295,32 @@ function updateProgressBar(value)
 % Updates the progress bar to the value parameter
     p = findobj('Tag','progressPatch');
     p.XData(2:3) = value;
+end
+
+function [data_table, exp_array] = searchExperiments(folderPath)
+% Return info of all experiments in folder
+
+    import managers.ItemSetting
+    
+    exp_folder = what(folderPath);
+    exp_number = length(exp_folder.packages);
+    
+    data_table = cell(exp_number, 2);
+     exp_array = cell(exp_number, 1);
+     
+    if exp_number > 0
+        
+        addpath(folderPath)
+
+        for i=1:exp_number
+            settingsObject = feval([exp_folder.packages{i}, '.settings']);
+            exp_array{i} = settingsObject;
+            data_table{i,1} = exp_folder.packages{i};
+            data_table{i,2} = settingsObject.returnItemSetting(ItemSetting.TYPE_EXP).value;
+        end
+
+    else
+        warning('No experiment package was found in the specified folder.')
+    end
+    
 end
