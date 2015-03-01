@@ -11,7 +11,8 @@ import dataComponents.*
 import managers.*
 
 % Load program settings
-progSettings = experiments.ex7.settings();
+addpath('experiments');
+progSettings = ex6.settings();
 experim = Experiment(progSettings);
 experim.run()
-experim.report()
+%experim.report()

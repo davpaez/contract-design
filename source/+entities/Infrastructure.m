@@ -17,7 +17,7 @@ classdef Infrastructure < matlab.mixin.Copyable
         initialPerf
         
         detRate   % Symbolic function of progressive deterioration
-        
+        contResponseFunction
         shockResponseFunction
         
         % ----------- %

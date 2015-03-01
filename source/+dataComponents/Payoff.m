@@ -391,7 +391,7 @@ classdef Payoff < matlab.mixin.Copyable
         specified (whether index or time)
         
             Input
-            
+                
             Output
                 
         %}

@@ -69,7 +69,7 @@ data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
 data.setAsGiven();
-data.value = 100;
+data.value = 1000;
 
 progSet.add(data);
 
