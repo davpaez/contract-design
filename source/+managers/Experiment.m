@@ -5,10 +5,10 @@ classdef Experiment < handle
     properties (Constant, Hidden = true)
         
         % Types of experiments
-        SING = 'SING'
-        DISP = 'DISP'
-        SENS = 'SENS'
-        OPT = 'OPT'
+        SING = 'SING'   % Single realization of a game
+        DISP = 'DISP'   % Many realizations of the same game (same parameters)
+        SENS = 'SENS'   % Many realizations of a games where parameters are varied
+        OPT = 'OPT'     % Optimization of objective function by changing game parameters
     end
     
     properties (GetAccess = public, SetAccess = protected)
@@ -142,7 +142,7 @@ classdef Experiment < handle
             fi.showLogFile();
         end
         
-        function report(thisEx)
+        function data = report(thisEx)
             import managers.*
             
             % Type of experiment
@@ -150,7 +150,7 @@ classdef Experiment < handle
             
             switch tp
                 case Experiment.SING
-                    thisEx.reportSingle();
+                    data = thisEx.reportSingle();
                 
                 case Experiment.DISP
                     thisEx.reportDispersion();
@@ -192,9 +192,8 @@ classdef Experiment < handle
         
         %% Reporters
         
-        function reportSingle(thisEx)
-            import managers.*
-            thisEx.gameEvals.report();
+        function data = reportSingle(thisEx)
+            data = thisEx.gameEvals.report();
         end
         
         

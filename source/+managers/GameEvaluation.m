@@ -72,7 +72,7 @@ classdef GameEvaluation < handle
             n = thisGame.numRealizations;
             
             %parfor_progress(N);
-            %p = ProgressBar(N);
+            p = ProgressBar(n);
             
             progSet = thisGame.programSettings;
             tic
@@ -80,11 +80,11 @@ classdef GameEvaluation < handle
                 r{i} = Realization(progSet);
                 r{i}.run()
                 %parfor_progress;
-                %p.progress();
+                p.progress();
                  
             end
             %parfor_progress(0);
-            %p.stop();
+            p.stop();
             
             thisGame.realizations = r;
             toc
@@ -94,19 +94,76 @@ classdef GameEvaluation < handle
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
         
-        function report(thisGame)
+        function data = report(thisGame, hFigure)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             if length(thisGame.realizations) > 1
-                thisGame.reportDispersion();
+                data = thisGame.reportDispersion(hFigure);
             else
-                thisGame.reportRealization();
+                data = thisGame.reportRealization(hFigure);
             end
         end
         
-        function reportRealization(thisGame)
-            thisGame.realizations.report();
+        
+        function data = reportRealization(thisGame, hFigure)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            data = thisGame.realizations.report();
         end
         
+        
         function reportDispersion(thisGame)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            thisGame.plotPathDispersion();
+            thisGame.plotUtilityDispersion();
+        end
+        
+        function plotUtilityDispersion(thisGame)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            numRlz = thisGame.numRealizations;
+            
+            ua = zeros(numRlz, 1);
+            up = zeros(numRlz, 1);
+            
+            for i=1:numRlz
+                utilVector = thisGame.realizations{i}.utilityPlayers();
+                ua(i) = utilVector(1);
+                up(i) = utilVector(2);
+            end
+            
+            scatter(ua, up)
+        end
+        
+        function plotPathDispersion(thisGame)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             rlzArray = thisGame.realizations;
 
             n_rlz = length(rlzArray);
@@ -187,12 +244,9 @@ classdef GameEvaluation < handle
                 assert((sum(prel)-1)<eps*4);
                 m(:,i) = prel;
             end
-
-            figure
-            plot(t,p,'*')
-            xlabel('Time')
-            ylabel('Perf')
-
+            
+            % Plotting figure
+            
             figure
             imagesc([interval/2:interval:maxTime],[minPerf+perfInterval/2:perfInterval:100],m)
             h = colorbar;

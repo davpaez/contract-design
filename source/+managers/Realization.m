@@ -25,6 +25,8 @@ classdef Realization < matlab.mixin.Copyable
         
         fileInfo
         
+        % Function handles
+        fh = struct
     end
         
     %% Static methods
@@ -66,6 +68,12 @@ classdef Realization < matlab.mixin.Copyable
             % Creating local copies of 
             thisRlz.contract = Contract(progSet);
             thisRlz.problem = Problem(progSet);
+            
+            % Creating function handles
+            thisRlz.fh.contEnvForce = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            thisRlz.fh.demandRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            thisRlz.fh.revenueRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            thisRlz.fh.contResponse = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             
             % Intial payoffs
             
@@ -170,11 +178,9 @@ classdef Realization < matlab.mixin.Copyable
                 thisRlz.fileInfo.printLog( ...
                     ['Performance before operation execution ',num2str(thisRlz.nature.solvePerformanceForTime(operation.time)),'\n']);
                 
-%                 if operation.time == lastTime
-%                     error('Hola')
-%                 end
+                assert(operation.time > thisRlz.time)
                 
-                lastTime = operation.time;
+                
                 
                 % Executes the earliest submitted operation
                 thisRlz.executeOperation(operation);
@@ -273,6 +279,12 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Operation
             
             mandMaintFlag = false;
+            
+            % Evolve the system up to the time of the operation to be
+            % executed
+            thisRlz.evolveContinuously(operation.time);
+            
+            % Execute the operation (execute discrete action)
             
             switch operation.type
                 case Operation.INSPECTION
@@ -607,6 +619,50 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
+        function evolveContinuously(thisRlz, tf)
+        %{
+        * 
+        
+            Input
+                
+            
+            Output
+                
+        %}
+            %import utils.ContinuousSolver
+            
+            fare = 72/10e7;
+            
+            %  ------ Differential equations for stocks -------
+            
+            contEnvForce = @CommonFnc.continuousEnvForce;
+            contRespFun = @CommonFnc.continuousRespFunction;
+            demand = @CommonFnc.demandFunction;
+            revenue = @CommonFnc.revenueRate;
+
+            v_f = @(t,v) contRespFun(   contEnvForce(t), ...
+                                        demand(v, fare), ...
+                                        v, ...
+                                        t);
+
+            d_f = @(v) demand(v, fare);
+
+            ba_f = @(v) revenue(demand(v, fare), fare);
+
+            fun = @(t,x) [  v_f(t,x(1)); ...
+                            d_f(x(1));...
+                            ba_f(x(1))];
+            
+            currentPerf = thisRlz.nature.infrastructure.getPerformance();
+            initialDemand = 0;
+            currentAgentBalance = -400;
+            
+            [t,x] = ode45(fun, [thisRlz.time, tf], [currentPerf; initialDemand; currentAgentBalance]);
+            
+            %error('hola')
+        end
+        
+        
         function finishRealization(thisRlz)
         %{
         * 
@@ -647,7 +703,7 @@ classdef Realization < matlab.mixin.Copyable
         % ----------------------------------------------------------------
         
         
-        function value = utilityPlayers(thisRlz)
+        function [ua, up] = utilityPlayers(thisRlz)
         %{
         * 
         
@@ -657,7 +713,8 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
-            value = [thisRlz.agent.utility, thisRlz.principal.utility];
+            ua = thisRlz.agent.utility;
+            up = thisRlz.principal.utility;
         end
         
         
@@ -729,7 +786,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function report(thisRlz)
+        function data = report(thisRlz)
         %{
         * 
         
@@ -738,124 +795,197 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
+            import dataComponents.Event
             
-        %% Import classes
-        import dataComponents.Event
-
-
-        %% Figure 1. Interaction sequence
+            [utilityAgent, utilityPrincipal] = thisRlz.utilityPlayers();
             contractDuration = thisRlz.contract.getContractDuration();
-
-            width_fig1 = 700; % pixels
-            height_fig1 = 400; % pixels
-
-        % ---------:::::::::::::::: Subfigure 1 ::::::::::::::::---------------
-
-        %   ::::--> Degradation path
-
-            finalTimePlot = (1+0.05)*contractDuration;
-            threshold = thisRlz.contract.getPerfThreshold();
-
-            perfHistory = thisRlz.nature.infrastructure.history.getData();
             
-            figure('units','pixels','outerposition',[100 100 width_fig1 height_fig1]);
-
-            subplot(3,1,1)
-            plot(perfHistory.time,perfHistory.value)
-            hold on
-            plot([0,finalTimePlot], [threshold, threshold],':', 'Color',[0.1 0.1 0.1])
-            ylabel('V')
-            xlim([0 finalTimePlot])
-            ylim([0 100])
-
-        %   ::::--> Events markers
-
-            % Inspections Only
-            inspectionMarker = thisRlz.principal.eventList.getMarkersInfo(Event.INSPECTION, thisRlz.principal.observation);
-            if ~isempty(inspectionMarker)
-                plot(inspectionMarker.time, inspectionMarker.value, 'o', 'MarkerEdgeColor','black','MarkerSize', 6)
-            end
-
-            % Detections
-            detectionMarker = thisRlz.principal.eventList.getMarkersInfo(Event.DETECTION, thisRlz.principal.observation);
-            if ~isempty(detectionMarker)
-                plot(detectionMarker.time, detectionMarker.value, 'd', 'MarkerEdgeColor','red','MarkerSize', 8)
-            end
-
-            % Maintenances
-            volMaintMarker = thisRlz.agent.eventList.getMarkersInfo(Event.VOL_MAINT, thisRlz.agent.observation);
-            if ~isempty(volMaintMarker)
-                plot(volMaintMarker.time, volMaintMarker.value,'+', ...
-                    'MarkerEdgeColor',[13 209 62]/255, ...
-                    'MarkerFaceColor','green', ...
-                    'MarkerSize', 4)
-            end
-
-            % Shocks
-            shockMarker = thisRlz.agent.eventList.getMarkersInfo(Event.SHOCK, thisRlz.agent.observation);
-            if ~isempty(shockMarker)
-                plot(shockMarker.time, shockMarker.value,'x','MarkerEdgeColor','magenta','MarkerSize', 7)
-            end
-            
-            ax = gca;
-            ax.Box = 'off';
-
-        % ---------:::::::::::::::: Subfigure 2 ::::::::::::::::---------------
-
-        balP = thisRlz.principal.payoff.getBalanceHistory(contractDuration);
-        balA = thisRlz.agent.payoff.getBalanceHistory(contractDuration);
-
-        realPerfMeanValue = thisRlz.nature.infrastructure.history.getMeanValueHistory();
-        perceivedPerfMeanValue = thisRlz.principal.observation.getMeanValueHistory();
-
-        % Plot Balance vs t : AGENT
-        subplot(3,1,2)
-
-        plot(balA.time, balA.balance);
-        hold on
-        h2 = plot(balA.time, balA.balance, '+', 'MarkerSize', 2, 'MarkerEdgeColor','r');
-        
-        %legend(h2,'Discrete flow', 'Location', 'best')
-        
-        %title('Agent Balance')
-        ylabel('b_{A} ($)')
-        xlim([0 finalTimePlot])
-        
-        ax = gca;
-        ax.Box = 'off';
-        
-        % ---------:::::::::::::::: Subfigure 3 ::::::::::::::::---------------
-
-        % Plot PV vs t : PRINCIPAL
-        subplot(3,1,3)
-
-        %{
-        plot(balP.time, balP.balance)
-        hold on
-        plot(balP.time, balP.balance,'*')
-        %}
-
-        plot(perceivedPerfMeanValue.time, perceivedPerfMeanValue.meanValue, '-o', ...
-            realPerfMeanValue.time, realPerfMeanValue.meanValue,'-.');
-        
-        hold on
-        %plot(perfHistory.time,perfHistory.value, 'Color', [0.9 0.9 0.9])
-
-        %legend('Perceived','Real', 'Location', 'best')
-
-        %title('Principal Balance')
-        xlabel('Time (Years)')
-        ylabel('Mean V')
-        xlim([0 finalTimePlot])
-
-        
-        set(gcf,'Color',[1 1 1])
-        
-        ax = gca;
-        ax.Box = 'off';
-        
+            data = struct(...
+                'ua',                       utilityAgent, ...
+                'up',                       utilityPrincipal, ...
+                'contractDuration',         contractDuration, ...
+                'threshold',                thisRlz.contract.getPerfThreshold(), ...
+                'maxPerf',                  thisRlz.nature.infrastructure.maxPerf, ...
+                'nullPerf',                 thisRlz.nature.infrastructure.nullPerf, ...
+                'perfHistory' ,             thisRlz.nature.infrastructure.history.getData(), ...
+                'inspectionMarker',         thisRlz.principal.eventList.getMarkersInfo(Event.INSPECTION, thisRlz.principal.observation), ...
+                'detectionMarker',          thisRlz.principal.eventList.getMarkersInfo(Event.DETECTION, thisRlz.principal.observation), ...
+                'volMaintMarker',           thisRlz.agent.eventList.getMarkersInfo(Event.VOL_MAINT, thisRlz.agent.observation), ...
+                'shockMarker',              thisRlz.agent.eventList.getMarkersInfo(Event.SHOCK, thisRlz.agent.observation), ...
+                'realPerfMeanValue',        thisRlz.nature.infrastructure.history.getMeanValueHistory(), ...
+                'perceivedPerfMeanValue',   thisRlz.principal.observation.getMeanValueHistory(), ...
+                'balP',                     thisRlz.principal.payoff.getBalanceHistory(contractDuration), ...
+                'balA',                     thisRlz.agent.payoff.getBalanceHistory(contractDuration) );
         end
         
+        
+        function plotRealization(thisRlz, hFigure)
+        %{
+        * 
+        
+            Input
+                
+            Output
+                
+        %}
+        
+        % Import classes
+        import dataComponents.Event
+        
+        horiz_margin = 0.05;
+        vert_margin = 0.05;
+        
+        height = (1-4*vert_margin)/3;
+        width = 0.85;
+        
+        boxColor = [0.35  0.35  0.35];
+        
+        posVec1 = [0.1    0.685    width   height];
+        posVec2 = [0.1    0.375      width   height];
+        posVec3 = [0.1    0.07                 width   height];
+        
+        ax1 = subplot('Position', posVec1, ...
+            'Parent', hFigure);
+        ax2 = subplot('Position', posVec2, ...
+            'Parent', hFigure);
+        ax3 = subplot('Position', posVec3, ...
+            'Parent', hFigure);
+        
+        % Figure 1. Interaction sequence
+        
+        contractDuration = thisRlz.contract.getContractDuration();
+        
+        width_fig1 = 700;       % pixels
+        height_fig1 = 400;      % pixels
+        
+        % ---------:::::::::::::::: Subfigure 1 ::::::::::::::::---------------
+        
+        %   ::::--> Degradation path
+        
+        finalTimePlot = (1+0.05)*contractDuration;
+        threshold = thisRlz.contract.getPerfThreshold();
+        
+        maxPerf = thisRlz.nature.infrastructure.maxPerf;
+        nullPerf = thisRlz.nature.infrastructure.nullPerf;
+        
+        perfHistory = thisRlz.nature.infrastructure.history.getData();
+        
+        set(ax1, ...
+            'XLim', [0 finalTimePlot], ...
+            'YLim', [nullPerf maxPerf],...
+            'FontSize', 8, ...
+            'Color', 'white', ...
+            'Box', 'on', ...
+            'XColor', boxColor,...
+            'YColor', boxColor, ...
+            'XTickLabel', []);
+        
+        hold(ax1, 'on')
+        grid(ax1, 'on');
+        
+        hLine1 = plot(ax1, perfHistory.time, perfHistory.value);
+        hLine2 = plot(ax1, [0, finalTimePlot], [threshold, threshold],':', ...
+            'Color',[0.7 0 0], ...
+            'LineWidth', 0.1);
+        
+        ylabel(ax1, 'Performance level')
+        
+        %   ::::--> Events markers
+        
+        % Inspections Only
+        inspectionMarker = thisRlz.principal.eventList.getMarkersInfo(Event.INSPECTION, thisRlz.principal.observation);
+        if ~isempty(inspectionMarker)
+            hLine3 = plot(ax1, ...
+                inspectionMarker.time, inspectionMarker.value, 'o', ...
+                'MarkerEdgeColor','black', ...
+                'MarkerSize', 6);
+        end
+        
+        % Detections
+        detectionMarker = thisRlz.principal.eventList.getMarkersInfo(Event.DETECTION, thisRlz.principal.observation);
+        if ~isempty(detectionMarker)
+            hLine4 = plot(ax1, ...
+                detectionMarker.time, detectionMarker.value, 'd', ...
+                'MarkerEdgeColor','red', ...
+                'MarkerSize', 8);
+        end
+        
+        % Maintenances
+        volMaintMarker = thisRlz.agent.eventList.getMarkersInfo(Event.VOL_MAINT, thisRlz.agent.observation);
+        if ~isempty(volMaintMarker)
+            hLine5 = plot(ax1, ...
+                volMaintMarker.time, volMaintMarker.value,'+', ...
+                'MarkerEdgeColor',[13 209 62]/255, ...
+                'MarkerFaceColor','green', ...
+                'MarkerSize', 4);
+        end
+        
+        % Shocks
+        shockMarker = thisRlz.agent.eventList.getMarkersInfo(Event.SHOCK, thisRlz.agent.observation);
+        if ~isempty(shockMarker)
+            hLine6 = plot(ax1, ...
+                shockMarker.time, shockMarker.value,'x', ...
+                'MarkerEdgeColor','magenta', ...
+                'MarkerSize', 7);
+        end
+        
+        hold(ax1, 'off')
+        
+        % ---------:::::::::::::::: Subfigure 2 ::::::::::::::::---------------
+        
+        balP = thisRlz.principal.payoff.getBalanceHistory(contractDuration);
+        balA = thisRlz.agent.payoff.getBalanceHistory(contractDuration);
+        
+        realPerfMeanValue = thisRlz.nature.infrastructure.history.getMeanValueHistory();
+        perceivedPerfMeanValue = thisRlz.principal.observation.getMeanValueHistory();
+        
+        set(ax2, ...
+            'XLim', [0 finalTimePlot], ...
+            'FontSize', 8, ...
+            'Color', 'white', ...
+            'Box', 'on', ...
+            'XColor', boxColor,...
+            'YColor', boxColor, ...
+            'XTickLabel', []);
+        
+        % Plot Balance vs t : AGENT
+        hold(ax2, 'on')
+        grid(ax2, 'on');
+        
+        plot(ax2, balA.time, balA.balance, '-')
+        plot(ax2, balA.time, balA.balance, '+', 'MarkerSize', 2, 'MarkerEdgeColor','r');
+        
+        %legend(ax2,'Discrete flow', 'Location', 'bestoutside')
+        ylabel(ax2, 'Agent''s balance ($)')
+        
+        % ---------:::::::::::::::: Subfigure 3 ::::::::::::::::---------------
+        
+        % Plot PV vs t : PRINCIPAL
+        
+        set(ax3, ...
+            'XLim', [0 finalTimePlot], ...
+            'FontSize', 8, ...
+            'Color', 'white', ...
+            'Box', 'on', ...
+            'XColor', boxColor,...
+            'YColor', boxColor);
+        
+        hold(ax3, 'on')
+        grid(ax3, 'on');
+        
+        plot(ax3, ...
+            perceivedPerfMeanValue.time, perceivedPerfMeanValue.meanValue, '-o', ...
+            realPerfMeanValue.time, realPerfMeanValue.meanValue,'-.');
+       
+        
+        %plot(perfHistory.time,perfHistory.value, 'Color', [0.9 0.9 0.9])
+        
+        %legend(ax3, 'Perceived','Real', 'Location', 'bestoutside')
+        
+        xlabel(ax3, 'Time')
+        ylabel(ax3, 'Mean performance')
+        
+        end
         
     end
     
@@ -879,8 +1009,8 @@ function [earliestOp, index] = returnEarliestOperation(opPrincipal, opAgent, opN
 
     opArray = {opPrincipal, opAgent, opNature};
     timeArray = [opPrincipal.time, ...
-                    opAgent.time, ...
-                    opNature.time];
+        opAgent.time, ...
+        opNature.time];
     
     [time, index] = min(timeArray);
     earliestOp = opArray{index};

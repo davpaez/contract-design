@@ -175,6 +175,33 @@ classdef Action < managers.ItemSetting
         % ---------- Accessor methods ------------------------------------
         % ----------------------------------------------------------------
         
+        function ca = returnCopyAction(thisAction)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            ca = copy(thisAction);
+        end
+        
+        
+        function index = getIndexSelectedStrategy(thisAction)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            index = thisAction.indexSelectedStrategy;
+        end
+        
+        % ----------------------------------------------------------------
+        % ---------- Mutator methods -------------------------------------
+        % ----------------------------------------------------------------
+        
         
         function selectStrategy(thisAction, index)
         %{
@@ -191,23 +218,6 @@ classdef Action < managers.ItemSetting
             thisAction.strategy = returnStrategyByIndex(stratArray, index);
             thisAction.indexSelectedStrategy = index;
         end
-        
-        
-        function ca = returnCopyAction(thisAction)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            ca = copy(thisAction);
-        end
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
         
         
         function setParamsValue_Random(thisAction)
