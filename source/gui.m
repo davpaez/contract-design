@@ -1,4 +1,4 @@
-function varargout = gui()
+function gui()
 % MYGUI Brief description of GUI.
 %       Comments displayed at the command line in response 
 %       to the help command. 
@@ -12,9 +12,9 @@ function varargout = gui()
 close all
 
 gui_State = struct('gui_Name', mfilename, ...
-                   'window_props', []);
+    'window_props', []);
 
-init(gui_State);
+layoutMainWindow(gui_State);
 
 end
 
@@ -22,7 +22,9 @@ end
 % http://www.mathworks.com/help/matlab/creating_guis/creating-figures-for-programmatic-guis.html
 % http://www.mathworks.com/help/matlab/creating_guis/adding-components-to-a-programmatic-gui.html
 
-function init(gui_State)
+
+function layoutMainWindow(gui_State)
+
     ss = get(0,'screensize');
     widthScreen = ss(3);
     heightScreen = ss(4);
@@ -42,6 +44,7 @@ function init(gui_State)
         'Toolbar','none',...
         'Units', 'pixels', ...
         'Position', posVec,...
+        'Resize', 'off', ...
         'Visible','off', ...
         'Tag', 'main');
     
@@ -163,12 +166,15 @@ function init(gui_State)
     
 end
 
+
 %%  Initialization tasks
 % http://www.mathworks.com/help/matlab/creating_guis/initializing-a-programmatic-gui.html
 
 
 %%  Callbacks for MYGUI
 % http://www.mathworks.com/help/matlab/creating_guis/adding-components-to-a-programmatic-gui.html
+
+
 function button1_callback(hObject, callbackdata)
 % Browse folder for experiments
     
@@ -180,6 +186,7 @@ function button1_callback(hObject, callbackdata)
         htext1.String = folderExperiments;
     end
 end
+
 
 function table1_callback(hObject, callbackdata)
 % Update description text box for selected experiment
@@ -224,6 +231,7 @@ function table1_callback(hObject, callbackdata)
     end
 end
 
+
 function button3_callback(hObject, callbackdata)
 % Runs selected experiment
     
@@ -239,12 +247,8 @@ function button3_callback(hObject, callbackdata)
     setappdata(hpanel3, 'experiment', experiment);
     
     hpanel4 = findobj('Tag', 'panel4');
-    child_handles = allchild(hpanel4);
     
-    for i=1:length(child_handles)
-        h = child_handles(i);
-        delete(h);
-    end
+    deleteChildHandles(hpanel4);
     
     typeExperiment = experiment.typeExp;
     
@@ -255,6 +259,9 @@ function button3_callback(hObject, callbackdata)
             layout_SING()
             
         case Experiment.DISP
+            data = experiment.report();
+            setappdata(hpanel4, 'reportDispersion', data);
+            layout_DISP()
             
         case Experiment.SENS
             
@@ -262,6 +269,7 @@ function button3_callback(hObject, callbackdata)
             
     end
 end
+
 
 function button4_callback(hObject, callbackdata)
 % Show the history of a SING experiment
@@ -445,6 +453,64 @@ function button5_callback(hObject, callbackdata)
     end
 end
 
+
+function button6_callback(hObject, callbackdata)
+
+hFigure = figure('Visible', 'off');
+
+ax1 = subplot('Position', [0.1 0.8 0.7 0.15]);
+ax2 = subplot('Position', [0.1 0.1 0.7 0.65]);
+ax3 = subplot('Position', [0.85 0.1 0.1 0.65]);
+
+hpanel4 = findobj('Tag', 'panel4');
+data = getappdata(hpanel4, 'reportDispersion');
+
+nbins = 25;
+
+histogram(ax1, data.ua, nbins);
+histogram(ax3, data.up, nbins);
+view(90,-90)
+
+scatter(ax2, data.ua, data.up)
+
+set(ax1, ...
+    'Color', hFigure.Color, ...
+    'XTick',[], ...
+    'Box', 'off', ...
+    'XColor', [0.4314  0.4314  0.4314],...
+    'YColor', [0.4314  0.4314  0.4314])
+
+set(ax3, ...
+    'Color', hFigure.Color, ...
+    'XTick',[], ...
+    'Box', 'off', ...
+    'XColor', [0.4314  0.4314  0.4314],...
+    'YColor', [0.4314  0.4314  0.4314])
+
+set(ax2, ...
+    'XColor', [0.4314  0.4314  0.4314],...
+    'YColor', [0.4314  0.4314  0.4314])
+
+xlabel(ax2, 'Agent''s utility')
+ylabel(ax2, 'Principal''s utility')
+
+hold(ax2, 'on')
+
+mean_ua = mean(data.ua);
+mean_up = mean(data.up);
+
+plot(ax2, [min(ax2.XLim), max(ax2.XLim)], [mean_up, mean_up],':', ...
+    'Color',[0.7 0 0], ...
+    'LineWidth', 0.1)
+
+plot(ax2, [mean_ua, mean_ua], [min(ax2.YLim), max(ax2.YLim)], ':', ...
+    'Color',[0.7 0 0], ...
+    'LineWidth', 0.1)
+
+hFigure.Visible = 'on';
+
+end
+
 %%  Utility functions for MYGUI
 
 function str = getPathField()
@@ -454,11 +520,13 @@ function str = getPathField()
     str = h.String;
 end
 
+
 function updateProgressBar(value)
 % Updates the progress bar to the value parameter
     p = findobj('Tag','progressPatch');
     p.XData(2:3) = value;
 end
+
 
 function [data_table, exp_array] = searchExperiments(folderPath)
 % Return info of all experiments in folder
@@ -488,10 +556,13 @@ function [data_table, exp_array] = searchExperiments(folderPath)
     
 end
 
+
 function layout_SING()
 
     hpanel4 = findobj('Tag', 'panel4');
-
+    
+    deleteChildHandles(hpanel4);
+    
     hpanel4_1 = uipanel(hpanel4, ...
         'Title', 'Overview', ...
         'Units', 'pixels', ...
@@ -517,14 +588,14 @@ function layout_SING()
     text3 = uicontrol(  hpanel4_1,...
         'Style','text',...
         'FontSize', 10, ...
-        'String','E[Ua]',...
+        'String','Ua',...
         'Position',[20 50 60 18], ...
         'Tag', 'text3');
     
     text4 = uicontrol(  hpanel4_1,...
         'Style','text',...
         'FontSize', 10, ...
-        'String','E[Up]',...
+        'String','Up',...
         'Position',[20 20 60 18], ...
         'Tag', 'text4');
     
@@ -546,15 +617,86 @@ function layout_SING()
 
 end
 
+
 function layout_DISP()
+    
+    hpanel4 = findobj('Tag', 'panel4');
+    
+    deleteChildHandles(hpanel4);
+    
+    hpanel4_1 = uipanel(hpanel4, ...
+        'Title', 'Overview', ...
+        'Units', 'pixels', ...
+        'Position', [20 20 300 115], ...
+        'Tag', 'panel4_1');
+
+    hpanel4_2 = uipanel(hpanel4, ...
+        'Title', 'Figures', ...
+        'Units', 'pixels', ...
+        'Position', [340 20 300 115], ...
+        'Tag', 'panel4_2');
+
+    button4 = uicontrol(hpanel4_2, ...
+        'Style', 'pushbutton', ...
+        'String', 'Utility disp.',...
+        'Position', [20 15 80 30],...
+        'Callback', @button6_callback, ...
+        'TooltipString', sprintf('Shows figure with dispersion of utilities\nand a histogram of each.'), ...
+        'Tag', 'button4');
+
+    data = getappdata(hpanel4, 'reportDispersion');
+    
+    mean_ua = mean(data.ua);
+    mean_up = mean(data.up);
+    
+    text3 = uicontrol(  hpanel4_1,...
+        'Style','text',...
+        'FontSize', 10, ...
+        'String','E[Ua]',...
+        'Position',[20 50 60 18], ...
+        'Tag', 'text3');
+    
+    text4 = uicontrol(  hpanel4_1,...
+        'Style','text',...
+        'FontSize', 10, ...
+        'String','E[Up]',...
+        'Position',[20 20 60 18], ...
+        'Tag', 'text4');
+    
+    text3 = uicontrol(  hpanel4_1,...
+        'Style','text',...
+        'Background', 'white', ...
+        'FontSize', 10, ...
+        'String', num2str(mean_ua),...
+        'Position',[100 50 120 18], ...
+        'Tag', 'text5');
+    
+    text4 = uicontrol(  hpanel4_1,...
+        'Style','text',...
+        'Background', 'white', ...
+        'FontSize', 10, ...
+        'String', num2str(mean_up),...
+        'Position',[100 20 120 18], ...
+        'Tag', 'text6');
+
 end
+
 
 function layout_SENS()
 end
 
+
 function layout_OPT()
 end
 
-function plotRealizationHistory(hFigure, data)
 
+function deleteChildHandles(h)
+% Deletes child handles from h
+    
+    child_handles = allchild(h);
+    
+    for i=1:length(child_handles)
+        h = child_handles(i);
+        delete(h);
+    end
 end

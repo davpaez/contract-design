@@ -153,7 +153,7 @@ classdef Experiment < handle
                     data = thisEx.reportSingle();
                 
                 case Experiment.DISP
-                    thisEx.reportDispersion();
+                    data = thisEx.reportDispersion();
                 
                 case Experiment.SENS
                     thisEx.reportSensitivity();
@@ -197,8 +197,8 @@ classdef Experiment < handle
         end
         
         
-        function reportDispersion(thisEx)
-            thisEx.gameEvals.report();
+        function data = reportDispersion(thisEx)
+            data = thisEx.gameEvals.report();
         end
         
         
