@@ -19,7 +19,6 @@ classdef Agent < entities.Player
         solvePerformanceForTime
         solveTimeForPerformance
         maintCostFunction
-        utilityFunction
         
         % ----------- %
         % Objects
@@ -38,7 +37,6 @@ classdef Agent < entities.Player
     
     properties (Dependent)
         inferredInspectionRate
-        utility
     end
         
     
@@ -109,19 +107,6 @@ classdef Agent < entities.Player
             end
         end
         %}
-        
-
-        function utility = get.utility(thisAgent)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            
-            utility = thisAgent.utilityFunction(thisAgent);
-        end
         
         
         %% Regular methods

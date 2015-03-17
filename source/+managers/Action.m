@@ -4,6 +4,7 @@ classdef Action < managers.ItemSetting
     
     properties (Constant, Hidden = true)
         % Types of actions
+        CONTRACT_OFFER  = 'behavior.principal.contractOffer'
         INSPECTION  = 'behavior.principal.inspection.'
         VOL_MAINT   = 'behavior.agent.voluntaryMaint.'
         MAND_MAINT  = 'behavior.agent.mandatoryMaint.'
@@ -106,6 +107,13 @@ classdef Action < managers.ItemSetting
         
         
         function cpObj = copyElement(obj)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             cpObj = copyElement@matlab.mixin.Copyable(obj);
             cpObj.strategy = copy(obj.strategy);
         end
@@ -198,6 +206,7 @@ classdef Action < managers.ItemSetting
             index = thisAction.indexSelectedStrategy;
         end
         
+        
         % ----------------------------------------------------------------
         % ---------- Mutator methods -------------------------------------
         % ----------------------------------------------------------------
@@ -237,6 +246,13 @@ classdef Action < managers.ItemSetting
         
         
         function setParamsValue_UserInput(thisAction)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             assert(~isempty(thisAction.indexSelectedStrategy), ...
                 ['No strategy index has been specified for this action, identified as ',thisAction.identifier])
             

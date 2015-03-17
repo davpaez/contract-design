@@ -40,7 +40,7 @@ data = InputData();
 
 data.setIdentifier(ItemSetting.TYPE_EXP);
 data.setAsGiven();
-data.value = Experiment.SING;
+data.value = Experiment.DISP;
 
 progSet.add(data);
 
@@ -69,7 +69,7 @@ data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
 data.setAsGiven();
-data.value = 500;
+data.value = 1000;
 
 progSet.add(data);
 

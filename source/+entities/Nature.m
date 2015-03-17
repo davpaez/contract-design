@@ -187,6 +187,12 @@ classdef Nature < handle
             
         end
         
+        
+        function finalizeHistory(thisNature, time)
+            thisNature.infrastructure.setTime(time);
+        end
+        
+        
         function confirmExecutionSubmittedOperation(thisNature, operation)
             assert(~isempty(thisNature.submittedOperation), ...
                 'The attribute submitted operation should not be empty.')

@@ -11,6 +11,7 @@ classdef Player < handle
         % Attributes
         % ----------- %
         time = 0
+        utilityFunction
         
         % ----------- %
         % Objects
@@ -227,6 +228,9 @@ classdef Player < handle
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
         
+        function u = getUtility(thisPlayer)
+            u = thisPlayer.utilityFunction(thisPlayer);
+        end
         
     end
     

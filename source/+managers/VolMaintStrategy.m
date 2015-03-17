@@ -33,7 +33,8 @@ classdef VolMaintStrategy < managers.Strategy
             thisStrategy.setDecisionVars_Number(2);
             
             % Nature of decision vars
-            thisStrategy.setDecisionVars_TypeInfo({ Information.TIME_VOL_MAINT , Information.PERF_VOL_MAINT });
+            thisStrategy.setDecisionVars_TypeInfo({ Information.TIME_VOL_MAINT , ...
+                Information.PERF_VOL_MAINT });
             
         end
     end

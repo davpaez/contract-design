@@ -13,7 +13,6 @@ classdef Principal <  entities.Player
         % ----------- %
         % Attributes
         % ----------- %
-        utilityFunction
         
         % ----------- %
         % Objects
@@ -24,7 +23,7 @@ classdef Principal <  entities.Player
     end
     
     properties ( Dependent )
-        utility
+        
     end
     
     methods (Access = protected)
@@ -63,17 +62,6 @@ classdef Principal <  entities.Player
         end
         
         %% Getter functions
-        
-        %{
-        * % TODO Make this function work
-            Input
-                
-            Output
-                
-        %}
-        function utility  = get.utility(thisPrincipal)
-            utility = thisPrincipal.utilityFunction(thisPrincipal);
-        end
         
         
         %%
@@ -124,6 +112,10 @@ classdef Principal <  entities.Player
         end
         
         function operation = submitFinalInspection(thisPrincipal)
+            % DELETE method
+            
+            warning('Deprecated. Final inspection is responsability of theinspection strategy.')
+            
             import dataComponents.Operation
             
             finalTimeContract = thisPrincipal.contract.getContractDuration();
@@ -137,8 +129,7 @@ classdef Principal <  entities.Player
         % ----------------------------------------------------------------
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
-        
-        
+
         
     end
     

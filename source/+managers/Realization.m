@@ -670,14 +670,15 @@ classdef Realization < matlab.mixin.Copyable
             Input
                 
             Output
-                
+               
+            TODO: Make players finalize interaction via a process different
+            from register a ficticious payoff.
         %}
         
             import dataComponents.Payoff
             import dataComponents.Event
             
-            operation = thisRlz.principal.submitFinalInspection();
-            thisRlz.executeOperation(operation);
+            contractDuration = thisRlz.contract.getContractDuration();
             
             % Final (fictitious) payoff
             finalPff = struct();
@@ -687,9 +688,12 @@ classdef Realization < matlab.mixin.Copyable
             
             % Final event
             finalEvent = struct();
-            finalEvent.time = operation.time;
+            finalEvent.time = contractDuration;
             finalEvent.type = Event.FINAL;
             finalEvent.pff = finalPff;
+            
+            % Finalize history infrastructure
+            thisRlz.nature.finalizeHistory(contractDuration);
             
             % Register FINAL event for Principal and Agent
             thisRlz.principal.registerEvent(finalEvent);
@@ -713,8 +717,8 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
-            ua = thisRlz.agent.utility;
-            up = thisRlz.principal.utility;
+            ua = thisRlz.agent.getUtility();
+            up = thisRlz.principal.getUtility();
         end
         
         
