@@ -1,8 +1,9 @@
-classdef Payoff < matlab.mixin.Copyable
+classdef Payoff < matlab.mixin.Copyable & managers.TypedClass
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
+        
         % Types of cash flow/actions
         REVENUE = 'REVENUE'
         CONTRIBUTION = 'CONTRIBUTION'
@@ -52,43 +53,6 @@ classdef Payoff < matlab.mixin.Copyable
         jumpsCounter = 0
     end
     
-    methods (Static)
-        
-        function answer = isValidType(type)
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-            
-            import dataComponents.Payoff
-            
-            answer = false;
-            validTypes = {  Payoff.REVENUE, ...
-                            Payoff.CONTRIBUTION, ...
-                            Payoff.INVESTMENT, ...
-                            Payoff.MAINTENANCE, ...
-                            Payoff.INSPECTION, ...
-                            Payoff.PENALTY, ...
-                            Payoff.FINAL };
-            nTypes = length(validTypes);
-            
-            for i=1:nTypes
-                currentType = validTypes{i};
-                
-                if strcmp(currentType, type);
-                    answer = true;
-                    break
-                end
-            end
-            
-        end
-        
-    end
-    
     
     methods
         %% Constructor
@@ -103,6 +67,19 @@ classdef Payoff < matlab.mixin.Copyable
                 
         %}
         function thisPff = Payoff(discountRate)
+            
+            import dataComponents.Payoff
+            
+            listTypes = {Payoff.REVENUE, ...
+                Payoff.CONTRIBUTION, ...
+                Payoff.INVESTMENT, ...
+                Payoff.MAINTENANCE, ...
+                Payoff.INSPECTION, ...
+                Payoff.PENALTY, ...
+                Payoff.FINAL };
+            
+        
+            thisPff@managers.TypedClass(listTypes);
             
             thisPff.pt = 1;
             thisPff.listSize = thisPff.BLOCKSIZE;
@@ -229,7 +206,7 @@ classdef Payoff < matlab.mixin.Copyable
             end
             
             % Validate type
-            assert(dataComponents.Payoff.isValidType(type) ,...
+            assert(thisPff.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
             % Registers time, value, type, duration
@@ -466,21 +443,21 @@ classdef Payoff < matlab.mixin.Copyable
                 
         %}
         % TODO This method generates some error
-        function st = returnPayoffsOfType(thisPayoff, type)
+        function st = returnPayoffsOfType(thisPff, type)
             import dataComponents.Payoff
             
-            assert(Payoff.isValidType(type), 'The type is not valid')
+            assert(thisPff.isValidType(type), 'The type is not valid')
             
-            lastValidIndex = thisPayoff.pt - 1;
+            lastValidIndex = thisPff.pt - 1;
             
             % Cell array of strings type
-            stringCell = thisPayoff.type(1:lastValidIndex);
+            stringCell = thisPff.type(1:lastValidIndex);
             
             % Boolean indices
             ids = strcmp(type, stringCell);
             
             % Call getData for boolean indices
-            st = thisPayoff.getData(ids);
+            st = thisPff.getData(ids);
         end
         
         
@@ -520,28 +497,28 @@ classdef Payoff < matlab.mixin.Copyable
             Output
                 
         %}
-        function st = getBalanceHistory(thisPayoff, finalTime)
+        function st = getBalanceHistory(thisPff, finalTime)
             
-            lastValidIndex = thisPayoff.pt - 1;
+            lastValidIndex = thisPff.pt - 1;
             st = struct();
             cont = 0;
             
             for i=1:lastValidIndex
                 
-                balBefore = thisPayoff.getBalancePreFlow('index',i);
+                balBefore = thisPff.getBalancePreFlow('index',i);
                 
-                if i==1 || ~ismember(i-1, thisPayoff.jumpsIndex)
+                if i==1 || ~ismember(i-1, thisPff.jumpsIndex)
                     % Point before flow (jump)
                     cont = cont + 1;
-                    st.time(cont) = thisPayoff.time(i);
+                    st.time(cont) = thisPff.time(i);
                     st.balance(cont) = balBefore;
                 end
                 
-                if thisPayoff.duration(i) == 0
+                if thisPff.duration(i) == 0
                     % Point after flow (jump)
                     cont = cont + 1;
-                    st.time(cont) = thisPayoff.time(i);
-                    st.balance(cont) = balBefore + thisPayoff.value(i);
+                    st.time(cont) = thisPff.time(i);
+                    st.balance(cont) = balBefore + thisPff.value(i);
                 end
             end
             

@@ -1,4 +1,4 @@
-classdef Event < matlab.mixin.Copyable
+classdef Event < matlab.mixin.Copyable & managers.TypedClass
     %EVENT Summary of this class goes here
     %   Detailed explanation goes here
     properties (Constant, Hidden = true)
@@ -55,41 +55,6 @@ classdef Event < matlab.mixin.Copyable
         %}
     end
     
-    methods (Static)
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function answer = isValidType(type)
-            import dataComponents.Event
-            
-            answer = false;
-            validTypes = {  Event.INIT, ...
-                            Event.INSPECTION, ...
-                            Event.VOL_MAINT, ...
-                            Event.MAND_MAINT, ...
-                            Event.DETECTION, ...
-                            Event.SHOCK, ...
-                            Event.FINAL};
-            nTypes = length(validTypes);
-            
-            for i=1:nTypes
-                currentType = validTypes{i};
-                
-                if strcmp(currentType, type);
-                    answer = true;
-                    break
-                end
-            end
-        end
-        
-    end
     
     methods
         %% Constructor
@@ -104,6 +69,18 @@ classdef Event < matlab.mixin.Copyable
                 
         %}
         function thisEvent = Event()
+            
+            import dataComponents.Event
+            
+            listTypes = {  Event.INIT, ...
+                Event.INSPECTION, ...
+                Event.VOL_MAINT, ...
+                Event.MAND_MAINT, ...
+                Event.DETECTION, ...
+                Event.SHOCK, ...
+                Event.FINAL};
+            
+            thisEvent@managers.TypedClass(listTypes);
             
             thisEvent.listSize = thisEvent.BLOCKSIZE;
             thisEvent.pt = 1;
@@ -180,7 +157,7 @@ classdef Event < matlab.mixin.Copyable
                 
         %}
         function st = getEventsOfType(thisEvent, type)
-            assert(dataComponents.Event.isValidType(type) ,...
+            assert(thisEvent.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
             ids = strcmp(thisEvent.type, type);
@@ -201,7 +178,7 @@ classdef Event < matlab.mixin.Copyable
                 
         %}
         function st = getLastEventOfType(thisEvent, type)
-            assert(dataComponents.Event.isValidType(type) ,...
+            assert(thisEvent.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
             ids = find(strcmp(thisEvent.type, type), 1, 'last');
@@ -232,7 +209,7 @@ classdef Event < matlab.mixin.Copyable
                 assert( time >= thisEvent.time(thisEvent.pt-1), ...
                      'The time of events must be non-decreasing.')
             end
-            assert(dataComponents.Event.isValidType(type) ,...
+            assert(thisEvent.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
             % Registers time, type, observation and payoff

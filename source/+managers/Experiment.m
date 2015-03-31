@@ -1,4 +1,4 @@
-classdef Experiment < handle
+classdef Experiment < managers.TypedClass
     %EXPERIMENT Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -25,29 +25,6 @@ classdef Experiment < handle
         
     end
     
-    methods (Static)
-        
-        function answer = isValidType(type)
-            import managers.Experiment
-            
-            answer = false;
-            validTypes = {  Experiment.SING, ...
-                            Experiment.DISP, ...
-                            Experiment.SENS, ...
-                            Experiment.OPT};
-            
-            nTypes = length(validTypes);
-            
-            for i=1:nTypes
-                currentType = validTypes{i};
-                
-                if strcmp(currentType, type);
-                    answer = true;
-                    break
-                end
-            end
-        end
-    end
     
     methods
         %% Constructor
@@ -56,10 +33,17 @@ classdef Experiment < handle
             import managers.*
             import dataComponents.*
             
+            listTypes = {  Experiment.SING, ...
+                Experiment.DISP, ...
+                Experiment.SENS, ...
+                Experiment.OPT};
+            
+            thisEx@managers.TypedClass(listTypes);
+            
             disp('Creating Experiment object:')
             
             tp = progSet.returnItemSetting(ItemSetting.TYPE_EXP).value;
-            assert(Experiment.isValidType(tp), ...
+            assert(thisEx.isValidType(tp), ...
                 'The type entered as argument is not valid');
             
             thisEx.programSettings = progSet;

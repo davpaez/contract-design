@@ -1,4 +1,4 @@
-classdef Operation < handle
+classdef Operation < managers.TypedClass
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -27,50 +27,23 @@ classdef Operation < handle
         
     end
     
-    methods (Static)
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function answer = isValidType(type)
-            import dataComponents.Operation
-            
-            answer = false;
-            validTypes = {  Operation.VOL_MAINT, ...
-                            Operation.MAND_MAINT, ...
-                            Operation.SHOCK, ...
-                            Operation.INSPECTION };
-            nTypes = length(validTypes);
-            
-            for i=1:nTypes
-                currentType = validTypes{i};
-                
-                if strcmp(currentType, type);
-                    answer = true;
-                    break
-                end
-            end
-        end
-        
-    end
-    
-    
     methods
         %% Constructor
         
-        function thisOperation = Operation(time, type, sens, param)
+        function thisOp = Operation(time, type, sens, param)
             import dataComponents.Operation
+            
+            listTypes = {  Operation.VOL_MAINT, ...
+                Operation.MAND_MAINT, ...
+                Operation.SHOCK, ...
+                Operation.INSPECTION };
+            
+            thisOp@managers.TypedClass(listTypes);
             
             % Validation of Input Data
             assert(time >= 0 , ...
                 'Time argument must be greater or equal than zero')
-            assert(Operation.isValidType(type) == true, ...
+            assert(thisOp.isValidType(type) == true, ...
                 'The type parameter is not valid')
             assert(islogical(sens), ...
                 'Adaptiveness parameter must be boolean');
@@ -86,26 +59,26 @@ classdef Operation < handle
             %}
             
             % Object construction
-            thisOperation.time = time;
-            thisOperation.setType(type);
-            thisOperation.sensitive = sens;
+            thisOp.time = time;
+            thisOp.setType(type);
+            thisOp.sensitive = sens;
             
             if isMaintenance == true
-                thisOperation.perfGoal = param;
+                thisOp.perfGoal = param;
             end
             
             if strcmp(type, Operation.SHOCK)
-                thisOperation.forceValue = param;
+                thisOp.forceValue = param;
             end
             
             % Validation of constructed object
-            if thisOperation.isType(Operation.INSPECTION)
-                assert(isempty(thisOperation.perfGoal) && isempty(thisOperation.forceValue), ...
+            if thisOp.isType(Operation.INSPECTION)
+                assert(isempty(thisOp.perfGoal) && isempty(thisOp.forceValue), ...
                     'An inspection operation must have an empty perfGoal and forceValue attributes')
             end
             
-            if thisOperation.isDeltaOperation()
-                assert(~isempty(thisOperation.perfGoal) || ~isempty(thisOperation.forceValue), ...
+            if thisOp.isDeltaOperation()
+                assert(~isempty(thisOp.perfGoal) || ~isempty(thisOp.forceValue), ...
                     'A  delta operation (maintenances or shock) operation  must have a non-empty either perfGoal or forceValue attribute')
             end
             
@@ -133,9 +106,9 @@ classdef Operation < handle
             Output
                 answer: [class Boolean]
         %}
-        function setType(thisOperation, type)
-            if dataComponents.Operation.isValidType(type)
-                thisOperation.type = type;
+        function setType(thisOp, type)
+            if thisOp.isValidType(type)
+                thisOp.type = type;
             else
                 error('The type entered as argument is not valid')
             end
@@ -182,11 +155,11 @@ classdef Operation < handle
             Output
                 
         %}
-        function answer = isType(thisOperation, type)
+        function answer = isType(thisOp, type)
             
-            assert(dataComponents.Operation.isValidType(type), 'The type entered as argument is not valid')
+            assert(thisOp.isValidType(type), 'The type entered as argument is not valid')
             
-            if strcmp(thisOperation.type, type)
+            if strcmp(thisOp.type, type)
                 answer = true;
             else
                 answer = false;

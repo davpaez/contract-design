@@ -1,4 +1,4 @@
-classdef Action < managers.ItemSetting
+classdef Action < managers.ItemSetting & managers.TypedClass
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -42,35 +42,6 @@ classdef Action < managers.ItemSetting
     end
     
     methods (Static)
-        
-        
-        function answer = isValidType(type)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            import managers.Action
-            
-            answer = false;
-            validTypes = {  Action.INSPECTION, ...
-                Action.VOL_MAINT, ...
-                Action.MAND_MAINT, ...
-                Action.SHOCK, ...
-                Action.PENALTY};
-            nTypes = length(validTypes);
-            
-            for i=1:nTypes
-                currentType = validTypes{i};
-                
-                if strcmp(currentType, type);
-                    answer = true;
-                    break
-                end
-            end
-        end
         
         
         function answer = isValidExecutor(nameExecutor)
@@ -135,9 +106,18 @@ classdef Action < managers.ItemSetting
         %}
             import managers.Action
             
+            listTypes = {Action.CONTRACT_OFFER, ...
+                Action.INSPECTION, ...
+                Action.VOL_MAINT, ...
+                Action.MAND_MAINT, ...
+                Action.SHOCK, ...
+                Action.PENALTY};
+            
+            thisAction@managers.TypedClass(listTypes);
+            
             thisAction@managers.ItemSetting();
             
-            assert(Action.isValidType(type), ...
+            assert(thisAction.isValidType(type), ...
                 'The type entered as argument is not valid');
             
             assert(Action.isValidExecutor(nameExecutor), ...
