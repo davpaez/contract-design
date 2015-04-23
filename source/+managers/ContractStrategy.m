@@ -37,14 +37,13 @@ classdef ContractStrategy < managers.Strategy
 			thisStrategy.typeAction = Action.CONTRACT_OFFER;
             
             % One decision variable: Time of volMaint, PerfGoal volMaint
-            thisStrategy.setDecisionVars_Number(5);
+            thisStrategy.setDecisionVars_Number(4);
             
             % Nature of decision vars
             thisStrategy.setDecisionVars_TypeInfo({ Information.CONTRACT_DURATION , ...
+                Information.PERFORMANCE_THRESHOLD
                 Information.PAYMENT_SCHEDULE, ...
-                Information.REVENUE_RATE_FUNC, ...
-                Information.PERFORMANCE_THRESHOLD, ...
-                Information.PENALTY_FEE_STRAT});
+                Information.REVENUE_RATE_FUNC});
             
         end
     end

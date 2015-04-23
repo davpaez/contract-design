@@ -1,6 +1,5 @@
-clear al
-close all
-clc
+function fieldplot(fnc, t0, tf)
+%TODO Make slope lines be centered in evaluation point
 
 nx = 50;
 ny = 30;
@@ -32,3 +31,5 @@ h.AutoScale = 'off';
 h.AutoScaleFactor = 0;
 xlim( [0, 25]);
 ylim( [0, 100]);
+
+end

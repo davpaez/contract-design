@@ -16,9 +16,10 @@ classdef Infrastructure < matlab.mixin.Copyable
         maxPerf                % Maximum possible performance
         initialPerf
         
-        detRate   % Symbolic function of progressive deterioration
-        contResponseFunction
-        shockResponseFunction
+        detRate   % Symbolic function of progressive deterioration %TODO Delete this attribute
+        
+        contResp    % Continuous response function handle
+        shockResp   % Shock response function handle
         
         % ----------- %
         % Objects
@@ -90,6 +91,8 @@ classdef Infrastructure < matlab.mixin.Copyable
         
         
         
+
+        function performance = getPerformance(thisInfrastructure)
         %{
         
             Input
@@ -97,8 +100,22 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-        function performance = getPerformance(thisInfrastructure)
             performance = thisInfrastructure.performance;
+        end
+        
+        
+        function obs = getObservation(thisInfra)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            
+            import dataComponents.Observation
+            
+            obs = Observation(thisInfra.time, thisInfra.performance);
         end
         
         
@@ -139,6 +156,15 @@ classdef Infrastructure < matlab.mixin.Copyable
         end
         
         
+        function evolve(thisInfra, t, v)
+            n = length(t);
+            
+            for i = 2:n
+                thisInfra.history.register(t(i), v(i));
+            end
+        end
+        
+        
         %{
         
             Input
@@ -148,7 +174,7 @@ classdef Infrastructure < matlab.mixin.Copyable
         %}
         function registerObservation(thisInfrastructure, time, perf)
             
-            thisInfrastructure.setTime(time);
+            %thisInfrastructure.setTime(time);
             thisInfrastructure.history.register(time, perf);
             
         end
@@ -170,6 +196,7 @@ classdef Infrastructure < matlab.mixin.Copyable
                 calculated.
         %}
         function perf = solvePerformanceForTime(thisInfra, time)
+            error('hola')
             
             l = length(time);
             assert(l==1, 'The time parameter must be a scalar')

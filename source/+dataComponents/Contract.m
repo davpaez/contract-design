@@ -8,40 +8,37 @@ classdef Contract < matlab.mixin.Copyable
         perfThreshold       % Minimum performance required by principal
         revenue             % Revenue: tolls
         investment          % Land purchase and construction cost
-        contribution        % Government contributions [nx2] --> [value time]
+        paymentSchedule        % Government contributions Array[nx2] --> [time value]
         maxSumPenalties     % Maximum possible penalty
         penaltyAction       % Penalty policy (Strategy object)
     end
     
     methods
         %% Constructor
-        function thisContract = Contract(progSet)
+        function thisContract = Contract(progSet, ...
+                conDur, paymentSchedule, revRateFnc, perfThreshold)
             
             import managers.*
             
             % Contract duration
-            thisContract.contractDuration = progSet.returnItemSetting(ItemSetting.CON_DUR).value;
+            thisContract.contractDuration = conDur;
+            
+            % Contribution
+            thisContract.paymentSchedule = paymentSchedule;
+            
+            % Revenue
+            thisContract.revenue = revRateFnc;
+            
+            % Performance threshold
+            thisContract.perfThreshold = perfThreshold;
+            
+            
             
             % Initial performance
             thisContract.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
-            
-            % Performance threshold
-            thisContract.perfThreshold = progSet.returnItemSetting(ItemSetting.PERF_THRESH).value;
-            
-            % Revenue
-            thisContract.revenue = progSet.returnItemSetting(ItemSetting.REV).value;
-            
+
             % Investment
             thisContract.investment = progSet.returnItemSetting(ItemSetting.INV).value;
-            
-            % Contribution
-            thisContract.contribution = progSet.returnItemSetting(ItemSetting.CONTRIB).value;
-            
-            % TODO: Who is making sure that this maximum is respected?
-            % Answer: So far the penalty policy strategies.
-
-            % Maximum sum of penalties
-            thisContract.maxSumPenalties = progSet.returnItemSetting(ItemSetting.MAX_SUM_PEN).value;
             
             % Penalty policy
             action = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
@@ -210,6 +207,25 @@ classdef Contract < matlab.mixin.Copyable
             else
                 answer = false;
             end
+        end
+        
+        
+        %{
+        * 
+        
+            Input
+                
+            Output
+                
+        %}
+        function [time, value] = getNextPayment(thisContract, currentTime)
+            index = find(thisContract.paymentSchedule >= currentTime, 1, 'first');
+            
+            if ~isempty(index)
+                time = thisContract.paymentSchedule(index, 1);
+                value = thisContract.paymentSchedule(index, 2);
+            end
+            
         end
         
     end

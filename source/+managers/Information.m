@@ -10,6 +10,8 @@ classdef Information
 		----  These constants seem to be unnecesary  ----
 		--------- Delete if not needed ------------------
 		
+
+        
         % Nature of decision variables
         TIME                = 'TIME'
         PERFORMANCE         = 'PERFORMANCE'
@@ -23,16 +25,18 @@ classdef Information
         SHOCK       = 'SHOCK'
 		%}
 		
-		
+        % Types of players in the game
+        PRINCIPAL   =   'PRINCIPAL'
+        AGENT       =   'AGENT'
+        NATURE      =   'NATURE'
         
         % Specific type of information related to each action available to
         % a player of the game
             % Contract offer Action
             CONTRACT_DURATION = 'CONTRACT_DURATION'
+            PERFORMANCE_THRESHOLD = 'PERFORMANCE_THRESHOLD'
             PAYMENT_SCHEDULE = 'PAYMENT_SCHEDULE'
             REVENUE_RATE_FUNC = 'REVENUE_RATE_FUNC'
-            PERFORMANCE_THRESHOLD = 'PERFORMANCE_THRESHOLD'
-            PENALTY_FEE_STRAT = 'PENALTY_FEE_STRAT'
             
             % Inspection Action
             TIME_INSPECTION     = 'TIME_INSPECTION'
@@ -79,7 +83,6 @@ classdef Information
                 Information.PAYMENT_SCHEDULE, ...
                 Information.REVENUE_RATE_FUNC, ...
                 Information.PERFORMANCE_THRESHOLD, ...
-                Information.PENALTY_FEE_STRAT, ...
                 Information.TIME_INSPECTION, ...
                 Information.TIME_VOL_MAINT, ...
                 Information.PERF_VOL_MAINT, ...

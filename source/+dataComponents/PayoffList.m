@@ -1,18 +1,6 @@
-classdef Payoff < matlab.mixin.Copyable & managers.TypedClass
+classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
-    
-    properties (Constant, Hidden = true)
-        
-        % Types of cash flow/actions
-        REVENUE = 'REVENUE'
-        CONTRIBUTION = 'CONTRIBUTION'
-        INVESTMENT = 'INVESTMENT'
-        MAINTENANCE = 'MAINTENANCE'
-        INSPECTION = 'INSPECTION'
-        PENALTY = 'PENALTY'
-        FINAL = 'FINAL'
-    end
     
     properties (Constant, GetAccess = protected)
         % Properties of payoff list

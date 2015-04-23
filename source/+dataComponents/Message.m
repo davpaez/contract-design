@@ -42,10 +42,10 @@ classdef Message < handle
             import dataComponents.Message
             
             validTypes = {  Message.MAX_PERF, ...
-                            Message.TIME_DETECTION, ...
-                            Message.PERF_DETECTION};
-             
-             answer = any(strcmp(validTypes, str));
+                Message.TIME_DETECTION, ...
+                Message.PERF_DETECTION};
+            
+            answer = any(strcmp(validTypes, str));
         end
         
     end
@@ -61,17 +61,20 @@ classdef Message < handle
             Output
                 
         %}
-            % Check that theExecutor is of class Player
-            isPrincipal = isa(theExecutor,'entities.Principal');
-            isAgent = isa(theExecutor,'entities.Agent');
-            isNature = isa(theExecutor,'entities.Nature');
-            
-            isPlayer = any([isPrincipal, isAgent, isNature]);
-            
-            assert(isPlayer, ...
-                'The parameter passed must be an object of either Principal, Agent or Nature class')
-            
-            thisMsg.executor = theExecutor;
+            if nargin > 0
+                
+                % Check that theExecutor is of class Player
+                isPrincipal = isa(theExecutor,'entities.Principal');
+                isAgent = isa(theExecutor,'entities.Agent');
+                isNature = isa(theExecutor,'entities.Nature');
+                
+                isPlayer = any([isPrincipal, isAgent, isNature]);
+                
+                assert(isPlayer, ...
+                    'The parameter passed must be an object of either Principal, Agent or Nature class')
+                
+                thisMsg.executor = theExecutor;
+            end
             
         end
         

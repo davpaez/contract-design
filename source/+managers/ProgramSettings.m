@@ -153,10 +153,15 @@ classdef ProgramSettings < matlab.mixin.Copyable
                             item.value <= thisProgSet.returnItemSetting(ItemSetting.MAX_PERF).value, ...
                             'The initial performance MUST be within the bounds of Null and Max performance')
                 
+                %{
+                %TODO This is no longer necessary. Remove or place within the ContractOffer strategy
+      
                 case ItemSetting.PERF_THRESH
                     assert( item.value >= thisProgSet.returnItemSetting(ItemSetting.NULL_PERF).value && ...
                             item.value < thisProgSet.returnItemSetting(ItemSetting.MAX_PERF).value, ...
                             'The performance threshold MUST be within the bounds of Null and Max performance')
+                %}
+                            
                 otherwise
                     disp('')
             end

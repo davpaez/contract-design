@@ -10,7 +10,7 @@ classdef CommonFnc
         * Resembles the rain period in Colombia.
         
             Input
-                t:  Time
+                t:  Time (years)
                 
             Output
                 f:  Precipitation [mm/year]
@@ -27,13 +27,13 @@ classdef CommonFnc
                 f:  Continuous environmental force
                 d:  Demand
                 v:  Performance
-                t:  Time
+                t:  Time (years)
                 
             Output
                 r:  Response
         %}
             r = -(f./1000).*20.*(0.5./((v+10)./100));
-            if v <= 0
+            if v <= 0 % TODO Make this truncation works when arguments are vectors
                 r = 0;
             end
             
@@ -55,6 +55,8 @@ classdef CommonFnc
             a = 160000;
             b = 40000;
             k = 50;
+            
+            % TODO Make this truncation works when arguments are vectors
             
             if v <= k
                 d = a*v;

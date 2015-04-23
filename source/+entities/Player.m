@@ -37,12 +37,11 @@ classdef Player < handle
             Output
                 
         %}
-        function thisPlayer = Player(contract, problem)
+        function thisPlayer = Player(problem)
             import dataComponents.Event
             import dataComponents.Payoff
             import dataComponents.Observation
             
-            thisPlayer.contract = contract;
             thisPlayer.problem = problem;
             thisPlayer.eventList = Event();
             thisPlayer.observation = Observation();

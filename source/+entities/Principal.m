@@ -19,6 +19,7 @@ classdef Principal <  entities.Player
         % ----------- %
         
         % Active strategies
+        contractAction      % Strategy object
         inspectionAction     % Strategy object
     end
     
@@ -41,15 +42,19 @@ classdef Principal <  entities.Player
             Output
                 
         %}
-        function thisPrincipal = Principal (progSet, contract, problem)
+        function thisPrincipal = Principal (progSet, problem)
             import managers.*
             
             % Creates instance of object of the superclass Player
-            thisPrincipal@entities.Player(contract, problem);
+            thisPrincipal@entities.Player(problem);
             
             % Cost single inspection
             cinsp = progSet.returnItemSetting(ItemSetting.COST_INSP);
             thisPrincipal.costSingleInspection = cinsp.value;
+            
+            % Assigns contract offer strategy attribute
+            action = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
+            thisPrincipal.contractAction = returnCopyAction(action);
             
             % Assigns inspection strategy attribute
             action = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
@@ -57,7 +62,7 @@ classdef Principal <  entities.Player
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.PRINCIPAL_UTIL_FNC);
-            thisPrincipal.utilityFunction = fnc.equation;
+            thisPrincipal.utilityFunction = fnc.equation;    
             
         end
         
@@ -74,7 +79,10 @@ classdef Principal <  entities.Player
         % ----------------------------------------------------------------
         % ---------- Mutator methods -------------------------------------
         % ----------------------------------------------------------------
-
+        
+        function contract = generateContract(thisPrincipal)
+            
+        end
         
         %{
         
@@ -86,6 +94,7 @@ classdef Principal <  entities.Player
         function operation = submitOperation(thisPrincipal)
             import dataComponents.Operation
             import dataComponents.Message
+            import dataComponents.Transaction
             import managers.Strategy
             import managers.Information
             
@@ -101,6 +110,17 @@ classdef Principal <  entities.Player
                 isSens = thisPrincipal.inspectionAction.isSensitive();
                 
                 operation = Operation(timeNextInspection, Operation.INSPECTION, isSens, []);
+                [timeNextPayment, valueNextPayment] = thisPrincipal.contract.getNextPayment(thisPrincipal.time);
+                
+                % Produce transaction if earlier than maintenance
+                if timeNextPayment < timeNextInspection
+                    transaction = Transaction(timeNextPayment, ...
+                        valueNextPayment, ...
+                        Information.PRINCIPAL, ...
+                        Information.AGENT);
+                    
+                    operation = transaction;
+                end
                 
                 % Stores Operation object
                 thisPrincipal.setSubmittedOperation(operation);

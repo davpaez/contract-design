@@ -4,7 +4,7 @@ classdef ItemSetting < matlab.mixin.Copyable
     
     properties (Constant, Hidden = true)
         % Type of problem setting
-        VALUE_PARAM   = 'VALUE_PARAM'
+        VALUE_PARAM     = 'VALUE_PARAM'
         PLAYER_ACTION   = 'PLAYER_ACTION'
         
         % Associated with 'type' attribute
@@ -20,12 +20,13 @@ classdef ItemSetting < matlab.mixin.Copyable
         %  ------------------- IDENTIFIERS -------------------------
         
         % Management
-        FILE_INFO    = 'FILE_INFO'
+        FILE_INFO    = 'FILE_INFO'  % 
         
         % Problem
         TYPE_EXP        = 'TYPE_EXP'    % Type of experiment
         TIME_RES        = 'TIME_RES'    % Time resolution
         DISC_RATE       = 'DISC_RATE'   % Annual discount rate
+        DEMAND_FNC      = 'DEMAND_FNC'  % How users demand respond to Perf, Fare and time
         
         % Optimization
         NUM_REALIZ      = 'NUM_REALIZ'  % Number of realizations
@@ -36,37 +37,35 @@ classdef ItemSetting < matlab.mixin.Copyable
         
         
         % Contract
-        CON_DUR         = 'CON_DUR'     % Contract duration
-        PERF_THRESH     = 'PERF_THRESH' % Performance threshold
-        REV             = 'REV'         % Revenue rate
-        INV             = 'INV'         % Initial investment
-        CONTRIB         = 'CONTRIB'     % Contributions payment schedule
-        MAX_SUM_PEN     = 'MAX_SUM_PEN'
-        PEN_POLICY      = 'PEN_POLICY'
+        INV             = 'INV'         % Initial investment %TODO May be initial agent's balance?
+        PEN_POLICY      = 'PEN_POLICY'  % 
         
         % Nature
-        NAT_HAZARD      = 'NAT_HAZARD'
-        STRATS_SHOCK    = 'STRATS_SHOCK'
+        NAT_HAZARD      = 'NAT_HAZARD'      % 
+        STRATS_SHOCK    = 'STRATS_SHOCK'    % 
+        CONT_ENV_FORCE  = 'CONT_ENV_FORCE'  % 
         
         
         % Principal
-        STRATS_INSP     = 'STRATS_INSP'
-        COST_INSP       = 'COST_INSP'
-        PRINCIPAL_UTIL_FNC = 'PRINCIPAL_UTIL_FNC'
+        STRATS_CONTRACT     = 'STRATS_CONTRACT'     % 
+        STRATS_INSP         = 'STRATS_INSP'         % 
+        COST_INSP           = 'COST_INSP'           % 
+        PRINCIPAL_UTIL_FNC  = 'PRINCIPAL_UTIL_FNC'  % 
         
         % Agent
-        PART_CONSTR     = 'PART_CONSTR'
-        STRATS_VOL_MAINT    = 'STRATS_VOL_MAINT'
-        STRATS_MAND_MAINT   = 'STRATS_MAND_MAINT'
-        MAINT_COST_FNC      = 'MAINT_COST_FNC'
-        AGENT_UTIL_FNC      = 'AGENT_UTIL_FNC'
+        PART_CONSTR         = 'PART_CONSTR'         % 
+        STRATS_VOL_MAINT    = 'STRATS_VOL_MAINT'    % 
+        STRATS_MAND_MAINT   = 'STRATS_MAND_MAINT'   % 
+        MAINT_COST_FNC      = 'MAINT_COST_FNC'      % 
+        AGENT_UTIL_FNC      = 'AGENT_UTIL_FNC'      % 
         
         % Infrastructure
-        MAX_PERF        = 'MAX_PERF'
-        NULL_PERF       = 'NULL_PERF'
-        INITIAL_PERF    = 'INITIAL_PERF'
-        DET_RATE        = 'DET_RATE'
-        SHOCK_RESP_FNC  = 'SHOCK_RESP_FNC'
+        MAX_PERF        = 'MAX_PERF'        % 
+        NULL_PERF       = 'NULL_PERF'       % 
+        INITIAL_PERF    = 'INITIAL_PERF'    % 
+        DET_RATE        = 'DET_RATE'        % 
+        CONT_RESP_FNC   = 'CONT_RESP_FNC'   % 
+        SHOCK_RESP_FNC  = 'SHOCK_RESP_FNC'  % 
         
     end
     

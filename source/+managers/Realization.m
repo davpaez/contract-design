@@ -65,44 +65,50 @@ classdef Realization < matlab.mixin.Copyable
             % Get fileInfo handle
             thisRlz.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             
+            
+            % Contract offer!!! %TODO
+            % Create principal
+            contractAction = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
+            penaltyFeeAction = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
+            
+            con = Agent.generateContract(progSet, contractAction);
+            
             % Creating local copies of 
-            thisRlz.contract = Contract(progSet);
+            thisRlz.contract = con;
             thisRlz.problem = Problem(progSet);
             
+            
+            % Make principal return contract object
+            
+            % 
+            
             % Creating function handles
+            %{
             thisRlz.fh.contEnvForce = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             thisRlz.fh.demandRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             thisRlz.fh.revenueRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             thisRlz.fh.contResponse = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            %}
             
             % Intial payoffs
-            
-                contractDuration = thisRlz.contract.getContractDuration();
-                revenueFlowRate = thisRlz.contract.getRevenue() / contractDuration;
+            % TODO Terminar schedule de pagos para contribuciones del
+            % gobierno
+%                 contractDuration = thisRlz.contract.getContractDuration();
+%                 revenueFlowRate = thisRlz.contract.getRevenue() / contractDuration;
                 
                 % Payoffs principal
                 % Government contributions
-                prinPff = struct();
-                prinPff.value = -thisRlz.contract.getContribution();
-                prinPff.duration = 0;
-                prinPff.type{1} = Payoff.CONTRIBUTION;
-                
-                % Revenue
-                prinPff.value(end+1) = -revenueFlowRate;
-                prinPff.duration(end+1) = contractDuration;
-                prinPff.type{end+1} = Payoff.REVENUE;
+%                 prinPff = struct();
+%                 prinPff.value = -thisRlz.contract.getContribution();
+%                 prinPff.duration = 0;
+%                 prinPff.type{1} = Payoff.CONTRIBUTION;
                 
                 % Payoffs agent
                 % Government contributions
-                agPff = struct();
-                agPff.value = thisRlz.contract.getContribution();
-                agPff.duration = 0;
-                agPff.type{1} = Payoff.CONTRIBUTION;
-                
-                % Revenue
-                agPff.value(end+1) = revenueFlowRate;
-                agPff.duration(end+1) = contractDuration;
-                agPff.type{end+1} = Payoff.REVENUE;
+%                 agPff = struct();
+%                 agPff.value = thisRlz.contract.getContribution();
+%                 agPff.duration = 0;
+%                 agPff.type{1} = Payoff.CONTRIBUTION;
                 
                 % Investment
                 agPff.value(end+1) = -thisRlz.contract.getInvestment();
@@ -110,10 +116,12 @@ classdef Realization < matlab.mixin.Copyable
                 agPff.type{end+1} = Payoff.INVESTMENT;
             
             
-            % Initial observation
-            initObs = thisRlz.contract.getInitialPerfObs();
+            % Initial balance agent
+            data = progSet.returnItemSetting(ItemSetting.INV);
+            investment = data.value;
             
             
+                
             % Construction of principal, agent and nature
             thisRlz.principal = Principal(  progSet, ...
                                                     thisRlz.contract, ...
@@ -126,18 +134,14 @@ classdef Realization < matlab.mixin.Copyable
             thisRlz.nature = Nature(progSet, ...
                                             thisRlz.contract);
             
-            % Construction of INIT event structs for principal and agent            
-            initEventPrincipal = struct();
-            initEventPrincipal.time = 0;
-            initEventPrincipal.type = Event.INIT;
-            initEventPrincipal.obs = initObs;
-            initEventPrincipal.pff = prinPff;
+            % Initial observation
+            initObs = thisRlz.nature.infrastructure.getObservation();
+                              
+            investment = Transaction(thisRlz.time, investment, Information.AGENT, []);
             
-            initEventAgent = struct();
-            initEventAgent.time = 0;
-            initEventAgent.type = Event.INIT;
-            initEventAgent.obs = initObs;
-            initEventAgent.pff = agPff;
+            % Construction of INIT event structs for principal and agent  
+            initEventPrincipal = Event(thisRlz.time, Event.INIT, initObs, []);
+            initEventAgent = Event(thisRlz.time, Event.INIT, initObs, investment);
             
             % Registration of INIT events for principal and agent
             thisRlz.principal.registerEvent(initEventPrincipal);
@@ -277,6 +281,7 @@ classdef Realization < matlab.mixin.Copyable
         %}
         
             import dataComponents.Operation
+            import dataComponents.Transaction
             
             mandMaintFlag = false;
             
@@ -285,17 +290,25 @@ classdef Realization < matlab.mixin.Copyable
             thisRlz.evolveContinuously(operation.time);
             
             % Execute the operation (execute discrete action)
-            
-            switch operation.type
-                case Operation.INSPECTION
-                    [timeExecution , mandMaintFlag] = ...
-                        thisRlz.executeInspection(operation);
-                    
-                case Operation.VOL_MAINT
-                    timeExecution = thisRlz.executeVolMaint(operation);
-                    
-                case Operation.SHOCK
-                    timeExecution = thisRlz.executeShock(operation);
+            if isa(operation, 'Operation')
+                
+                switch operation.type
+                    case Operation.INSPECTION
+                        [timeExecution , mandMaintFlag] = ...
+                            thisRlz.executeInspection(operation);
+                        
+                    case Operation.VOL_MAINT
+                        timeExecution = thisRlz.executeVolMaint(operation);
+                        
+                    case Operation.SHOCK
+                        timeExecution = thisRlz.executeShock(operation);
+                        
+                end
+                
+            elseif isa(operation, 'Transaction')
+                
+                timeExecution = thisRlz.executePayment(operation);
+                
             end
             
             % Update time for ALL entities
@@ -604,6 +617,45 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
+        function timeExecution = executePayment(thisRlz, transaction)
+        %{
+        * TODO Terminar esta funcion
+
+            Input
+
+            Output
+
+        %}
+            import dataComponents.Payoff
+            
+            assert(thisRlz.time == transaction.time)
+            
+            v = transaction.value;
+            
+            [em, r] = getEmitterReceiver(transaction);
+            
+            % Emitter side
+            emitterPff = struct();
+            emitterPff.value = transaction.value;
+            emitterPff.type{1} = Payoff.CONTRIBUTION;
+            
+            emitterEvent = struct();
+            emitterEvent.time = transaction.time;
+            emitterEvent.type = Event.CONTRIBUTION;
+            emitterEvent.pff = emitterPff;
+            
+            % Receiver side
+            receiverPff = struct();
+            receiverPff.value = transaction.value;
+            receiverPff.type{1} = Payoff.CONTRIBUTION;
+            
+            receiverEvent = struct();
+            receiverEvent.time = transaction.time;
+            receiverEvent.type = Event.CONTRIBUTION;
+            receiverEvent.pff = receiverPff;
+        end
+        
+        
         function validateOperation(thisRlz, operation)
         %{
         * 
@@ -639,27 +691,32 @@ classdef Realization < matlab.mixin.Copyable
             contRespFun = @CommonFnc.continuousRespFunction;
             demand = @CommonFnc.demandFunction;
             revenue = @CommonFnc.revenueRate;
-
-            v_f = @(t,v) contRespFun(   contEnvForce(t), ...
-                                        demand(v, fare), ...
-                                        v, ...
-                                        t);
-
+            
+            % Performance rate function
+            v_f = @(t,v) contRespFun(contEnvForce(t), ...
+                demand(v, fare), ...
+                v, ...
+                t);
+            
+            % Demand rate function
             d_f = @(v) demand(v, fare);
-
+            
+            % Agent's balance rate function
             ba_f = @(v) revenue(demand(v, fare), fare);
-
-            fun = @(t,x) [  v_f(t,x(1)); ...
-                            d_f(x(1));...
-                            ba_f(x(1))];
+            
+            fun = @(t,x) [v_f(t,x(1));  d_f(x(1)); ba_f(x(1))];
             
             currentPerf = thisRlz.nature.infrastructure.getPerformance();
-            initialDemand = 0;
-            currentAgentBalance = -400;
+            initialDemand = 0; %TODO Current value of demand
+            currentAgentBalance = -400; % TODO Current agent's balance
             
             [t,x] = ode45(fun, [thisRlz.time, tf], [currentPerf; initialDemand; currentAgentBalance]);
             
-            %error('hola')
+            perf = x(:,1);
+            demand = x(:,2);
+            agentBalance = x(:,3);
+            
+            thisRlz.nature.infrastructure.evolve(t, perf);
         end
         
         
@@ -701,10 +758,32 @@ classdef Realization < matlab.mixin.Copyable
             
         end
         
-        
         % ----------------------------------------------------------------
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
+        
+        
+        function [emitter, receiver] = getEmitterReceiver(thisRlz, transaction)
+            import managers.Information
+            
+            if strcmp(transaction.emitter, Information.PRINCIPAL)
+                emitter = thisRlz.principal;
+            elseif strcmp(transaction.emitter, Information.AGENT)
+                emitter = thisRlz.agent;
+            else
+                error('Emitter should be either PRINCIPAL or AGENT')
+            end
+            
+            
+            if strcmp(transaction.receiver, Information.PRINCIPAL)
+                receiver = thisRlz.principal;
+            elseif strcmp(transaction.receiver, Information.AGENT)
+                receiver = thisRlz.agent;
+            else
+                error('Receiver should be either PRINCIPAL or AGENT')
+            end
+            
+        end
         
         
         function [ua, up] = utilityPlayers(thisRlz)

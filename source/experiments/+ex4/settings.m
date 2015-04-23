@@ -62,6 +62,15 @@ data.value = 0.04;
 
 progSet.add(data);
 
+% 4. Demand function
+fnc = Function();
+
+fnc.setIdentifier(ItemSetting.DEMAND_FNC);
+fnc.setAsGiven();
+fnc.equation = @commonFnc.demandFunction;
+
+progSet.add(fnc);
+
 %% Optimization (16 - 30)
 
 % 16. Number of realizations per simulation of game
@@ -127,12 +136,14 @@ data.value = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
 
 progSet.add(data);
 
-% 109. Deterioration function
+% 109. Continuous response function
 fnc = Function();
 
-fnc.setIdentifier(ItemSetting.DET_RATE);
+fnc.setIdentifier(ItemSetting.CONT_RESP_FNC);
 fnc.setAsGiven();
-fnc.equation = @deteriorationRate;
+fnc.equation = @continuousRespFunction;
+
+progSet.add(fnc);
 
 progSet.add(fnc);
 
@@ -176,14 +187,14 @@ data.value_UpperBound = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
 
 progSet.add(data);
 
-% 48. Revenue: Tolls
-data = InputData();
+% 48. Revenue function
+fnc = Function();
 
-data.setIdentifier(ItemSetting.REV);
-data.setAsGiven();
-data.value = 1800;
+fnc.setIdentifier(ItemSetting.REVENUE_FNC);
+fnc.setAsGiven();
+fnc.equation = @CommonFnc.revenueRate;
 
-progSet.add(data);
+progSet.add(fnc);
 
 % 49. Investment
 inv = InputData();
@@ -243,6 +254,15 @@ action.selectStrategy(1);
 action.setParamsValue_Random();
 
 progSet.add(action);
+
+% 63. Continuous environmental force
+fnc = Function();
+
+fnc.setIdentifier(ItemSetting.CONT_ENV_FORCE);
+fnc.setAsGiven();
+fnc.equation = @CommonFnc.continuousEnvForce;
+
+progSet.add(fnc);
 
 
 %% Principal (76 - 90)
@@ -358,10 +378,22 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
     assert(isreal(cost), 'Cost must be a real number.')
 end
 
-function dydt = deteriorationRate(t,v)
-a = 1.2;
-b = 1.3;
-vi = 100;
+function r = continuousRespFunction(f, d, v, t)
+%{
+* 
 
-dydt = -15;
+    Input
+        f:  Continuous environmental force
+        d:  Demand
+        v:  Performance
+        t:  Time (years)
+
+    Output
+        r:  Response
+%}
+    r = -15;
+    if v <= 0
+        r = 0;
+    end
+
 end

@@ -25,6 +25,8 @@ classdef Nature < handle
         
         submittedOperation
         
+        contEnvForce
+        
     end
     
     events

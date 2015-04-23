@@ -64,14 +64,13 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setName('Standard contract');
 
             % One decision variable: Time of voluntary maintenance
-            thisRule.setDecisionVars_Number(5);
+            thisRule.setDecisionVars_Number(4);
             
             % Nature of decision vars
             thisRule.setDecisionVars_TypeInfo({ Information.CONTRACT_DURATION , ...
                 Information.PAYMENT_SCHEDULE, ...
                 Information.REVENUE_RATE_FUNC, ...
-                Information.PERFORMANCE_THRESHOLD, ...
-                Information.PENALTY_FEE_STRAT});
+                Information.PERFORMANCE_THRESHOLD});
             
             % Set as Sensitive
             thisRule.setTypeRule_Sensitivity(DecisionRule.INSENSITIVE);
@@ -81,7 +80,6 @@ classdef Rule_1 < managers.DecisionRule
             
             % Type of output produced by this rule
             thisRule.setTypeRule_Output({ DecisionRule.ABSOLUTE_VALUE, ...
-                DecisionRule.ABSOLUTE_VALUE, ...
                 DecisionRule.ABSOLUTE_VALUE, ...
                 DecisionRule.ABSOLUTE_VALUE, ...
                 DecisionRule.ABSOLUTE_VALUE});
@@ -129,16 +127,40 @@ classdef Rule_1 < managers.DecisionRule
               - payment schedule
               - revenue rate function
               - performance threshold
-              - penalty fee strategy (passed as argument)
             %}
+            
+            tm = 20;
+            h = [0 100;
+                5 150;
+                10 150;
+                15 200];
+            
+            fare = 72/10e7;
+            
+            rf = @(d)revenueRate(d, fare);
+            k = 60;
+            
             theMsg.submitResponse(Information.CONTRACT_DURATION, tm, ...
                 Information.PAYMENT_SCHEDULE, h, ...
                 Information.REVENUE_RATE_FUNC, rf, ...
-                Information.PERFORMANCE_THRESHOLD, k, ...
-                Information.PENALTY_FEE_STRAT, sl);
+                Information.PERFORMANCE_THRESHOLD, k);
         end
         
         
     end
     
+end
+
+function rate = revenueRate(d, fare)
+%{
+* 
+
+    Input
+        d:      Rate of demand
+        fare:	Price received per unit of demand
+
+    Output
+        rate:   Rate of revenue
+%}
+    rate = d*fare;
 end

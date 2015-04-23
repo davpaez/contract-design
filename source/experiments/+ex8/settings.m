@@ -1,4 +1,10 @@
 %{
+-------------------------------------------------------------
+Experiment 8
+
+This experiment is being used as a test for the new features
+of the model!
+-------------------------------------------------------------
 
 Description:
 Single and deterministic analysis of the game
@@ -61,6 +67,15 @@ data.setAsGiven();
 data.value = 0.04;
 
 progSet.add(data);
+
+% 4. Demand function
+fnc = Function();
+
+fnc.setIdentifier(ItemSetting.DEMAND_FNC);
+fnc.setAsGiven();
+fnc.equation = @commonFnc.demandFunction;
+
+progSet.add(fnc);
 
 %% Optimization (16 - 30)
 
@@ -127,12 +142,12 @@ data.value = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
 
 progSet.add(data);
 
-% 109. Deterioration function
+% 109. Continuous response function
 fnc = Function();
 
-fnc.setIdentifier(ItemSetting.DET_RATE);
+fnc.setIdentifier(ItemSetting.CONT_RESP_FNC);
 fnc.setAsGiven();
-fnc.equation = @deteriorationRate;
+fnc.equation = @continuousRespFunction;
 
 progSet.add(fnc);
 
@@ -151,39 +166,7 @@ progSet.add(fnc);
 
 %% Contract (46 - 60)
 
-% 46. Contract duration
-data = InputData();
 
-data.setIdentifier(ItemSetting.CON_DUR);
-data.setAsControlled(ItemSetting.PRINCIPAL);
-data.value = 25;
-data.setValue_NumberSet(InputData.REAL);
-data.value_LowerBound = 5;
-data.value_UpperBound = 100;
-
-progSet.add(data);
-
-% 47. Performance threshold
-data = InputData();
-
-data.setIdentifier(ItemSetting.PERF_THRESH);
-data.setAsControlled(ItemSetting.PRINCIPAL);
-data.value = 70;
-
-data.setValue_NumberSet(InputData.REAL);
-data.value_LowerBound = progSet.returnItemSetting(ItemSetting.NULL_PERF).value;
-data.value_UpperBound = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
-
-progSet.add(data);
-
-% 48. Revenue: Tolls
-data = InputData();
-
-data.setIdentifier(ItemSetting.REV);
-data.setAsGiven();
-data.value = 1800;
-
-progSet.add(data);
 
 % 49. Investment
 inv = InputData();
@@ -193,34 +176,6 @@ inv.setAsGiven();
 inv.value = 875;
 
 progSet.add(inv);
-
-% 50. Contributions
-data = InputData(); 
-
-data.setIdentifier(ItemSetting.CONTRIB);
-data.setAsGiven();
-data.value = 400;
-
-progSet.add(data);
-
-% 51. Maximum cumulative penalty
-data = InputData();
-
-data.setIdentifier(ItemSetting.MAX_SUM_PEN);
-data.setAsGiven();
-data.value = 400;
-
-progSet.add(data);
-
-% 52. Strategies Penalty fee enforcement action
-action = Action(Action.PENALTY, ItemSetting.PRINCIPAL);
-
-action.setIdentifier(ItemSetting.PEN_POLICY);
-action.setAsGiven();
-action.selectStrategy(1);
-action.setParamsValue_Random();
-
-progSet.add(action);
 
 
 %% Nature (61 - 75)
@@ -244,8 +199,36 @@ action.selectStrategy(1);
 
 progSet.add(action);
 
+% 63. Continuous environmental force
+fnc = Function();
+
+fnc.setIdentifier(ItemSetting.CONT_ENV_FORCE);
+fnc.setAsGiven();
+fnc.equation = @CommonFnc.continuousEnvForce;
+
+progSet.add(fnc);
+
 
 %% Principal (76 - 90)
+
+% 75. Strategies Conctract offer action
+action = Action(Action.CONTRACT_OFFER, ItemSetting.PRINCIPAL);
+
+action.setIdentifier(ItemSetting.STRATS_CONTRACT);
+action.setAsGiven();
+action.selectStrategy(1);
+
+progSet.add(action);
+
+% 52. Strategies Penalty fee enforcement action
+action = Action(Action.PENALTY, ItemSetting.PRINCIPAL);
+
+action.setIdentifier(ItemSetting.PEN_POLICY);
+action.setAsGiven();
+action.selectStrategy(1);
+action.setParamsValue_Random();
+
+progSet.add(action);
 
 % 76. Strategies Inspection action
 action = Action(Action.INSPECTION, ItemSetting.PRINCIPAL);
@@ -359,10 +342,27 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
     assert(isreal(cost), 'Cost must be a real number.')
 end
 
-function dydt = deteriorationRate(t,v)
+function r = continuousRespFunction(f, d, v, t)
+%{
+* 
+
+    Input
+        f:  Continuous environmental force
+        d:  Demand
+        v:  Performance
+        t:  Time (years)
+
+    Output
+        r:  Response
+%}
+
 a = 1.3;
 b = 2.3;
 vi = 100;
 
-dydt = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t;
+r = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t;
+if v <= 0
+    r = 0;
+end
+
 end
