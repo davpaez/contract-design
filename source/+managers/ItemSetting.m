@@ -1,6 +1,4 @@
 classdef ItemSetting < matlab.mixin.Copyable
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         % Type of problem setting
@@ -173,7 +171,7 @@ classdef ItemSetting < matlab.mixin.Copyable
                 
         %}
         function setValue_NumberSet(thisItemSetting, setName)
-            thisItemSetting.value_NumberSet = setName;            
+            thisItemSetting.value_NumberSet = setName;
         end
         
         

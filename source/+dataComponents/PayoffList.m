@@ -1,6 +1,4 @@
 classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, GetAccess = protected)
         % Properties of payoff list
@@ -54,17 +52,16 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function thisPff = Payoff(discountRate)
+        function thisPff = PayoffList(discountRate)
             
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             
-            listTypes = {Payoff.REVENUE, ...
-                Payoff.CONTRIBUTION, ...
-                Payoff.INVESTMENT, ...
-                Payoff.MAINTENANCE, ...
-                Payoff.INSPECTION, ...
-                Payoff.PENALTY, ...
-                Payoff.FINAL };
+            listTypes = {Transaction.CONTRIBUTION, ...
+                Transaction.INVESTMENT, ...
+                Transaction.MAINTENANCE, ...
+                Transaction.INSPECTION, ...
+                Transaction.PENALTY, ...
+                Transaction.FINAL };
             
         
             thisPff@managers.TypedClass(listTypes);
@@ -173,7 +170,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function id = register(thisPff, time, value, type, varargin)
+        function id = register(thisPff, time, value, type)
             
             % Check validity of arguments
             
@@ -185,13 +182,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 end
             end
             
-            if isempty(varargin)
-                dur = 0;
-            else
-                assert(length(varargin) == 1, 'Wrong number of parameters varargin.')
-                dur = varargin{1};   % Final time of flow
-                assert(dur >= 0 , 'Duration must be non-negative')
-            end
             
             % Validate type
             assert(thisPff.isValidType(type) ,...
@@ -432,7 +422,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         %}
         % TODO This method generates some error
         function st = returnPayoffsOfType(thisPff, type)
-            import dataComponents.Payoff
             
             assert(thisPff.isValidType(type), 'The type is not valid')
             

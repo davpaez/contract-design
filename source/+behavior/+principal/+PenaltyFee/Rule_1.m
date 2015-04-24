@@ -110,12 +110,12 @@ classdef Rule_1 < managers.DecisionRule
                 
         %}
         function mainAlgorithm(~, theMsg)
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import managers.Information
             
             thePrincipal = theMsg.getExecutor();
             
-            penaltyPayoffs = thePrincipal.payoff.returnPayoffsOfType(Payoff.PENALTY);
+            penaltyPayoffs = thePrincipal.payoff.returnPayoffsOfType(Transaction.PENALTY);
             pmax = thePrincipal.contract.getMaxSumPenalties();
 
             sumPastPenalties = sum(penaltyPayoffs.value);

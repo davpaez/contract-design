@@ -1,6 +1,4 @@
 classdef Operation < managers.TypedClass
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         % Types of operations

@@ -1,6 +1,4 @@
 classdef Strategy_1 < managers.MandMaintStrategy
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (GetAccess = public, SetAccess = protected)
         % ----------- %

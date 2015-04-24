@@ -1,12 +1,10 @@
 classdef Contract < matlab.mixin.Copyable
-    %CONTRACT Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (GetAccess = public, SetAccess = protected)
         contractDuration 	% Mission time (years)
         initialPerf         % Initial performance of infrastructure: Assummed to be equal to MAX_PERF
         perfThreshold       % Minimum performance required by principal
-        revenue             % Revenue: tolls
+        revenueRate             % Function handle
         investment          % Land purchase and construction cost
         paymentSchedule        % Government contributions Array[nx2] --> [time value]
         maxSumPenalties     % Maximum possible penalty
@@ -16,7 +14,7 @@ classdef Contract < matlab.mixin.Copyable
     methods
         %% Constructor
         function thisContract = Contract(progSet, ...
-                conDur, paymentSchedule, revRateFnc, perfThreshold)
+                conDur, paymentSchedule, revRateFnc, perfThreshold, penStrat)
             
             import managers.*
             
@@ -32,8 +30,6 @@ classdef Contract < matlab.mixin.Copyable
             % Performance threshold
             thisContract.perfThreshold = perfThreshold;
             
-            
-            
             % Initial performance
             thisContract.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
 
@@ -42,7 +38,10 @@ classdef Contract < matlab.mixin.Copyable
             
             % Penalty policy
             action = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
-            thisContract.penaltyAction = returnCopyAction(action);
+            thisContract.penaltyAction = action.returnCopy();
+            
+            % Penalty policy strategy
+            thisContract.penaltyStrategy = penStrat;
             
         end
         
@@ -103,8 +102,8 @@ classdef Contract < matlab.mixin.Copyable
             Output
                 
         %}
-        function r = getRevenue(thisContract)
-            r = thisContract.revenue;
+        function r = getRevenueRate(thisContract)
+            r = thisContract.revenueRate;
         end
         
         

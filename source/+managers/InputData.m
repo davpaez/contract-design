@@ -1,6 +1,4 @@
 classdef InputData < managers.ItemSetting
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         % Number set: Associated with any 'value' attribute

@@ -1,7 +1,7 @@
 classdef Agent < entities.Player
-    %AGENT Summary of this class goes here
-    %   Detailed explanation goes here
+    
     properties (Constant, Hidden = true)
+        NAME = 'AGENT'
         
         % Types of cash flow/actions
         ALL = 'ALL';
@@ -76,7 +76,7 @@ classdef Agent < entities.Player
         %% Constructor
         
         
-        function thisAgent = Agent(progSet, contract, problem)
+        function thisAgent = Agent(progSet, problem)
         %{
         * Constructor method of Agent class
         
@@ -91,15 +91,15 @@ classdef Agent < entities.Player
             import managers.*
             
             % Creates instance of object of the superclass Player
-            thisAgent@entities.Player(contract, problem);
+            thisAgent@entities.Player(problem);
             
             % Assigns voluntary maintenance action
             action = progSet.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
-            thisAgent.volMaintAction = returnCopyAction(action);
+            thisAgent.volMaintAction = action.returnCopy();
             
             % Assigns mandatory maintenance action
             action = progSet.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
-            thisAgent.mandMaintAction = returnCopyAction(action);
+            thisAgent.mandMaintAction = action.returnCopy();
             
             % Maintenance cost function
             fnc = progSet.returnItemSetting(ItemSetting.MAINT_COST_FNC);
@@ -151,7 +151,7 @@ classdef Agent < entities.Player
 
         
         % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
+        % ---------- Mutator methods -------------------------------------
         % ----------------------------------------------------------------
         
         function operation = submitOperation(thisAgent, currentPerf, ...

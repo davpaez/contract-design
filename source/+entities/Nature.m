@@ -1,13 +1,5 @@
 classdef Nature < handle
-    %NATURE Summary of this class goes here
-    %   Detailed explanation goes here
-    properties (Constant, Hidden = true)
-        % Actions available
-        SHOCK = 'SHOCK'
-        UPDATEPERF = 'UPDATEPERF';
-    end
-    
-    
+
     properties
         % ----------- %
         % Attributes
@@ -15,26 +7,16 @@ classdef Nature < handle
         time = 0
         hazard          % [Boolean] Turns on and off the natural hazards
         
+        contEnvForce    % Function handle
+        
         % ----------- %
         % Objects
         % ----------- %
         
-        shockAction
-        
         infrastructure
-        
+        shockAction
         submittedOperation
         
-        contEnvForce
-        
-    end
-    
-    events
-        finishedShock
-    end
-    
-    methods (Access = protected)
-
     end
     
     methods
@@ -48,18 +30,19 @@ classdef Nature < handle
             Output
                 
         %}
-        function thisNature = Nature(progSet, contract)
-            import managers.*
+        function thisNature = Nature(progSet)
+            import managers.ItemSetting
+            import entities.Infrastructure
             
             % Active hazard status
             thisNature.hazard = progSet.returnItemSetting(ItemSetting.NAT_HAZARD).value;
             
             % Shock strategy
             action = progSet.returnItemSetting(ItemSetting.STRATS_SHOCK);
-            thisNature.shockAction = returnCopyAction(action);
+            thisNature.shockAction = action.returnCopy();
             
             % Creates infrastructure object
-            thisNature.infrastructure = entities.Infrastructure(progSet, contract);
+            thisNature.infrastructure = Infrastructure(progSet);
         end
         
         %% Getter functions

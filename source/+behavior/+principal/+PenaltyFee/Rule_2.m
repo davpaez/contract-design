@@ -111,9 +111,9 @@ classdef Rule_2 < managers.DecisionRule
                 
         %}
         function valuePenaltyFee = mainAlgorithm(thisRule, thePrincipal, inputStructInfo)
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             
-            penaltyPayoffs = thePrincipal.payoff.returnPayoffsOfType(Payoff.PENALTY);
+            penaltyPayoffs = thePrincipal.payoff.returnPayoffsOfType(Transaction.PENALTY);
             pmax = thePrincipal.contract.getMaxSumPenalties();
             tm = thePrincipal.contract.getContractDuration();
 

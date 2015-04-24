@@ -1,6 +1,4 @@
 classdef Realization < matlab.mixin.Copyable
-    %REALIZATION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant)
         
@@ -65,79 +63,43 @@ classdef Realization < matlab.mixin.Copyable
             % Get fileInfo handle
             thisRlz.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             
-            
-            % Contract offer!!! %TODO
-            % Create principal
-            contractAction = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
-            penaltyFeeAction = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
-            
-            con = Agent.generateContract(progSet, contractAction);
-            
-            % Creating local copies of 
-            thisRlz.contract = con;
+            % Problem object
             thisRlz.problem = Problem(progSet);
             
+
+            % Intial payoffs
+            % TODO Terminar schedule de pagos para contribuciones del
+            % gobierno
             
-            % Make principal return contract object
             
-            % 
+            % Construction of principal, agent
+            thisRlz.principal = Principal(progSet, thisRlz.problem);
+            thisRlz.agent = Agent(progSet, thisRlz.problem);
+                        
+            % Creation and distribution of contract
+            con = thisRlz.principal.generateContract();
+            
+            thisRlz.contract = con;
+            thisRlz.principal.receiveContract(con);
+            thisRlz.agent.receiveContract(con);
             
             % Creating function handles
             %{
             thisRlz.fh.contEnvForce = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             thisRlz.fh.demandRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             thisRlz.fh.revenueRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            thisRlz.fh.contResponse = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            thisRlz.fh.contResponse = progSet.returnItemSetting(ItemSetting.CONT_RESP_FNC);
             %}
             
-            % Intial payoffs
-            % TODO Terminar schedule de pagos para contribuciones del
-            % gobierno
-%                 contractDuration = thisRlz.contract.getContractDuration();
-%                 revenueFlowRate = thisRlz.contract.getRevenue() / contractDuration;
-                
-                % Payoffs principal
-                % Government contributions
-%                 prinPff = struct();
-%                 prinPff.value = -thisRlz.contract.getContribution();
-%                 prinPff.duration = 0;
-%                 prinPff.type{1} = Payoff.CONTRIBUTION;
-                
-                % Payoffs agent
-                % Government contributions
-%                 agPff = struct();
-%                 agPff.value = thisRlz.contract.getContribution();
-%                 agPff.duration = 0;
-%                 agPff.type{1} = Payoff.CONTRIBUTION;
-                
-                % Investment
-                agPff.value(end+1) = -thisRlz.contract.getInvestment();
-                agPff.duration(end+1) = 0;
-                agPff.type{end+1} = Payoff.INVESTMENT;
-            
-            
-            % Initial balance agent
-            data = progSet.returnItemSetting(ItemSetting.INV);
-            investment = data.value;
-            
-            
-                
-            % Construction of principal, agent and nature
-            thisRlz.principal = Principal(  progSet, ...
-                                                    thisRlz.contract, ...
-                                                    thisRlz.problem     );
-                                                
-            thisRlz.agent = Agent(  progSet, ...
-                                            thisRlz.contract, ...
-                                            thisRlz.problem     );
-                                        
-            thisRlz.nature = Nature(progSet, ...
-                                            thisRlz.contract);
+            % Contruction of nature
+            thisRlz.nature = Nature(progSet);
             
             % Initial observation
             initObs = thisRlz.nature.infrastructure.getObservation();
-                              
-            investment = Transaction(thisRlz.time, investment, Information.AGENT, []);
+            
+            % Agent's investment transaction
+            data = progSet.returnItemSetting(ItemSetting.INV);
+            investment = Transaction(thisRlz.time, data.value, Transaction.INVESTMENT, Information.AGENT, []);
             
             % Construction of INIT event structs for principal and agent  
             initEventPrincipal = Event(thisRlz.time, Event.INIT, initObs, []);
@@ -339,7 +301,7 @@ classdef Realization < matlab.mixin.Copyable
                 triggered a mandatory maintenance, false otherwise.
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Observation
             import dataComponents.Event
             
@@ -354,7 +316,7 @@ classdef Realization < matlab.mixin.Copyable
 
             pffPrincipal = struct();
             pffPrincipal.value = -inspectionCost;
-            pffPrincipal.type{1} = Payoff.INSPECTION;
+            pffPrincipal.type{1} = Transaction.INSPECTION;
             
             % Creates observation struct
             perf = thisRlz.nature.solvePerformanceForTime(timeInspection);
@@ -405,13 +367,13 @@ classdef Realization < matlab.mixin.Copyable
                 % Appending the income (penalty fee) to the principal's
                 % payoff struct
                 pffPrincipal.value(end+1) = penaltyFee;
-                pffPrincipal.type{end+1} = Payoff.PENALTY;
+                pffPrincipal.type{end+1} = Transaction.PENALTY;
                 
                 
                 % Creation payoff struct for the agent
                 pffAgent = struct();
                 pffAgent.value = -penaltyFee;
-                pffAgent.type{1} = Payoff.PENALTY;
+                pffAgent.type{1} = Transaction.PENALTY;
                 
                 % Creates and registers detection event for the principal
                 detectionEvent_Principal = struct();
@@ -448,7 +410,7 @@ classdef Realization < matlab.mixin.Copyable
                 
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Observation
             import dataComponents.Event
             
@@ -469,7 +431,7 @@ classdef Realization < matlab.mixin.Copyable
             
             pffAgent = struct();
             pffAgent.value = -costMaintenance;
-            pffAgent.type{1} = Payoff.MAINTENANCE;
+            pffAgent.type{1} = Transaction.MAINTENANCE;
             
             thisRlz.fileInfo.printLog(['Cost voluntary maintenance: ',num2str(costMaintenance),'\n'])
             
@@ -501,7 +463,7 @@ classdef Realization < matlab.mixin.Copyable
                 
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Observation
             import dataComponents.Operation
             import dataComponents.Event
@@ -538,7 +500,7 @@ classdef Realization < matlab.mixin.Copyable
 
             pffAgent = struct();
             pffAgent.value = -costMaintenance;
-            pffAgent.type{1} = Payoff.MAINTENANCE;
+            pffAgent.type{1} = Transaction.MAINTENANCE;
             
             thisRlz.fileInfo.printLog(['Cost mandatory maintenance: ',num2str(costMaintenance),'\n'])
             
@@ -619,40 +581,31 @@ classdef Realization < matlab.mixin.Copyable
         
         function timeExecution = executePayment(thisRlz, transaction)
         %{
-        * TODO Terminar esta funcion
+        * TODO Deprecated. Execution of payments will be performed by
+        Player class.
 
             Input
 
             Output
 
         %}
-            import dataComponents.Payoff
+            import dataComponents.Event
             
             assert(thisRlz.time == transaction.time)
             
-            v = transaction.value;
+            [emitter, receiver] = transaction.returnEmitterReceiver(thisRlz.principal, thisRlz.agent);
             
-            [em, r] = getEmitterReceiver(transaction);
+            ev = Event(transaction.time, Event.CONTRIBUTION, [], transaction);
             
-            % Emitter side
-            emitterPff = struct();
-            emitterPff.value = transaction.value;
-            emitterPff.type{1} = Payoff.CONTRIBUTION;
+            % Emitter end receiver register the event
+            if ~isempty(emitter)
+                emitter.registerEvent(ev);
+            end
             
-            emitterEvent = struct();
-            emitterEvent.time = transaction.time;
-            emitterEvent.type = Event.CONTRIBUTION;
-            emitterEvent.pff = emitterPff;
+            if ~isempty(receiver)
+                receiver.registerEvent(ev);
+            end
             
-            % Receiver side
-            receiverPff = struct();
-            receiverPff.value = transaction.value;
-            receiverPff.type{1} = Payoff.CONTRIBUTION;
-            
-            receiverEvent = struct();
-            receiverEvent.time = transaction.time;
-            receiverEvent.type = Event.CONTRIBUTION;
-            receiverEvent.pff = receiverPff;
         end
         
         
@@ -732,7 +685,7 @@ classdef Realization < matlab.mixin.Copyable
             from register a ficticious payoff.
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Event
             
             contractDuration = thisRlz.contract.getContractDuration();
@@ -741,7 +694,7 @@ classdef Realization < matlab.mixin.Copyable
             finalPff = struct();
             finalPff.value = 0;
             finalPff.duration = 0;
-            finalPff.type{1} = Payoff.FINAL;
+            finalPff.type{1} = Transaction.FINAL;
             
             % Final event
             finalEvent = struct();

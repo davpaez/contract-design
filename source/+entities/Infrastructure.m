@@ -1,6 +1,4 @@
 classdef Infrastructure < matlab.mixin.Copyable
-    %INFRASTRUCTURE Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant)
         TIMESTEP = 20/365    % Resolution in years of the performance samples
@@ -16,10 +14,8 @@ classdef Infrastructure < matlab.mixin.Copyable
         maxPerf                % Maximum possible performance
         initialPerf
         
-        detRate   % Symbolic function of progressive deterioration %TODO Delete this attribute
-        
-        contResp    % Continuous response function handle
-        shockResp   % Shock response function handle
+        contResponseFnc    % Continuous response function handle
+        shockResponseFnc   % Shock response function handle
         
         % ----------- %
         % Objects
@@ -49,7 +45,7 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-        function thisInfrastructure = Infrastructure(progSet, contract)
+        function thisInfrastructure = Infrastructure(progSet)
             import dataComponents.Observation
             import managers.*
             
@@ -58,14 +54,14 @@ classdef Infrastructure < matlab.mixin.Copyable
             thisInfrastructure.maxPerf = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
             thisInfrastructure.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
             
-            % Deterioration function
-            fnc = progSet.returnItemSetting(ItemSetting.DET_RATE);
-            thisInfrastructure.detRate = fnc.equation;
-            
             % Initial observation
+            initialTime = 0;
             thisInfrastructure.history = Observation();
-            initialObs = contract.getInitialPerfObs();
-            thisInfrastructure.history.register(0, initialObs.value);
+            thisInfrastructure.history.register(initialTime, thisInfrastructure.initialPerf);
+            
+            % Continuous response function
+            fnc = progSet.returnItemSetting(ItemSetting.CONT_RESP_FNC);
+            thisInfrastructure.contResponseFnc = fnc.equation;
             
             % Shock response function
             fnc = progSet.returnItemSetting(ItemSetting.SHOCK_RESP_FNC);

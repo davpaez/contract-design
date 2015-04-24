@@ -1,6 +1,6 @@
 classdef Action < managers.ItemSetting & managers.TypedClass
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    
+    %TODO Rename class to Faculty
     
     properties (Constant, Hidden = true)
         % Types of actions
@@ -163,7 +163,7 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         % ---------- Accessor methods ------------------------------------
         % ----------------------------------------------------------------
         
-        function ca = returnCopyAction(thisAction)
+        function ca = returnCopy(thisAction)
         %{
         
             Input

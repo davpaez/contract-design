@@ -1,10 +1,9 @@
 classdef Principal <  entities.Player
-    %PRINCIPAL Summary of this class goes here
-    %   Detailed explanation goes here
-    %{
     
-    %}
-
+    properties (Constant, Hidden = true)
+        NAME = 'AGENT'
+    end
+    
     properties (GetAccess = public, SetAccess = protected, Hidden = true)
         costSingleInspection
     end
@@ -20,7 +19,7 @@ classdef Principal <  entities.Player
         
         % Active strategies
         contractAction      % Strategy object
-        inspectionAction     % Strategy object
+        inspectionAction    % Strategy object
     end
     
     properties ( Dependent )
@@ -54,11 +53,11 @@ classdef Principal <  entities.Player
             
             % Assigns contract offer strategy attribute
             action = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
-            thisPrincipal.contractAction = returnCopyAction(action);
+            thisPrincipal.contractAction = action.returnCopy();
             
             % Assigns inspection strategy attribute
             action = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
-            thisPrincipal.inspectionAction = returnCopyAction(action);
+            thisPrincipal.inspectionAction = action.returnCopy();
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.PRINCIPAL_UTIL_FNC);
@@ -82,6 +81,10 @@ classdef Principal <  entities.Player
         
         function contract = generateContract(thisPrincipal)
             
+            import dataComponents.Message
+            
+            msg = Message(thisPrincipal);
+            thisPrincipal.contractAction.decide(msg);
         end
         
         %{

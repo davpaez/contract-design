@@ -1,6 +1,4 @@
 classdef Player < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant)
         
@@ -18,9 +16,10 @@ classdef Player < handle
         % ----------- %
         contract      % Instance of contract
         problem
+        
         eventList      % Events known to Agent
-        observation     % % Observation object
-        payoff
+        observationList     % % Observation object
+        payoffList
         
         submittedOperation     % Operation object
     end
@@ -38,14 +37,14 @@ classdef Player < handle
                 
         %}
         function thisPlayer = Player(problem)
-            import dataComponents.Event
-            import dataComponents.Payoff
-            import dataComponents.Observation
+            import dataComponents.EventList
+            import dataComponents.PayoffList
+            import dataComponents.ObservationList
             
             thisPlayer.problem = problem;
-            thisPlayer.eventList = Event();
-            thisPlayer.observation = Observation();
-            thisPlayer.payoff = Payoff(problem.discountRate);
+            thisPlayer.eventList = EventList();
+            thisPlayer.observationList = ObservationList();
+            thisPlayer.payoffList = PayoffList(problem.discountRate);
         end
         
         %% Getter functions
@@ -66,6 +65,11 @@ classdef Player < handle
         %}
         function time = getTime(thisPlayer)
             time = thisPlayer.time;
+        end
+        
+        
+        function receiveContract(thisPlayer, con)
+            thisPlayer.contract = con;
         end
         
         %%
@@ -102,7 +106,7 @@ classdef Player < handle
             numObs = length(obs.value);
             idObs = zeros(1,numObs);
             for i=1:numObs
-                idObs(i) = thisPlayer.observation.register(time, obs.value(i));
+                idObs(i) = thisPlayer.observationList.register(time, obs.value(i));
             end
         end
         
@@ -120,22 +124,14 @@ classdef Player < handle
         register(thisPayoff, time, value, type, varargin)
         %}
         function idPff = registerPayoff(thisPlayer, time, pff)
+            
             numPff = length(pff.value);
             idPff = zeros(1,numPff);
             
-            if isfield(pff,'duration')
-                for i=1:numPff
-                    idPff(i) = thisPlayer.payoff.register(  time, ...
-                                                            pff.value(i), ...
-                                                            pff.type{i}, ...
-                                                            pff.duration(i));
-                end
-            else
-                for i=1:numPff
-                    idPff(i) = thisPlayer.payoff.register(  time, ...
-                                                            pff.value(i), ...
-                                                            pff.type{i});
-                end
+            for i=1:numPff
+                idPff(i) = thisPlayer.payoffList.register(  time, ...
+                    pff.value(i), ...
+                    pff.type{i});
             end
         end
         
@@ -153,39 +149,47 @@ classdef Player < handle
                 None
         %}
         function registerEvent(thisPlayer, evt)
+            
+            import managers.Information
+            
+            %TODONEXT [23 April 2015] Rewrite so that it works with recent changes
+            
             % Input validation
             assert(~isempty(evt), ...
                 'The event object passed as argument must not be empty')
             
             timeNewEvent = evt.time;
             
-            idObs = [];
-            idPff = [];
-            
             % Register observation in thisPlayer
-            if isfield(evt, 'obs')
-                assert(~isempty(evt.obs), 'The field "obs" cannot be empty.')
-                idObs = thisPlayer.registerObservation(timeNewEvent, evt.obs);
+            if ~isempty(evt.observation)
+                idObs = thisPlayer.registerObservation(timeNewEvent, evt.observation);
+            else
+                idObs = [];
             end
             
-            % Register payoff in thisPlayer
-            if isfield(evt, 'pff')
-                assert(~isempty(evt.pff), 'The field "pff" cannot be empty.')
-                idPff = thisPlayer.registerPayoff(timeNewEvent, evt.pff);
+            % Register transaction in thisPlayer
+            if ~isempty(evt.transaction)
+                %TODONEXT_2 Create mechanism to create a payoff entry from
+                %the transaction object
+                
+                [value, role] = evt.transaction.getPayoffValue(thisPlayer);
+                idPff = thisPlayer.registerPayoff(timeNewEvent, value);
+                evt.transaction.confirmExecutionBy(role);
+            else
+                idPff = [];
             end
             
             % Register event
-            assert(isfield(evt,'type') && ~isempty(evt.type), ...
-                'The field "type" is not well specified.')
             thisPlayer.eventList.register(timeNewEvent, evt.type, idObs, idPff);
             
-            % Clear submitted operation
-            if ~isempty(thisPlayer.submittedOperation) && thisPlayer.submittedOperation.sensitive
-                thisPlayer.clearSubmittedOperation();
-            end
+			% Clear submitted operation
+			if ~isempty(thisPlayer.submittedOperation) && thisPlayer.submittedOperation.sensitive
+				thisPlayer.clearSubmittedOperation();
+			end
+			
+			% Set time of player to the time of the newEvent
+			thisPlayer.setTime(timeNewEvent);
             
-            % Set time of player to the time of the newEvent
-            thisPlayer.setTime(timeNewEvent);
         end
         
         function confirmExecutionSubmittedOperation(thisPlayer, operation)
@@ -229,6 +233,18 @@ classdef Player < handle
         
         function u = getUtility(thisPlayer)
             u = thisPlayer.utilityFunction(thisPlayer);
+        end
+        
+        function answer = isPrincipal(thisPlayer)
+            import entities.Principal
+            
+            answer = isa(thisPlayer, 'Principal');
+        end
+        
+        function answer = isAgent(thisPlayer)
+            import entities.Agent
+            
+            answer = isa(thisPlayer, 'Agent');
         end
         
     end

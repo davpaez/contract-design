@@ -1,6 +1,4 @@
 classdef Message < handle
-    %MESSAGE Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         MAX_PERF            = 'MAX_PERF'

@@ -1,6 +1,4 @@
 classdef Information
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         
@@ -10,20 +8,12 @@ classdef Information
 		----  These constants seem to be unnecesary  ----
 		--------- Delete if not needed ------------------
 		
-
-        
         % Nature of decision variables
         TIME                = 'TIME'
         PERFORMANCE         = 'PERFORMANCE'
         MONEY               = 'MONEY'
         
-        
-        % Types of actions
-        INSPECTION  = 'INSPECTION'
-        VOL_MAINT   = 'VOL_MAINT'
-        MAND_MAINT  = 'MAND_MAINT'
-        SHOCK       = 'SHOCK'
-		%}
+        %}
 		
         % Types of players in the game
         PRINCIPAL   =   'PRINCIPAL'
@@ -33,10 +23,10 @@ classdef Information
         % Specific type of information related to each action available to
         % a player of the game
             % Contract offer Action
-            CONTRACT_DURATION = 'CONTRACT_DURATION'
+            CONTRACT_DURATION =     'CONTRACT_DURATION'
             PERFORMANCE_THRESHOLD = 'PERFORMANCE_THRESHOLD'
-            PAYMENT_SCHEDULE = 'PAYMENT_SCHEDULE'
-            REVENUE_RATE_FUNC = 'REVENUE_RATE_FUNC'
+            PAYMENT_SCHEDULE =      'PAYMENT_SCHEDULE'
+            REVENUE_RATE_FUNC =     'REVENUE_RATE_FUNC'
             
             % Inspection Action
             TIME_INSPECTION     = 'TIME_INSPECTION'

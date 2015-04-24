@@ -1,6 +1,4 @@
 classdef EventList < matlab.mixin.Copyable
-    %EVENT Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, GetAccess = protected)
         BLOCKSIZE = 100

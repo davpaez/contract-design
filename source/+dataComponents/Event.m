@@ -1,6 +1,5 @@
-classdef Event < matlab.mixin.Copyable & managers.TypedClass
-    %EVENT Summary of this class goes here
-    %   Detailed explanation goes here
+classdef Event < matlab.mixin.Copyable
+    
     properties (Constant, Hidden = true)
         INIT        = 'INIT'
         CONTRIBUTION = 'CONTRIBUTION'

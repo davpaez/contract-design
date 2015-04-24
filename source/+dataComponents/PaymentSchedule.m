@@ -1,6 +1,4 @@
 classdef PaymentSchedule < handle
-    %PAYMENTSCHEDULE Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         listTransactions
@@ -21,7 +19,7 @@ classdef PaymentSchedule < handle
             
         end
         
-        function addTransaction(thisPaySch, time, value, emitter, receiver)
+        function addTransaction(thisPaySch, time, value, type, emitter, receiver)
         %{
         * Adds a payment schedule between a pair (emitter, receiver)
             
@@ -36,7 +34,8 @@ classdef PaymentSchedule < handle
                 
         %}
             import dataComponents.Transaction
-            thisPaySch.listTransactions{end+1} = Transaction(time, value, emitter, receiver);
+            
+            thisPaySch.listTransactions{end+1} = Transaction(time, value, type, emitter, receiver);
 
         end
         

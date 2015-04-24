@@ -1,13 +1,4 @@
 classdef ContractStrategy < managers.Strategy
-    % CONTRACTSTRATEGY Summary of this class goes here
-    %   This strategy determines:
-    %
-    %   - contract duration
-    %   - payment schedule
-    %   - revenue rate function
-    %   - performance threshold
-    %   - penalty fee strategy (passed as argument)
-    % 
     
     properties (GetAccess = public, SetAccess = protected)
         % ----------- %
@@ -27,7 +18,18 @@ classdef ContractStrategy < managers.Strategy
         % Constructor
         
         function thisStrategy = ContractStrategy()
+        %{
+        * This strategy determines:
+            - contract duration
+            - performance threshold
+            - payment schedule
+            - revenue rate function
             
+            Input
+                
+            Output
+                
+        %}
             thisStrategy@managers.Strategy();
             
             import managers.*
