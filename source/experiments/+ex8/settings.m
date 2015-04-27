@@ -190,14 +190,14 @@ data.value = true;
 progSet.add(data);
 
 % 62. Strategies Shock action
-action = Action(Action.SHOCK, ItemSetting.NATURE);
+faculty = Faculty(Faculty.SHOCK);
 
-action.setIdentifier(ItemSetting.STRATS_SHOCK)
-action.setAsGiven();
-action.selectStrategy(1);
-%action.setParamsValue_Random();
+faculty.setIdentifier(ItemSetting.STRATS_SHOCK)
+faculty.setAsGiven();
+faculty.selectStrategy(1);
+%faculty.setParamsValue_Random();
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 63. Continuous environmental force
 fnc = Function();
@@ -212,33 +212,33 @@ progSet.add(fnc);
 %% Principal (76 - 90)
 
 % 75. Strategies Conctract offer action
-action = Action(Action.CONTRACT_OFFER, ItemSetting.PRINCIPAL);
+faculty = Faculty(Faculty.CONTRACT_OFFER);
 
-action.setIdentifier(ItemSetting.STRATS_CONTRACT);
-action.setAsGiven();
-action.selectStrategy(1);
+faculty.setIdentifier(ItemSetting.STRATS_CONTRACT);
+faculty.setAsGiven();
+factulty.selectStrategy(1);
 
-progSet.add(action);
+progSet.add(factulty);
 
 % 52. Strategies Penalty fee enforcement action
-action = Action(Action.PENALTY, ItemSetting.PRINCIPAL);
+faculty = Faculty(Faculty.PENALTY);
 
-action.setIdentifier(ItemSetting.PEN_POLICY);
-action.setAsGiven();
-action.selectStrategy(1);
-action.setParamsValue_Random();
+faculty.setIdentifier(ItemSetting.PEN_POLICY);
+faculty.setAsGiven();
+faculty.selectStrategy(1);
+faculty.setParamsValue_Random();
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 76. Strategies Inspection action
-action = Action(Action.INSPECTION, ItemSetting.PRINCIPAL);
+faculty = Faculty(Faculty.INSPECTION);
 
-action.setIdentifier(ItemSetting.STRATS_INSP);
-action.setAsGiven();
-action.selectStrategy(2);
+faculty.setIdentifier(ItemSetting.STRATS_INSP);
+faculty.setAsGiven();
+faculty.selectStrategy(2);
 %action.setParamsValue_Random();
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 77. Cost of single inspection
 data = InputData();
@@ -270,24 +270,24 @@ data.value = 120;
 progSet.add(data);
 
 % 92. Strategies VoluntaryMaint action
-action = Action(Action.VOL_MAINT, ItemSetting.AGENT);
+faculty = Faculty(Faculty.VOL_MAINT);
 
-action.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
-action.setAsGiven();
-action.selectStrategy(4);
+faculty.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
+faculty.setAsGiven();
+faculty.selectStrategy(4);
 %action.setParamsValue_Random();
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 93. Strategies MandatoryMaint action
-action = Action(Action.MAND_MAINT, ItemSetting.AGENT);
+faculty = Faculty(Faculty.MAND_MAINT);
 
-action.setIdentifier(ItemSetting.STRATS_MAND_MAINT);
-action.setAsGiven();
-action.selectStrategy(1);
-action.setParamsValue_Random();
+faculty.setIdentifier(ItemSetting.STRATS_MAND_MAINT);
+faculty.setAsGiven();
+faculty.selectStrategy(1);
+faculty.setParamsValue_Random();
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 95. Maintenance cost function
 fnc = Function();

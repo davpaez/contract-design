@@ -1,6 +1,6 @@
 classdef Action < managers.ItemSetting & managers.TypedClass
     
-    %TODO Rename class to Faculty
+    %TODO Will be deprecated
     
     properties (Constant, Hidden = true)
         % Types of actions
@@ -10,10 +10,6 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         MAND_MAINT  = 'behavior.agent.mandatoryMaint.'
         SHOCK       = 'behavior.nature.shock.'
         PENALTY     = 'behavior.principal.penaltyFee.'
-        
-    end
-    
-    properties
     end
     
     properties (GetAccess = public, SetAccess = protected)

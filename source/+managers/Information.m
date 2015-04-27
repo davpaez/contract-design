@@ -19,6 +19,7 @@ classdef Information
         PRINCIPAL   =   'PRINCIPAL'
         AGENT       =   'AGENT'
         NATURE      =   'NATURE'
+        COURT       =   'COURT'
         
         % Specific type of information related to each action available to
         % a player of the game

@@ -26,13 +26,13 @@ classdef ShockStrategy < managers.Strategy
             import behavior.nature.*
             
 			% Set type action
-			thisStrategy.typeAction = Action.SHOCK;
+			%thisStrategy.typeAction = Action.SHOCK;
             
             % One decision variable: Time of shock, Force Value
-            thisStrategy.setDecisionVars_Number(2);
+            %thisStrategy.setDecisionVars_Number(2);
             
             % Nature of decision vars
-            thisStrategy.setDecisionVars_TypeInfo({ Information.TIME_SHOCK , Information.FORCE_SHOCK });
+            %thisStrategy.setDecisionVars_TypeInfo({ Information.TIME_SHOCK , Information.FORCE_SHOCK });
             
         end
         

@@ -152,8 +152,6 @@ classdef Player < handle
             
             import managers.Information
             
-            %TODONEXT [23 April 2015] Rewrite so that it works with recent changes
-            
             % Input validation
             assert(~isempty(evt), ...
                 'The event object passed as argument must not be empty')
@@ -169,9 +167,6 @@ classdef Player < handle
             
             % Register transaction in thisPlayer
             if ~isempty(evt.transaction)
-                %TODONEXT_2 Create mechanism to create a payoff entry from
-                %the transaction object
-                
                 [value, role] = evt.transaction.getPayoffValue(thisPlayer);
                 idPff = thisPlayer.registerPayoff(timeNewEvent, value);
                 evt.transaction.confirmExecutionBy(role);

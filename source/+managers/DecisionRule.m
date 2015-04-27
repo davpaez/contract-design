@@ -271,6 +271,13 @@ classdef DecisionRule < matlab.mixin.Copyable
         end
         
         
+        function addDecisionVar_TypeInfo(thisRule, type)
+            
+            % Make sure the type added is not repeated
+            %TODO
+        end
+        
+        
         function setDecisionVars_TypeInfo(thisRule, cell)
         %{
         * 
@@ -617,7 +624,21 @@ classdef DecisionRule < matlab.mixin.Copyable
         % ----------------------------------------------------------------
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
-        
+        function v = getCoverage(thisRule, requiredDecVars)
+            %TODONEXT
+            
+            ownDecVars = thisRule.decisionVars_TypeInfo;
+            
+            numRequiredDecVars = length(requiredDecVars);
+            numOwnDecVars = length(ownDecVars);
+            
+            v = false(numRequiredDecVars, 1);
+            
+            for i=1:numOwnDecVars
+                answer = strcmp(requiredDecVars, ownDecVars{i});
+                v = or(answer, v);
+            end
+        end
         
         function answer = isSensitive(thisRule)
         %{
@@ -649,6 +670,7 @@ classdef DecisionRule < matlab.mixin.Copyable
                 answer = false;
             end
         end
+        
         
         %{
         function answer = isDelta(thisRule)
@@ -720,6 +742,7 @@ classdef DecisionRule < matlab.mixin.Copyable
                 answer = true;
             end
         end
+        
         
         %{
         function answer = isCurrentlyOutputInvariant(thisRule)
