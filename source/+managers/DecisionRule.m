@@ -272,7 +272,13 @@ classdef DecisionRule < matlab.mixin.Copyable
         
         
         function addDecisionVar_TypeInfo(thisRule, type)
-            
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             % Make sure the type added is not repeated
             %TODO
         end
@@ -625,8 +631,13 @@ classdef DecisionRule < matlab.mixin.Copyable
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
         function v = getCoverage(thisRule, requiredDecVars)
-            %TODONEXT
-            
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             ownDecVars = thisRule.decisionVars_TypeInfo;
             
             numRequiredDecVars = length(requiredDecVars);

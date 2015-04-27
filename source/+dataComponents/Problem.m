@@ -11,7 +11,13 @@ classdef Problem < matlab.mixin.Copyable
     methods
         
         function thisProblem = Problem(progSettings)
-            
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             % Discount rate
             dicountRateId = managers.ItemSetting.DISC_RATE;
             thisProblem.discountRate = progSettings.returnItemSetting(dicountRateId).value;
@@ -19,6 +25,13 @@ classdef Problem < matlab.mixin.Copyable
         end
         
         function rate = getDiscountRate(thisProblem)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             rate = thisProblem.discountRate;
         end
         

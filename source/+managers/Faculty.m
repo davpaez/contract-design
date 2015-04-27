@@ -40,6 +40,13 @@ classdef Faculty < managers.ItemSetting
     methods (Static)
         
         function decVars = getInfoDecVars(typeFaculty)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             
             import managers.Faculty
             import managers.Information
@@ -79,6 +86,13 @@ classdef Faculty < managers.ItemSetting
     methods
         
         function thisFaculty = Faculty(type)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             
             switch type
                 case thisFaculty.CONTRACT_OFFER
@@ -119,6 +133,13 @@ classdef Faculty < managers.ItemSetting
         
         
         function getDecisionRuleAndCustomStratList(thisFaculty)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             
             % Search for all DecisionRule classes of this type of faculty
             % and create a list containing one object for each of these
@@ -192,24 +213,29 @@ classdef Faculty < managers.ItemSetting
         
         
         function combinationArray = getRuleCombinations(thisFaculty, vectors)
-            
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             [numDecRules, numCombinations] = size(vectors);
             combinationArray = cell(0);
-            
+
             for i=1:numCombinations
                 ruleArray = cell(0);
-                
+
                 v = vectors(:,i);
-                
+
                 for j=1:numDecRules
                     if v(j) == true
                         ruleArray{end+1,1} = copy(thisFaculty.decisionRuleList{j});
                     end
                 end
-                
+
                 combinationArray{end+1,1} = ruleArray;
             end
-            
         end
         
         
@@ -407,6 +433,13 @@ classdef Faculty < managers.ItemSetting
 end
 
 function C = getCoverageMatrix(decVars, ruleList)
+%{
+* 
+    Input
+
+    Output
+
+%}
 
 numDecRules = length(ruleList);
 numDecVars = length(decVars);
@@ -424,6 +457,13 @@ end
 end
 
 function sols = getCombinations(C)
+%{
+* 
+    Input
+
+    Output
+
+%}
 
 % Remove combinations 
 sumFilas = sum(C,2);

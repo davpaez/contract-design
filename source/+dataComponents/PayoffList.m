@@ -44,6 +44,8 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         %% Constructor
         
         
+
+        function thisPff = PayoffList(discountRate)
         %{
         * 
         
@@ -52,8 +54,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function thisPff = PayoffList(discountRate)
-            
             import dataComponents.Transaction
             
             listTypes = {Transaction.CONTRIBUTION, ...
@@ -101,32 +101,33 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         % ----------------------------------------------------------------
         
         
+        function currentTime = getCurrentTime(thisPff)
         %{
         * 
         
             Input
-            
+                
             Output
                 
         %}
-        function currentTime = getCurrentTime(thisPff)
             currentTime = thisPff.time(thisPff.pt-1);
         end
         
         
+        function currentValue = getCurrentValue(thisPff)
         %{
         * 
         
             Input
-            
+                
             Output
                 
         %}
-        function currentValue = getCurrentValue(thisPff)
             currentValue = thisPff.value(thisPff.pt-1);
         end
         
-        
+
+        function st = getData(thisPff, ids)
         %{
         * 
         
@@ -135,7 +136,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function st = getData(thisPff, ids)
             if nargin < 2
                 lastValidIndex = thisPff.pt - 1;
                 ids = 1:lastValidIndex;
@@ -162,6 +162,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         % ----------------------------------------------------------------
         
         
+        function id = register(thisPff, time, value, type)
         %{
         * 
         
@@ -170,8 +171,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function id = register(thisPff, time, value, type)
-            
             % Check validity of arguments
             
             if thisPff.pt > 1
@@ -204,6 +203,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
+        function extendArrays(thisPff)
         %{
         * Sets all measures out-of-date
         
@@ -212,8 +212,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function extendArrays(thisPff)
-            
             % Increments list size
             thisPff.listSize = thisPff.listSize + thisPff.BLOCKSIZE;
             
@@ -231,6 +229,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
+        function extendJumpsArray(thisPff)
         %{
         * 
         
@@ -239,12 +238,12 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function extendJumpsArray(thisPff)
             thisPff.listJumpsSize = thisPff.listJumpsSize + thisPff.JUMPBLOCKSIZE;
             thisPff.jumpsIndex(thisPff.jumpsCounter+1:thisPff.listJumpsSize, :) = 0;
         end
         
         
+        function registerJump(thisPff)
         %{
         * 
         
@@ -253,8 +252,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function registerJump(thisPff)
-            
             thisPff.jumpsCounter = thisPff.jumpsCounter + 1;
             
             % Register the pre-jump index!
@@ -266,12 +263,12 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
-        
         % ----------------------------------------------------------------
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
         
         
+        function val = getBalancePostFlow(thisPayoff, id)
         %{
         * 
         
@@ -280,7 +277,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function val = getBalancePostFlow(thisPayoff, id)
             if nargin < 2
                 id = thisPayoff.pt - 1;
             end
@@ -293,6 +289,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
+        function balValue = getBalancePreFlow(thisPayoff, varargin)
         %{
         * 
         
@@ -301,7 +298,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function balValue = getBalancePreFlow(thisPayoff, varargin)
             positionStruct = struct();
             
             if nargin < 2
@@ -341,6 +337,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
+        function balValue = calculateBalance(thisPayoff, positionStruct)
         %{
         * Calculate balance NOT including the value of the position
         specified (whether index or time)
@@ -350,8 +347,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function balValue = calculateBalance(thisPayoff, positionStruct)
-            
             logicalTest = isfield(positionStruct, 'index') || isfield(positionStruct, 'time');
             assert( logicalTest, 'Either "index" or "time" must be specified')
             
@@ -399,7 +394,8 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             balValue = valInst + valDist;
         end
         
-        
+
+        function answer = isType(thisPayoff, type, id)
         %{
         
             Input
@@ -407,11 +403,11 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function answer = isType(thisPayoff, type, id)
             answer =  strcmp(type, thisPayoff.type{id});
         end
         
         
+        function st = returnPayoffsOfType(thisPff, type)
         %{
         * 
         
@@ -419,10 +415,8 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 
             Output
                 
+            % TODO This method generates some error
         %}
-        % TODO This method generates some error
-        function st = returnPayoffsOfType(thisPff, type)
-            
             assert(thisPff.isValidType(type), 'The type is not valid')
             
             lastValidIndex = thisPff.pt - 1;
@@ -438,6 +432,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
+        function presentValue = getNPV(thisPff, tm)
         %{
         *Calculates and returns the NPV of the linked-list of payoffs up
         until (and including) thisPayoff
@@ -448,7 +443,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 PresentValue: [class double] Present value caltulated in
                 time t = 0
         %}
-        function presentValue = getNPV(thisPff, tm)
             
             t = max(thisPff.time + thisPff.duration);
             deltaTime = tm - t;
@@ -466,6 +460,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
+        function st = getBalanceHistory(thisPff, finalTime)
         %{
         * 
         
@@ -474,8 +469,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-        function st = getBalanceHistory(thisPff, finalTime)
-            
             lastValidIndex = thisPff.pt - 1;
             st = struct();
             cont = 0;
@@ -518,6 +511,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
 end
 
 
+function value = futureValueContFlow(flow, ti, tf, discRate)
 %{
 * 
 
@@ -526,13 +520,13 @@ end
     Output
 
 %}
-function value = futureValueContFlow(flow, ti, tf, discRate)
 
 value = flow/discRate * (exp(discRate*tf)-exp(discRate*ti));
 
 end
 
 
+function value = presentValueFlow(futureValue, futureTime, discRate)
 %{
 * 
 
@@ -541,13 +535,13 @@ end
     Output
 
 %}
-function value = presentValueFlow(futureValue, futureTime, discRate)
 
 value = futureValue*exp(-discRate*futureTime);
 
 end
 
 
+function value = futureValueFlow(presentValue, futureTime, discRate)
 %{
 * 
 
@@ -556,7 +550,6 @@ end
     Output
 
 %}
-function value = futureValueFlow(presentValue, futureTime, discRate)
 
 value = presentValue*exp(discRate*futureTime);
 
