@@ -1,21 +1,17 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
-
 ### What is this repository for? ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+This is the repository for an Agent-Based Model developed in MATLAB to simulate the performance on an infrastructure system whose operation has been delegated to a private party (e.g., a public-private partnership). 
 
-### How do I get set up? ###
+### How do I use it? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+You need to have installed MATLAB 2014b or later.
+
+From the MATLAB environment, the model can be run in two ways:
+
+* By executing the `main.m` file. This runs the selected experiment without showing a GUI.
+* By executing the `gui.m` file. This lauches the GUI from which you can select an experiment to run.
 
 ### Contribution guidelines ###
 
@@ -26,4 +22,3 @@ This README would normally document whatever steps are necessary to get your app
 ### Who do I talk to? ###
 
 * Repo owner or admin
-* Other community or team contact
