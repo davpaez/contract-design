@@ -1,5 +1,5 @@
 classdef Action < managers.ItemSetting & managers.TypedClass
-    
+    % 
     %TODO Will be deprecated
     
     properties (Constant, Hidden = true)
@@ -30,15 +30,9 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         % Objects
         % ----------- %
         strategy
-        
-    end
-    
-    properties (Dependent)
-        
     end
     
     methods (Static)
-        
         
         function answer = isValidExecutor(nameExecutor)
         %{
@@ -72,7 +66,6 @@ classdef Action < managers.ItemSetting & managers.TypedClass
     
     methods (Access = protected)
         
-        
         function cpObj = copyElement(obj)
         %{
         
@@ -89,8 +82,9 @@ classdef Action < managers.ItemSetting & managers.TypedClass
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisAction = Action(type, nameExecutor)
         %{
@@ -129,8 +123,8 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         end
         
         
-        %% Getter functions
-        
+        %% ::::::::::::::::::::    Getter methods    ::::::::::::::::::::::
+        % *****************************************************************
         
         function answer = get.determinedAction(thisAction)
         %{
@@ -153,11 +147,8 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         end
         
         
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
         function ca = returnCopy(thisAction)
         %{
@@ -183,10 +174,8 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function selectStrategy(thisAction, index)
         %{
@@ -236,10 +225,8 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function decide(thisAction, theMsg)
         %{
@@ -319,14 +306,14 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         
         
     end
-    
 end
 
-%% Auxiliar functions
 
+%% ::::::::::::::::::    Auxiliary functions    :::::::::::::::::::
+% *****************************************************************
 
-    function strategyArray = returnStrategyArray(typeAction)
-    %{
+function strategyArray = returnStrategyArray(typeAction)
+%{
     * Search the appropriate folder corresponding to the type of action
     queried. Creates the strategy objects and forms a cell array of
     strategy objects
@@ -334,61 +321,62 @@ end
         Input
             typeAction: [class string]
         Output
-            strategyArray: (cell array)[class Strategy] 
-    %}
+            strategyArray: (cell array)[class Strategy]
+%}
+
+strategyArray = {};
+
+behaviorFile = what('+behavior');
+
+for i = 1:length(behaviorFile.packages)
+    playerName = behaviorFile.packages{i};
+    playerFile = what(['+behavior/+',playerName]);
     
-        strategyArray = {};
+    for j=1:length(playerFile.packages)
+        actionName = playerFile.packages{j};
+        query = dir(['+behavior/+',playerName,'/+',actionName,'/','*Strategy_*.m']);
         
-        behaviorFile = what('+behavior');
-        
-        for i = 1:length(behaviorFile.packages)
-            playerName = behaviorFile.packages{i};
-            playerFile = what(['+behavior/+',playerName]);
-            
-            for j=1:length(playerFile.packages)
-                actionName = playerFile.packages{j};
-                query = dir(['+behavior/+',playerName,'/+',actionName,'/','*Strategy_*.m']);
+        if ~isempty(query)
+            numberStrategies = length(query);
+            for k=1:numberStrategies
+                spl = strsplit(query(k).name,'.m');
+                className = spl{1};
+                currentStrategy = feval(['behavior.',playerName,'.',...
+                    actionName,'.',className]);
+                typeCurrent = currentStrategy.getTypeAction();
                 
-                if ~isempty(query)
-                    numberStrategies = length(query);
-                    for k=1:numberStrategies
-                        spl = strsplit(query(k).name,'.m');
-                        className = spl{1};
-                        currentStrategy = feval(['behavior.',playerName,'.',...
-                                actionName,'.',className]);
-                        typeCurrent = currentStrategy.getTypeAction();
-                        
-                        if strcmp(typeCurrent, typeAction)
-                            strategyArray{k} = currentStrategy;
-                        end
-                    end
+                if strcmp(typeCurrent, typeAction)
+                    strategyArray{k} = currentStrategy;
                 end
             end
         end
-        
-        assert(~isempty(strategyArray), ...
-            'There are no strategies that coincide with the type of action specified.')
     end
+end
 
-    
-    function strat = returnStrategyByIndex(stratArray, index)
-    %{
+assert(~isempty(strategyArray), ...
+    'There are no strategies that coincide with the type of action specified.')
+end
+
+
+function strat = returnStrategyByIndex(stratArray, index)
+%{
     *
         Input
 
         Output
 
-    %}
-        strat = [];
+%}
+strat = [];
 
-        for i=1:length(stratArray)
-            currentStrat = stratArray{i};
-            if index == currentStrat.index
-                strat = currentStrat;
-                break
-            end
-        end
-
-        assert(~isempty(strat), ...
-            'There are no strategies that coincide with the index specified')
+for i=1:length(stratArray)
+    currentStrat = stratArray{i};
+    if index == currentStrat.index
+        strat = currentStrat;
+        break
     end
+end
+
+assert(~isempty(strat), ...
+    'There are no strategies that coincide with the index specified')
+end
+

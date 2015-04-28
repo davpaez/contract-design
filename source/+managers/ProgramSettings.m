@@ -1,4 +1,5 @@
 classdef ProgramSettings < matlab.mixin.Copyable
+    % Collection of item settings that define an experiment
     
     properties (Constant, Hidden = true)
         

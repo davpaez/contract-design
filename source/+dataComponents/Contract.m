@@ -1,9 +1,9 @@
 classdef Contract < matlab.mixin.Copyable
-    
+    % 
     properties (GetAccess = public, SetAccess = protected)
         contractDuration 	% Mission time (years)
-        initialPerf         % Initial performance of infrastructure: Assummed to be equal to MAX_PERF
-        perfThreshold       % Minimum performance required by principal
+        initialPerf         % Initial perf of infrastructure: Assummed to be equal to MAX_PERF
+        perfThreshold       % Minimum perf required by principal
         revenueRate             % Function handle
         investment          % Land purchase and construction cost
         paymentSchedule        % Government contributions Array[nx2] --> [time value]
@@ -12,9 +12,20 @@ classdef Contract < matlab.mixin.Copyable
     end
     
     methods
-        %% Constructor
-        function thisContract = Contract(progSet, ...
-                conDur, paymentSchedule, revRateFnc, perfThreshold, penStrat)
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
+        
+        function thisContract = Contract(progSet, conDur, perfThreshold, ...
+                paymentSchedule, revRateFnc, penStrat)
+        %{
+        * 
+        
+            Input
+                
+            Output
+                
+        %}
             
             import managers.*
             
@@ -45,48 +56,19 @@ classdef Contract < matlab.mixin.Copyable
             
         end
         
-        %% Getter functions
         
-        %% Regular methods
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
-        % ---------- Accessor methods ------------------------------------
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function tm = getContractDuration(thisContract)
-            tm = thisContract.contractDuration;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function initPerf = getInitialPerformance(thisContract)
-            initPerf = thisContract.initialPerf;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
         function obs = getInitialPerfObs(thisContract)
+        %{
+        * 
+        
+            Input
+                
+            Output
+                
+        %}
             initPerf = thisContract.initialPerf;
             
             obs = struct();
@@ -94,113 +76,18 @@ classdef Contract < matlab.mixin.Copyable
         end
         
         
-        %{
-        * 
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
-            Input
-                
-            Output
-                
-        %}
-        function r = getRevenueRate(thisContract)
-            r = thisContract.revenueRate;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function inv = getInvestment(thisContract)
-            inv = thisContract.investment;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function c = getContribution(thisContract)
-            c = thisContract.contribution;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function maxPenalty = getMaxSumPenalties(thisContract)
-            maxPenalty = thisContract.maxSumPenalties();
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function perfThreshold =getPerfThreshold(thisContract)
-            perfThreshold = thisContract.perfThreshold;
-        end
-        
-        % ---------- Mutator methods -------------------------------------
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function updateTm(thisContract, newTm)
-            thisContract.tm = newTm;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function updateThreshold(thisContract, newThreshold)
-            if newThreshold >= 100
-                error('Threshold must be less than 100')
-            end
-            thisContract.thresholdPerf = newThreshold;
-        end
-        
-        % ---------- Informative methods ---------------------------------
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
         function answer = isViolation(thisContract, currentPerf)
+        %{
+        * 
+        
+            Input
+                
+            Output
+                
+        %}
             if currentPerf < thisContract.getThresholdPerf()
                 answer = true;
             else
@@ -209,6 +96,7 @@ classdef Contract < matlab.mixin.Copyable
         end
         
         
+        function [time, value] = getNextPayment(thisContract, currentTime)
         %{
         * 
         
@@ -217,7 +105,6 @@ classdef Contract < matlab.mixin.Copyable
             Output
                 
         %}
-        function [time, value] = getNextPayment(thisContract, currentTime)
             index = find(thisContract.paymentSchedule >= currentTime, 1, 'first');
             
             if ~isempty(index)
@@ -226,6 +113,7 @@ classdef Contract < matlab.mixin.Copyable
             end
             
         end
+        
         
     end
     

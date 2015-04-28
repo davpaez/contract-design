@@ -1,10 +1,14 @@
 classdef PaymentSchedule < handle
+    % Collection of payments between emitter and receiver
     
     properties
         listTransactions
     end
     
     methods
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisPaymentSch = PaymentSchedule()
         %{
@@ -14,10 +18,13 @@ classdef PaymentSchedule < handle
             Output
                 
         %}
-            
             thisPaymentSch.listTransactions = cell(0,1);
             
         end
+        
+        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function addTransaction(thisPaySch, time, value, type, emitter, receiver)
         %{
@@ -28,6 +35,7 @@ classdef PaymentSchedule < handle
             (emitter,receiver). If emitter and receiver have lenght = 1,
             then all transactions will be associated with the same pair
             (emitter,receiver)
+            
             Input
                 
             Output
@@ -36,10 +44,18 @@ classdef PaymentSchedule < handle
             import dataComponents.Transaction
             
             thisPaySch.listTransactions{end+1} = Transaction(time, value, type, emitter, receiver);
-
         end
         
+        
         function nextTransaction = getNextTransaction(thisPaySch)
+        %{
+        * 
+        
+            Input
+            
+            Output
+                
+        %}
             n = length(thisPaySch.listTransactions);
             
             for i=1:n
@@ -52,8 +68,6 @@ classdef PaymentSchedule < handle
         end
         
         
-        
     end
-    
 end
 

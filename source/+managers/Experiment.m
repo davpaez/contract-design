@@ -1,7 +1,7 @@
 classdef Experiment < managers.TypedClass
+    % 
     
     properties (Constant, Hidden = true)
-        
         % Types of experiments
         SING = 'SING'   % Single realization of a game
         DISP = 'DISP'   % Many realizations of the same game (same parameters)
@@ -20,14 +20,21 @@ classdef Experiment < managers.TypedClass
         % ----------- %
         gameEvals
         programSettings
-        
     end
     
-    
     methods
-        %% Constructor
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisEx = Experiment(progSet)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             import dataComponents.*
             
@@ -67,6 +74,13 @@ classdef Experiment < managers.TypedClass
         
         
         function single(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             
             thisEx.gameEvals = GameEvaluation(thisEx.programSettings);
@@ -75,6 +89,13 @@ classdef Experiment < managers.TypedClass
         
         
         function dispersion(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             
             thisEx.gameEvals = GameEvaluation(thisEx.programSettings);
@@ -83,15 +104,40 @@ classdef Experiment < managers.TypedClass
         
         
         function sensitivity(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
         end
         
         
         function optimization(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
         end
         
-        %% General methods
+        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function run(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             
             % Load experiment's file info
@@ -124,6 +170,7 @@ classdef Experiment < managers.TypedClass
             fi.showLogFile();
         end
         
+        
         function data = report(thisEx)
             import managers.*
             
@@ -145,9 +192,15 @@ classdef Experiment < managers.TypedClass
             end
         end
         
-        %% Runners
         
         function runSingle(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             
             r = Realization(thisEx.programSettings);
@@ -158,42 +211,91 @@ classdef Experiment < managers.TypedClass
         
         
         function runDispersion(thisEx)
-            
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             thisEx.gameEvals.runGame();
         end
         
         
         function runSensitivity(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             
         end
         
         
         function runOptimization(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             
         end
         
-        %% Reporters
+        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function data = reportSingle(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             data = thisEx.gameEvals.report();
         end
         
         
         function data = reportDispersion(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             data = thisEx.gameEvals.report();
         end
         
         
         function reportSensitivity(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             
         end
         
         
         function reportOptimization(thisEx)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             
         end
         
+        
     end
-    
 end
-

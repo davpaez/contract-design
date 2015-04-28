@@ -1,5 +1,6 @@
 classdef Nature < handle
-
+    % This class represents the natural environment
+    
     properties
         % ----------- %
         % Attributes
@@ -20,9 +21,11 @@ classdef Nature < handle
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function thisNature = Nature(progSet)
         %{
         
             Input
@@ -30,7 +33,6 @@ classdef Nature < handle
             Output
                 
         %}
-        function thisNature = Nature(progSet)
             import managers.ItemSetting
             import entities.Infrastructure
             
@@ -45,15 +47,11 @@ classdef Nature < handle
             thisNature.infrastructure = Infrastructure(progSet);
         end
         
-        %% Getter functions
         
-        %% Regular methods
+        %% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
+        function time = getTime(thisNature)
         %{
         
             Input
@@ -61,11 +59,11 @@ classdef Nature < handle
             Output
                 
         %}
-        function time = getTime(thisNature)
             time = thisNature.time;
         end
         
         
+        function performance = getCurrentPerformance(thisNature)
         %{
         
             Input
@@ -73,15 +71,14 @@ classdef Nature < handle
             Output
                 
         %}
-        function performance = getCurrentPerformance(thisNature)
             performance = thisNature.infrastructure.getPerformance();
         end
+
+
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
-        
-        
+        function setTime(thisNature,time)
         %{
         
             Input
@@ -89,13 +86,14 @@ classdef Nature < handle
             Output
                 
         %}
-        function setTime(thisNature,time)
             if time > thisNature.time
                 thisNature.time = time;
                 thisNature.infrastructure.setTime(time);
             end
         end
         
+        
+        function operation = submitOperation(thisNature)
         %{
         
             Input
@@ -103,7 +101,6 @@ classdef Nature < handle
             Output
                 
         %}
-        function operation = submitOperation(thisNature)
             import dataComponents.Operation
             import dataComponents.Message
             import managers.Strategy
@@ -143,6 +140,7 @@ classdef Nature < handle
         end
         
         
+        function applyOperation(thisNature, operation)
         %{
         
             Input
@@ -150,7 +148,6 @@ classdef Nature < handle
             Output
                 
         %}
-        function applyOperation(thisNature, operation)
             import dataComponents.Operation
             
             condition = operation.isType(Operation.VOL_MAINT) || operation.isType(Operation.MAND_MAINT) || ...
@@ -174,11 +171,25 @@ classdef Nature < handle
         
         
         function finalizeHistory(thisNature, time)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             thisNature.infrastructure.setTime(time);
         end
         
         
         function confirmExecutionSubmittedOperation(thisNature, operation)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             assert(~isempty(thisNature.submittedOperation), ...
                 'The attribute submitted operation should not be empty.')
             
@@ -189,6 +200,8 @@ classdef Nature < handle
             
         end
         
+        
+        function setSubmittedOperation(thisNature, operation)
         %{
         
             Input
@@ -196,10 +209,11 @@ classdef Nature < handle
             Output
                 
         %}
-        function setSubmittedOperation(thisNature, operation)
             thisNature.submittedOperation = operation;
         end
         
+        
+        function clearSubmittedOperation(thisNature)
         %{
         
             Input
@@ -207,17 +221,14 @@ classdef Nature < handle
             Output
                 
         %}
-        function clearSubmittedOperation(thisNature)
             thisNature.submittedOperation = [];
         end
        
-
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
-        
+        function performance = solvePerformanceForTime(thisNature,time)
         %{
         
             Input
@@ -225,21 +236,9 @@ classdef Nature < handle
             Output
                 
         %}
-        function performance = solvePerformanceForTime(thisNature,time)
             performance = thisNature.infrastructure.solvePerformanceForTime(time);
         end
         
+        
     end
 end
-
-%% Auxiliary functions
-
-
-    %{
-
-        Input
-
-        Output
-
-    %}
-

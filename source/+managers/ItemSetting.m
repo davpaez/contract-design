@@ -9,10 +9,10 @@ classdef ItemSetting < matlab.mixin.Copyable
         GIVEN           = 'GIVEN'       % Set by the user of program
         CONTROLLED      = 'CONTROLLED'  % Or controlled by some player
         
-            % Controller / Executors
-            PRINCIPAL       = 'PRINCIPAL'
-            AGENT           = 'AGENT'
-            NATURE          = 'NATURE'
+        % Controller / Executors
+        PRINCIPAL       = 'PRINCIPAL'
+        AGENT           = 'AGENT'
+        NATURE          = 'NATURE'
         
         
         %  ------------------- IDENTIFIERS -------------------------

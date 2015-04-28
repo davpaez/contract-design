@@ -1,4 +1,5 @@
 classdef ObservationList < matlab.mixin.Copyable
+    % 
     
     properties (Constant, GetAccess = protected)
         BLOCKSIZE = 1000
@@ -38,9 +39,11 @@ classdef ObservationList < matlab.mixin.Copyable
     end
     
     methods
-        %% Constructor
         
-        function thisObs = Observation()
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
+        
+        function thisObs = ObservationList()
         %{
         * 
         
@@ -74,17 +77,10 @@ classdef ObservationList < matlab.mixin.Copyable
             % Auxiliary lists
             thisObs.jumpsIndex = zeros(thisObs.JUMPBLOCKSIZE, 1);
         end
-            
         
-        %% Getter functions
-
         
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
         function currentTime = getCurrentTime(thisObs)
         %{
@@ -161,10 +157,8 @@ classdef ObservationList < matlab.mixin.Copyable
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function pointer = register(thisObs, time, value)
         %{
@@ -438,13 +432,21 @@ classdef ObservationList < matlab.mixin.Copyable
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function l = getLength(thisObs)
+        %{
+        * 
+        
+            Input
+            
+            Output
+                
+        %}
             l = thisObs.pt - 1;
         end
+        
         
         function [index, extra] = timeToIndex(thisobs, time)
         %{
@@ -557,6 +559,14 @@ classdef ObservationList < matlab.mixin.Copyable
         
         
         function value = interpolate(thisObs, time)
+        %{
+        * 
+        
+            Input
+            
+            Output
+                
+        %}
             lastEntry = thisObs.pt - 1;
             
             t = thisObs.time(1:lastEntry);
@@ -566,6 +576,6 @@ classdef ObservationList < matlab.mixin.Copyable
             value = interp1(t, v, time);
         end
         
+        
     end
-    
 end

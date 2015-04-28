@@ -1,4 +1,5 @@
 classdef EventList < matlab.mixin.Copyable
+    % 
     
     properties (Constant, GetAccess = protected)
         BLOCKSIZE = 100
@@ -44,11 +45,12 @@ classdef EventList < matlab.mixin.Copyable
         %}
     end
     
-    
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function thisEventList = EventList()
         %{
         * 
 		
@@ -57,8 +59,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-        function thisEventList = EventList()
-            
             import dataComponents.Event
             
             thisEventList.listSize = thisEventList.BLOCKSIZE;
@@ -71,16 +71,11 @@ classdef EventList < matlab.mixin.Copyable
             thisEventList.idPayoff = cell(thisEventList.BLOCKSIZE,1);
         end
         
-        %% Getter funcions
         
-        
-        
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
 		
+		function currentTime = getCurrentTime(thisEvent)
         %{
         * 
 		
@@ -89,11 +84,11 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-		function currentTime = getCurrentTime(thisEvent)
 			currentTime = thisEvent.time(thisEvent.pt-1);
         end
         
         
+        function currentType = getCurrentType(thisEvent)
         %{
         *  
             Input
@@ -101,11 +96,11 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-        function currentType = getCurrentType(thisEvent)
             currentType = thisEvent.type{thisEvent.pt-1};
         end
         
         
+        function st = getData(thisEvent, ids)
         %{
         *  
             Input
@@ -113,7 +108,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-        function st = getData(thisEvent, ids)
             if nargin < 2
                 lastValidIndex = thisEvent.pt - 1;
                 ids = 1:lastValidIndex;
@@ -126,8 +120,9 @@ classdef EventList < matlab.mixin.Copyable
             st.idObservation = thisEvent.idObservation(ids);
             st.idPayoff = thisEvent.idPayoff(ids);
         end
-		  
 		
+		
+        function st = getEventsOfType(thisEvent, type)
         %{
         *  
             Input
@@ -135,7 +130,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-        function st = getEventsOfType(thisEvent, type)
             assert(thisEvent.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
@@ -148,6 +142,7 @@ classdef EventList < matlab.mixin.Copyable
         end
         
         
+        function st = getLastEventOfType(thisEvent, type)
         %{
         * 
         
@@ -156,7 +151,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-        function st = getLastEventOfType(thisEvent, type)
             assert(thisEvent.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
@@ -167,13 +161,12 @@ classdef EventList < matlab.mixin.Copyable
                 st = [];
             end
         end
-			
-            
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
         
         
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
+        
+        function id = register(thisEvent, time, type, idObs, idPff)
         %{
         * 
         
@@ -182,8 +175,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-        function id = register(thisEvent, time, type, idObs, idPff)
-            
             if thisEvent.pt > 1
                 assert( time >= thisEvent.time(thisEvent.pt-1), ...
                      'The time of events must be non-decreasing.')
@@ -208,6 +199,7 @@ classdef EventList < matlab.mixin.Copyable
         end
         
         
+        function extendArrays(thisEvent)
         %{
         * 
         
@@ -216,7 +208,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-        function extendArrays(thisEvent)
             % Increments register or list size
             thisEvent.listSize = thisEvent.listSize + thisEvent.BLOCKSIZE;
             
@@ -228,11 +219,18 @@ classdef EventList < matlab.mixin.Copyable
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function st = getMarkersInfo(thisEvent, type, theObs)
+        %{
+        * 
+        
+            Input
+                
+            Output
+                
+        %}
             st = thisEvent.getEventsOfType(type);
             if ~isempty(st)
                 numEvents = length(st.time);
@@ -245,7 +243,6 @@ classdef EventList < matlab.mixin.Copyable
             end
         end
 		
-
 		
     end
 end

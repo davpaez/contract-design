@@ -1,4 +1,5 @@
 classdef DecisionRule < matlab.mixin.Copyable
+    % 
     
     properties (Constant, Hidden = true)
         % Types of rules: Regarding sensitivity to model state
@@ -12,7 +13,6 @@ classdef DecisionRule < matlab.mixin.Copyable
         % Types of values specified as output of a decision rule
         ABSOLUTE_VALUE      = 'ABSOLUTE_VALUE'
         DELTA_VALUE         = 'DELTA_VALUE'
-        
     end
     
     properties
@@ -58,15 +58,9 @@ classdef DecisionRule < matlab.mixin.Copyable
         % ----------- %
         
 		auxRuleArray                % [array of DecisionRule] Array of Decision Rule objects 
-        
-    end
-    
-    properties (Dependent)
-        
     end
     
     methods (Static)
-        
         
         function answer = isValid_Sensitivity(str)
         %{
@@ -140,12 +134,13 @@ classdef DecisionRule < matlab.mixin.Copyable
             end
         end
         
+        
     end
     
     methods
-        %% Constructor
         
-        %% Getter functions
+        %% ::::::::::::::::::::    Getter methods    ::::::::::::::::::::::
+        % *****************************************************************
         
         function answer = get.determinedRule(thisRule)
         %{
@@ -163,17 +158,8 @@ classdef DecisionRule < matlab.mixin.Copyable
         end
         
         
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function setIndex(thisRule, index)
         %{
@@ -627,9 +613,9 @@ classdef DecisionRule < matlab.mixin.Copyable
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
+        
         function v = getCoverage(thisRule, requiredDecVars)
         %{
         * 
@@ -650,6 +636,7 @@ classdef DecisionRule < matlab.mixin.Copyable
                 v = or(answer, v);
             end
         end
+        
         
         function answer = isSensitive(thisRule)
         %{
@@ -681,24 +668,6 @@ classdef DecisionRule < matlab.mixin.Copyable
                 answer = false;
             end
         end
-        
-        
-        %{
-        function answer = isDelta(thisRule)
-        %{
-        * 
-            Input
-                
-            Output
-                
-        %}
-            if strcmp(thisRule.typeRule_Output, managers.DecisionRule.DELTA_VALUE)
-                answer = true;
-            else
-                answer = false;
-            end
-        end
-        %}
         
         
         function answer = areAllParamsPropertiesSet(thisRule)
@@ -755,22 +724,5 @@ classdef DecisionRule < matlab.mixin.Copyable
         end
         
         
-        %{
-        function answer = isCurrentlyOutputInvariant(thisRule)
-        %{
-        * 
-            Input
-                
-            Output
-                
-        %}
-            answer = thisRule.determinedRule && ...
-                ~thisRule.isStochastic() && ...
-                ~isempty(thisRule.lastOutput) && ...
-                ~thisRule.isSensitive();
-        end
-        %}
-        
     end
-    
 end

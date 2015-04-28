@@ -1,5 +1,5 @@
 classdef Operation < managers.TypedClass
-    
+    % 
     properties (Constant, Hidden = true)
         % Types of operations
         INSPECTION  = 'INSPECTION'
@@ -26,9 +26,19 @@ classdef Operation < managers.TypedClass
     end
     
     methods
-        %% Constructor
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisOp = Operation(time, type, sens, param)
+        %{
+        * 
+        
+            Input
+            
+            Output
+                
+        %}
             import dataComponents.Operation
             
             listTypes = {  Operation.VOL_MAINT, ...
@@ -82,20 +92,11 @@ classdef Operation < managers.TypedClass
             
         end
         
-        %% Getter functions
         
-        %% Regular methods
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
+        function setType(thisOp, type)
         %{
         * Sets the type attribute of thisOperation if type argument is valid
         
@@ -104,7 +105,6 @@ classdef Operation < managers.TypedClass
             Output
                 answer: [class Boolean]
         %}
-        function setType(thisOp, type)
             if thisOp.isValidType(type)
                 thisOp.type = type;
             else
@@ -112,32 +112,30 @@ classdef Operation < managers.TypedClass
             end
         end
         
-        %{
         
+        function setAsPending(thisOperation)
+        %{
+        * 
             Input
                 
             Output
                 
         %}
-        
-        function setAsPending(thisOperation)
             thisOperation.pendingExecution = true;
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
+        function answer = isDeltaOperation(thisOperation)
         %{
-        
+        * 
             Input
                 
             Output
                 
         %}
-        
-        function answer = isDeltaOperation(thisOperation)
             import dataComponents.Operation
             
             answer = thisOperation.isType(Operation.VOL_MAINT) || ...
@@ -146,15 +144,14 @@ classdef Operation < managers.TypedClass
         end
         
         
+        function answer = isType(thisOp, type)
         %{
-        
+        * 
             Input
                 
             Output
                 
         %}
-        function answer = isType(thisOp, type)
-            
             assert(thisOp.isValidType(type), 'The type entered as argument is not valid')
             
             if strcmp(thisOp.type, type)
@@ -163,9 +160,7 @@ classdef Operation < managers.TypedClass
                 answer = false;
             end
         end
-
         
         
     end
-    
 end

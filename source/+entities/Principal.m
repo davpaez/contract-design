@@ -1,4 +1,5 @@
 classdef Principal <  entities.Player
+    % 
     
     properties (Constant, Hidden = true)
         NAME = 'AGENT'
@@ -22,18 +23,12 @@ classdef Principal <  entities.Player
         inspectionAction    % Strategy object
     end
     
-    properties ( Dependent )
-        
-    end
-    
-    methods (Access = protected)
-        
-    end
-    
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function thisPrincipal = Principal (progSet, problem)
         %{
         
             Input
@@ -41,7 +36,6 @@ classdef Principal <  entities.Player
             Output
                 
         %}
-        function thisPrincipal = Principal (progSet, problem)
             import managers.*
             
             % Creates instance of object of the superclass Player
@@ -65,28 +59,26 @@ classdef Principal <  entities.Player
             
         end
         
-        %% Getter functions
         
-        
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function contract = generateContract(thisPrincipal)
-            
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             import dataComponents.Message
             
             msg = Message(thisPrincipal);
             thisPrincipal.contractAction.decide(msg);
         end
         
+        
+        function operation = submitOperation(thisPrincipal)
         %{
         
             Input
@@ -94,7 +86,6 @@ classdef Principal <  entities.Player
             Output
                 operation: [class Operation] 
         %}
-        function operation = submitOperation(thisPrincipal)
             import dataComponents.Operation
             import dataComponents.Message
             import dataComponents.Transaction
@@ -134,8 +125,17 @@ classdef Principal <  entities.Player
             
         end
         
+        
         function operation = submitFinalInspection(thisPrincipal)
-            % DELETE method
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
+            % TODO DELETE method
             
             warning('Deprecated. Final inspection is responsability of theinspection strategy.')
             
@@ -148,16 +148,5 @@ classdef Principal <  entities.Player
         end
         
         
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-
-        
     end
-    
-    methods (Static)
-        
-    end
-    
 end

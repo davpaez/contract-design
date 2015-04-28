@@ -1,9 +1,7 @@
 classdef Transaction < handle
-    %TRANSACTION Summary of this class goes here
-    %   Detailed explanation goes here
+    % A transaction is a transfer of money between emitter and receiver
     
     properties (Constant, Hidden = true)
-        
         EMITTER = 'EMITTER'
         RECEIVER = 'RECEIVER'
         
@@ -25,10 +23,12 @@ classdef Transaction < handle
         
         confirmationEmitter = false
         confirmationReceiver = false
-        
     end
     
     methods
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisTran = Transaction(t, v, tp, em, r)
         %{
@@ -68,10 +68,9 @@ classdef Transaction < handle
             end
         end
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
         
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
         function ve = getValueEmitter(thisTran)
         %{
@@ -157,10 +156,8 @@ classdef Transaction < handle
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function completedEmitterSide(thisTran)
         %{
@@ -211,10 +208,8 @@ classdef Transaction < handle
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function answer = isExecuted(thisTran)
         %{

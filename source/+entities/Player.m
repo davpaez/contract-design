@@ -1,8 +1,5 @@
 classdef Player < handle
-    
-    properties (Constant)
-        
-    end
+    % 
     
     properties (GetAccess = public, SetAccess = protected)
         % ----------- %
@@ -25,9 +22,11 @@ classdef Player < handle
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function thisPlayer = Player(problem)
         %{
         * 
         
@@ -36,7 +35,6 @@ classdef Player < handle
             Output
                 
         %}
-        function thisPlayer = Player(problem)
             import dataComponents.EventList
             import dataComponents.PayoffList
             import dataComponents.ObservationList
@@ -47,36 +45,11 @@ classdef Player < handle
             thisPlayer.payoffList = PayoffList(problem.discountRate);
         end
         
-        %% Getter functions
         
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        %{
-        * Returns value of time attribute
-        
-            Input
-                None
-            
-            Output
-                time: [class double] Value of time attribute of thisPlayer
-        %}
-        function time = getTime(thisPlayer)
-            time = thisPlayer.time;
-        end
-        
-        
-        function receiveContract(thisPlayer, con)
-            thisPlayer.contract = con;
-        end
-        
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
+        function setTime(thisPlayer, time)
         %{
         * Set new time for thisPlayer and adds a PV snapshot
         
@@ -86,13 +59,25 @@ classdef Player < handle
             Output
                 None
         %}
-        function setTime(thisPlayer, time)
             if time > thisPlayer.time
                 thisPlayer.time = time;    % Updates time
             end
         end
         
         
+        function receiveContract(thisPlayer, con)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            thisPlayer.contract = con;
+        end
+        
+        
+        function idObs = registerObservation(thisPlayer, time, obs)
         %{
         * 
             Input
@@ -102,7 +87,6 @@ classdef Player < handle
             Output
                 None
         %}
-        function idObs = registerObservation(thisPlayer, time, obs)
             numObs = length(obs.value);
             idObs = zeros(1,numObs);
             for i=1:numObs
@@ -111,6 +95,7 @@ classdef Player < handle
         end
         
         
+        function idPff = registerPayoff(thisPlayer, time, pff)
         %{
         * Append newPayoff to the payoff linked-list attribute of
         thisPlayer
@@ -121,10 +106,7 @@ classdef Player < handle
             Output
                 None
         
-        register(thisPayoff, time, value, type, varargin)
         %}
-        function idPff = registerPayoff(thisPlayer, time, pff)
-            
             numPff = length(pff.value);
             idPff = zeros(1,numPff);
             
@@ -136,6 +118,7 @@ classdef Player < handle
         end
         
         
+        function registerEvent(thisPlayer, evt)
         %{
         * Registers an Event object to the eventList attribute of
         thisPlayer. After adding the event, the time of thisPlayer is updated
@@ -148,8 +131,6 @@ classdef Player < handle
             Output
                 None
         %}
-        function registerEvent(thisPlayer, evt)
-            
             import managers.Information
             
             % Input validation
@@ -187,7 +168,15 @@ classdef Player < handle
             
         end
         
+        
         function confirmExecutionSubmittedOperation(thisPlayer, operation)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             assert(~isempty(thisPlayer.submittedOperation), ...
                 'The attribute submitted operation should not be empty.')
             
@@ -195,65 +184,75 @@ classdef Player < handle
                 'The operation executed does not coincide with the operation submitted.')
             
             thisPlayer.clearSubmittedOperation();
-            
         end
         
+
+        function setSubmittedOperation(thisPlayer, operation)
         %{
-        
+        * 
             Input
                 
             Output
                 
         %}
-        function setSubmittedOperation(thisPlayer, operation)
             thisPlayer.submittedOperation = operation;
         end
         
         
+        function clearSubmittedOperation(thisPlayer)
         %{
-        
+        * 
             Input
                 
             Output
                 
         %}
-        function clearSubmittedOperation(thisPlayer)
             thisPlayer.submittedOperation = [];
         end
         
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function u = getUtility(thisPlayer)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             u = thisPlayer.utilityFunction(thisPlayer);
         end
         
+        
         function answer = isPrincipal(thisPlayer)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import entities.Principal
             
             answer = isa(thisPlayer, 'Principal');
         end
         
+        
         function answer = isAgent(thisPlayer)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import entities.Agent
             
             answer = isa(thisPlayer, 'Agent');
         end
         
+        
     end
-    
 end
-
-%% Auxiliar functions
-
-    %{
-    * Description of the auxiliar function
-    
-        Input
-
-        Output
-
-    %}
-

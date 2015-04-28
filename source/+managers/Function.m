@@ -8,4 +8,3 @@ classdef Function < managers.ItemSetting
     end
     
 end
-

@@ -1,4 +1,5 @@
 classdef Agent < entities.Player
+    % 
     
     properties (Constant, Hidden = true)
         NAME = 'AGENT'
@@ -29,10 +30,6 @@ classdef Agent < entities.Player
         
         % Reactive strategies
         mandMaintAction
-    end
-    
-    methods (Access = protected)
-
     end
     
     properties (Dependent)
@@ -70,11 +67,14 @@ classdef Agent < entities.Player
             contract = Contract(progSet, conDur, paymentSch, revRateFnc, threshold);
             
         end
+        
+        
     end
         
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisAgent = Agent(progSet, problem)
         %{
@@ -112,47 +112,8 @@ classdef Agent < entities.Player
         end
         
         
-        %% Getter functions
-        
-        
-        %{
-        * Calculates inferred inspection rate from the past registered
-        inspection events. This function is called every time the
-        inferredInspectionRate attribute is accessed
-        
-            Input
-                None
-            
-            Output
-                inferredInspectionRate: [class double] Value of the inferred
-                inspection rate
-        %}
-        %{
-        function inferredInspectionRate = get.inferredInspectionRate(thisAgent)
-            
-            if thisAgent.eventList.isSingle()
-                timeInsp = eventList.returnTimeSeries();
-                inferredInspectionRate = 1/mean(diff(timeInsp));
-            else
-                % How should this initial value be set?
-                inferredInspectionRate = 2;
-            end
-        end
-        %}
-        
-        
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function operation = submitOperation(thisAgent, currentPerf, ...
                 solvePerformanceForTime, solveTimeForPerformance, ...
@@ -199,10 +160,8 @@ classdef Agent < entities.Player
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function utility = calculateUtility(thisAgent)
         %{
@@ -218,7 +177,5 @@ classdef Agent < entities.Player
         end
         
         
-        
     end
-
 end

@@ -1,8 +1,8 @@
 classdef Infrastructure < matlab.mixin.Copyable
+    % 
     
     properties (Constant)
         TIMESTEP = 20/365    % Resolution in years of the performance samples
-
     end
     
     properties (GetAccess = public, SetAccess = protected)
@@ -25,7 +25,6 @@ classdef Infrastructure < matlab.mixin.Copyable
     end
     
     properties (Dependent)
-        % timeLastMaintenance     % Time last maintenance
         performance             % Current performance
         time                    % Current time
     end
@@ -35,9 +34,11 @@ classdef Infrastructure < matlab.mixin.Copyable
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function thisInfrastructure = Infrastructure(progSet)
         %{
         
             Input
@@ -45,7 +46,6 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-        function thisInfrastructure = Infrastructure(progSet)
             import dataComponents.Observation
             import managers.*
             
@@ -66,27 +66,24 @@ classdef Infrastructure < matlab.mixin.Copyable
             % Shock response function
             fnc = progSet.returnItemSetting(ItemSetting.SHOCK_RESP_FNC);
             thisInfrastructure.shockResponseFunction = fnc.equation;
-            
-
         end
         
-        %% Getter functions
+        
+        %% ::::::::::::::::::::    Getter methods    ::::::::::::::::::::::
+        % *****************************************************************
+        
         function p = get.performance(thisInfrastructure)
             p = thisInfrastructure.history.getCurrentValue();   % Last value of history
         end
+        
         
         function t = get.time(thisInfrastructure)
             t = thisInfrastructure.history.getCurrentTime();    % Last value of time
         end
         
-        %% Regular methods
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
 
         function performance = getPerformance(thisInfrastructure)
         %{
@@ -115,11 +112,10 @@ classdef Infrastructure < matlab.mixin.Copyable
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        
+        function setTime(thisInfra, newTime)
         %{
         * This method must be called BEFORE a jump action is applied!
         
@@ -128,8 +124,6 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-        function setTime(thisInfra, newTime)
-            
             if newTime > thisInfra.time
                 currentTime =  thisInfra.time;
                 currentPerf = thisInfra.performance;
@@ -153,6 +147,14 @@ classdef Infrastructure < matlab.mixin.Copyable
         
         
         function evolve(thisInfra, t, v)
+        %{
+        * 
+            
+            Input
+                
+            Output
+                
+        %}
             n = length(t);
             
             for i = 2:n
@@ -161,26 +163,24 @@ classdef Infrastructure < matlab.mixin.Copyable
         end
         
         
+        function registerObservation(thisInfrastructure, time, perf)
         %{
+        *
         
             Input
                 
             Output
                 
         %}
-        function registerObservation(thisInfrastructure, time, perf)
-            
             %thisInfrastructure.setTime(time);
             thisInfrastructure.history.register(time, perf);
-            
         end
-            
-        
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
         
         
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
+        
+        function perf = solvePerformanceForTime(thisInfra, time)
         %{
         
             Input
@@ -191,7 +191,6 @@ classdef Infrastructure < matlab.mixin.Copyable
                 performance: [class double] Value of performance
                 calculated.
         %}
-        function perf = solvePerformanceForTime(thisInfra, time)
             error('hola')
             
             l = length(time);
@@ -215,10 +214,10 @@ classdef Infrastructure < matlab.mixin.Copyable
                 % TODO Implement this if necessary
                 error('This has not been implemented yet!')
             end
-
         end
         
         
+        function time = solveTimeForPerformance(thisInfrastructure, performance)
         %{
         * This method returns the value of the deterioration function for a
         given value of time.
@@ -229,13 +228,11 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 time: [class double]
         %}
-        function time = solveTimeForPerformance(thisInfrastructure, performance)
+            
             % TODO Implement this if necessary
             error('This has not been implemented yet!')
         end
         
+        
     end
 end
-
-%% Auxiliary functions
-

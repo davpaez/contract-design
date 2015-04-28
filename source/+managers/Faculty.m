@@ -1,4 +1,5 @@
 classdef Faculty < managers.ItemSetting
+    % 
     
     properties (Constant, Hidden = true)
         % Faculties of players
@@ -23,7 +24,6 @@ classdef Faculty < managers.ItemSetting
     end
     
     properties
-        
         idFaculty       % String identifier of this faculty
         packageAddress  % String to folder with decision rules classes and custom strategies classes
         nameExecutor    % String identifier 
@@ -33,15 +33,13 @@ classdef Faculty < managers.ItemSetting
         customStratList
         
         strategyList
-        
-        
     end
     
     methods (Static)
         
         function decVars = getInfoDecVars(typeFaculty)
         %{
-        
+        * 
             Input
                 
             Output
@@ -81,9 +79,13 @@ classdef Faculty < managers.ItemSetting
             
         end
         
+        
     end
     
     methods
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisFaculty = Faculty(type)
         %{
@@ -122,15 +124,9 @@ classdef Faculty < managers.ItemSetting
             
         end
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
         
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function getDecisionRuleAndCustomStratList(thisFaculty)
         %{
@@ -237,15 +233,6 @@ classdef Faculty < managers.ItemSetting
                 combinationArray{end+1,1} = ruleArray;
             end
         end
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-        
-    end
-    
-    methods (Access = protected)
         
         
         function setFacultyContractOffer(thisFaculty)
@@ -429,8 +416,11 @@ classdef Faculty < managers.ItemSetting
         
         
     end
-    
 end
+
+
+%% ::::::::::::::::::    Auxiliary functions    :::::::::::::::::::
+% *****************************************************************
 
 function C = getCoverageMatrix(decVars, ruleList)
 %{
@@ -455,6 +445,7 @@ for i=1:n
 end
 
 end
+
 
 function sols = getCombinations(C)
 %{
@@ -503,3 +494,4 @@ end
 %TODO Report or warn decision rules that were not part of a solution
 
 end
+

@@ -1,4 +1,5 @@
 classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
+    % 
     
     properties (Constant, GetAccess = protected)
         % Properties of payoff list
@@ -41,10 +42,10 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
     
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
-
         function thisPff = PayoffList(discountRate)
         %{
         * 
@@ -89,17 +90,10 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             % Auxiliary lists
             thisPff.jumpsIndex = zeros(thisPff.JUMPBLOCKSIZE, 1);
         end
-            
-        
-        %% Getter functions
         
         
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
         function currentTime = getCurrentTime(thisPff)
         %{
@@ -157,10 +151,8 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
         function id = register(thisPff, time, value, type)
         %{
@@ -263,10 +255,8 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
         function val = getBalancePostFlow(thisPayoff, id)
         %{
@@ -506,10 +496,12 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             %}
         end
         
+        
     end
-    
 end
 
+%% ::::::::::::::::::    Auxiliary functions    :::::::::::::::::::
+% *****************************************************************
 
 function value = futureValueContFlow(flow, ti, tf, discRate)
 %{

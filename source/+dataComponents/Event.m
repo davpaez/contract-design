@@ -1,4 +1,5 @@
 classdef Event < matlab.mixin.Copyable
+    % 
     
     properties (Constant, Hidden = true)
         INIT        = 'INIT'
@@ -23,11 +24,12 @@ classdef Event < matlab.mixin.Copyable
         
     end
     
-    
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function thisEvent = Event(t, tp, obs, trn)
         %{
         * 
 		
@@ -36,58 +38,13 @@ classdef Event < matlab.mixin.Copyable
             Output
                 
         %}
-        function thisEvent = Event(t, tp, obs, trn)
-            
             thisEvent.time = t;
             thisEvent.type = tp;
             thisEvent.observation = obs;
             thisEvent.transaction = trn;
             
         end
-        
-        %% Getter funcions
-        
-        
-        
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
 		
-		  
-		
-        %{
-        *  
-            Input
-                
-            Output
-                
-        %}
-
         
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-
-			
-            
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-        
-		
-
-		
     end
 end

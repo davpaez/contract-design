@@ -1,14 +1,15 @@
 classdef Problem < matlab.mixin.Copyable
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    % This class saves useful public information
+    % TODO This class may not be necessary
     
     properties
         discountRate
-        
-        
     end
     
     methods
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
         function thisProblem = Problem(progSettings)
         %{
@@ -19,23 +20,12 @@ classdef Problem < matlab.mixin.Copyable
                 
         %}
             % Discount rate
-            dicountRateId = managers.ItemSetting.DISC_RATE;
-            thisProblem.discountRate = progSettings.returnItemSetting(dicountRateId).value;
-            
+            import managers.ItemSetting
+
+            thisProblem.discountRate = progSettings.returnItemSetting(ItemSetting.DISC_RATE).value;
         end
         
-        function rate = getDiscountRate(thisProblem)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            rate = thisProblem.discountRate;
-        end
         
     end
-    
 end
 

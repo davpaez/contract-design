@@ -1,6 +1,5 @@
 classdef FileInfo < managers.ItemSetting
-    %FILEINFO Summary of this class goes here
-    %   Detailed explanation goes here
+    % 
     
     properties (Constant, Hidden = true)
         nameLogFile = 'log'
