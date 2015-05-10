@@ -19,8 +19,8 @@ classdef Principal <  entities.Player
         % ----------- %
         
         % Active strategies
-        contractAction      % Strategy object
-        inspectionAction    % Strategy object
+        contractStrategy      % Strategy object
+        inspectionStrategy    % Strategy object
     end
     
     methods
@@ -47,11 +47,11 @@ classdef Principal <  entities.Player
             
             % Assigns contract offer strategy attribute
             action = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
-            thisPrincipal.contractAction = action.returnCopy();
+            thisPrincipal.contractStrategy = action.returnCopy();
             
             % Assigns inspection strategy attribute
             action = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
-            thisPrincipal.inspectionAction = action.returnCopy();
+            thisPrincipal.inspectionStrategy = action.returnCopy();
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.PRINCIPAL_UTIL_FNC);
@@ -74,7 +74,7 @@ classdef Principal <  entities.Player
             import dataComponents.Message
             
             msg = Message(thisPrincipal);
-            thisPrincipal.contractAction.decide(msg);
+            thisPrincipal.contractStrategy.decide(msg);
         end
         
         
@@ -97,11 +97,11 @@ classdef Principal <  entities.Player
                 msg = Message(thisPrincipal);
                 msg.setTypeRequestedInfo(Information.TIME_INSPECTION);
                 
-                thisPrincipal.inspectionAction.decide(msg);
+                thisPrincipal.inspectionStrategy.decide(msg);
                 
                 timeNextInspection = msg.getOutput(Information.TIME_INSPECTION);
                 
-                isSens = thisPrincipal.inspectionAction.isSensitive();
+                isSens = thisPrincipal.inspectionStrategy.isSensitive();
                 
                 operation = Operation(timeNextInspection, Operation.INSPECTION, isSens, []);
                 [timeNextPayment, valueNextPayment] = thisPrincipal.contract.getNextPayment(thisPrincipal.time);

@@ -8,7 +8,7 @@ classdef Contract < matlab.mixin.Copyable
         investment          % Land purchase and construction cost
         paymentSchedule        % Government contributions Array[nx2] --> [time value]
         maxSumPenalties     % Maximum possible penalty
-        penaltyAction       % Penalty policy (Strategy object)
+        penaltyStrategy       % Penalty policy (Strategy object)
     end
     
     methods
@@ -48,8 +48,8 @@ classdef Contract < matlab.mixin.Copyable
             thisContract.investment = progSet.returnItemSetting(ItemSetting.INV).value;
             
             % Penalty policy
-            action = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
-            thisContract.penaltyAction = action.returnCopy();
+            strat = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
+            thisContract.penaltyStrategy = strat.returnCopy();
             
             % Penalty policy strategy
             thisContract.penaltyStrategy = penStrat;

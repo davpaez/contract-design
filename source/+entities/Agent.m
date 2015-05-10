@@ -38,7 +38,7 @@ classdef Agent < entities.Player
     
     methods (Static)
         
-        function contract = submitContract(progSet, contractAction)
+        function contract = submitContract(progSet, contractStrategy)
         %{
         
             Input
@@ -57,7 +57,7 @@ classdef Agent < entities.Player
                 Information.REVENUE_RATE_FUNC, ...
                 Information.PERFORMANCE_THRESHOLD);
             
-            contractAction.decide(msg);
+            contractStrategy.decide(msg);
             
             conDur = msg.getOutput(Information.CONTRACT_DURATION);
             paymentSch = msg.getOutput(Information.PAYMENT_SCHEDULE);

@@ -1,6 +1,10 @@
 classdef Player < handle
     % 
     
+    properties (Constant, Abstract=true)
+        NAME
+    end
+    
     properties (GetAccess = public, SetAccess = protected)
         % ----------- %
         % Attributes
