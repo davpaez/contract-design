@@ -164,12 +164,10 @@ classdef Faculty < managers.ItemSetting
                 listRules{i} = feval([thisFaculty.packageAddress,'.',className]);
             end
             
-            %TODONEXT
-            
             for i = 1:numStrats
                 stratName = queryStrats(i).name;
                 className = strrep(stratName, '.m', '');
-                listStrats{i} = feval([thisFaculty.packageAddress,'.',className]);
+                listStrats{i} = feval([thisFaculty.packageAddress,'.',className], thisFaculty);
             end
             
             thisFaculty.decisionRuleList = listRules;
