@@ -1,4 +1,4 @@
-classdef Strategy_2 < managers.VolMaintStrategy
+classdef Strategy_2 < managers.Strategy
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -18,26 +18,23 @@ classdef Strategy_2 < managers.VolMaintStrategy
     methods
         %% Constructor
         
-        function thisStrategy = Strategy_2()
-
-            thisStrategy@managers.VolMaintStrategy();
+        function thisStrategy = Strategy_2(theFaculty)
             
             import managers.*
             import behavior.agent.*
 			
-            % Set index
-            thisStrategy.setIndex(2);
+            thisStrategy@managers.Strategy(theFaculty.decisionVars);
             
             % Create decision rule objects
             rule_2 = VoluntaryMaint.Rule_2();
             rule_10 = VoluntaryMaint.Rule_10();
             
+            % Customize parameters properties of rules implemented
+            
+            
             % Initialize cell array of strategy objects
-            thisStrategy.decisionRuleArray{1} = rule_2;
-            thisStrategy.decisionRuleArray{2} = rule_10;
-            
-            % Populate parameters properties of rules implemented
-            
+            thisStrategy.addDecisionRule(rule_2);
+            thisStrategy.addDecisionRule(rule_10);
         end
         
     end

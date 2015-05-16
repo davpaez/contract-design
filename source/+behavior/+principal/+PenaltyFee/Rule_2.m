@@ -110,6 +110,8 @@ classdef Rule_2 < managers.DecisionRule
             Output
                 
         %}
+        
+        %TODO Change method signature to receive theMsg object
         function valuePenaltyFee = mainAlgorithm(thisRule, thePrincipal, inputStructInfo)
             import dataComponents.Transaction
             

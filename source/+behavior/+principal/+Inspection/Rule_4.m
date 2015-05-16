@@ -104,6 +104,7 @@ classdef Rule_4 < managers.DecisionRule
             Output
                 
         %}
+        %TODO Change method signature to receive theMsg object
         function timeNextInspection = mainAlgorithm(thisRule, thePrincipal, inputStructInfo)
             %TODO Fix this. It is not working
             

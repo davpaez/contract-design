@@ -1,4 +1,4 @@
-classdef Strategy_4 < managers.InspectionStrategy
+classdef Strategy_4 < managers.Strategy
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -18,24 +18,20 @@ classdef Strategy_4 < managers.InspectionStrategy
     methods
         %% Constructor
         
-        function thisStrategy = Strategy_4()
-            
-            thisStrategy@managers.InspectionStrategy();
+        function thisStrategy = Strategy_4(theFaculty)
             
             import managers.*
-            import behavior.principal.*
-			
-            % Set index
-            thisStrategy.setIndex(4);
+            
+            thisStrategy@managers.Strategy(theFaculty.decisionVars);
             
             % Create decision rule objects
             rule_4 = Inspection.Rule_4();
             
+            % Customize parameters properties of rules implemented
+            
+            
             % Initialize cell array of decision rule objects
-            thisStrategy.decisionRuleArray{1} = rule_4;
-            
-            % Populate parameters properties of rules implemented
-            
+            thisStrategy.addDecisionRule(rule_4);
         end
         
     end
