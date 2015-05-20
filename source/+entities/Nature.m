@@ -15,7 +15,7 @@ classdef Nature < handle
         % ----------- %
         
         infrastructure
-        shockAction
+        shockStrategy
         submittedOperation
         
     end
@@ -40,8 +40,8 @@ classdef Nature < handle
             thisNature.hazard = progSet.returnItemSetting(ItemSetting.NAT_HAZARD).value;
             
             % Shock strategy
-            action = progSet.returnItemSetting(ItemSetting.STRATS_SHOCK);
-            thisNature.shockAction = action.returnCopy();
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_SHOCK);
+            thisNature.shockStrategy = faculty.getSelectedStrategy();
             
             % Creates infrastructure object
             thisNature.infrastructure = Infrastructure(progSet);
@@ -114,9 +114,9 @@ classdef Nature < handle
                     msg.setTypeRequestedInfo(Information.TIME_SHOCK, ...
                                              Information.FORCE_SHOCK);
                                          
-                    thisNature.shockAction.decide(msg);
+                    thisNature.shockStrategy.decide(msg);
                     
-                    isSens = thisNature.shockAction.isSensitive();
+                    isSens = thisNature.shockStrategy.isSensitive();
                     
                     timeShock = msg.getOutput(Information.TIME_SHOCK);
                     shockForce = msg.getOutput(Information.FORCE_SHOCK);

@@ -1,5 +1,4 @@
 classdef Principal <  entities.Player
-    % 
     
     properties (Constant, Hidden = true)
         NAME = 'AGENT'
@@ -46,12 +45,12 @@ classdef Principal <  entities.Player
             thisPrincipal.costSingleInspection = cinsp.value;
             
             % Assigns contract offer strategy attribute
-            action = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
-            thisPrincipal.contractStrategy = action.returnCopy();
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
+            thisPrincipal.contractStrategy = faculty.getSelectedStrategy();
             
             % Assigns inspection strategy attribute
-            action = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
-            thisPrincipal.inspectionStrategy = action.returnCopy();
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
+            thisPrincipal.inspectionStrategy = faculty.getSelectedStrategy();
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.PRINCIPAL_UTIL_FNC);
@@ -74,6 +73,8 @@ classdef Principal <  entities.Player
             import dataComponents.Message
             
             msg = Message(thisPrincipal);
+            
+            %TODONEXT There is not decide method. What is its replacement?
             thisPrincipal.contractStrategy.decide(msg);
         end
         

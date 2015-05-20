@@ -1,5 +1,4 @@
 classdef Agent < entities.Player
-    % 
     
     properties (Constant, Hidden = true)
         NAME = 'AGENT'
@@ -26,10 +25,10 @@ classdef Agent < entities.Player
         % ----------- %
         
         % Active strategies
-        volMaintAction
+        volMaintStrategy
         
         % Reactive strategies
-        mandMaintAction
+        mandMaintStrategy
     end
     
     properties (Dependent)
@@ -94,12 +93,12 @@ classdef Agent < entities.Player
             thisAgent@entities.Player(problem);
             
             % Assigns voluntary maintenance action
-            action = progSet.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
-            thisAgent.volMaintAction = action.returnCopy();
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
+            thisAgent.volMaintStrategy = faculty.getSelectedStrategy();
             
             % Assigns mandatory maintenance action
-            action = progSet.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
-            thisAgent.mandMaintAction = action.returnCopy();
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
+            thisAgent.mandMaintStrategy = faculty.getSelectedStrategy();
             
             % Maintenance cost function
             fnc = progSet.returnItemSetting(ItemSetting.MAINT_COST_FNC);
@@ -145,9 +144,9 @@ classdef Agent < entities.Player
             
             msg.setExtraInfo(Message.MAX_PERF, infra.maxPerf)
             
-            thisAgent.volMaintAction.decide(msg);
+            thisAgent.volMaintStrategy.decide(msg);
             
-            isSens = thisAgent.volMaintAction.isSensitive();
+            isSens = thisAgent.volMaintStrategy.isSensitive();
             
             timeMaint = msg.getOutput(Information.TIME_VOL_MAINT);
             perfGoal = msg.getOutput(Information.PERF_VOL_MAINT);
