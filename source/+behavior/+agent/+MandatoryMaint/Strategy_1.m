@@ -1,18 +1,5 @@
 classdef Strategy_1 < managers.Strategy
     
-    properties (GetAccess = public, SetAccess = protected)
-        % ----------- %
-        % Attributes
-        % ----------- %
-		
-        
-        % ----------- %
-        % Objects
-        % ----------- %
-        
-        
-    end
-    
     methods
         %% Constructor
         
@@ -21,7 +8,8 @@ classdef Strategy_1 < managers.Strategy
             import managers.*
             import behavior.agent.*
 			
-            thisStrategy@managers.Strategy(theFaculty.decisionVars);
+            id = 'Perfect';
+            thisStrategy@managers.Strategy(id, theFaculty.decisionVars);
             
             % Create decision rule objects
             rule_1 = MandatoryMaint.Rule_1();
