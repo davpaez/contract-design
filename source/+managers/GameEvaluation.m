@@ -1,7 +1,6 @@
 classdef GameEvaluation < handle
     %GAMEEVALUATION Class responsible for decoding the inputDataArray
     % object into parameter values to construct each realization
-    %   Detailed explanation goes here
     
     properties (Constant)
         

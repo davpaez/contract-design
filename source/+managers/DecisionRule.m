@@ -1,5 +1,4 @@
 classdef DecisionRule < matlab.mixin.Copyable
-    % 
     
     properties (Constant, Hidden = true)
         % Types of rules: Regarding sensitivity to model state

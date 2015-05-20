@@ -1,5 +1,5 @@
 classdef Contract < matlab.mixin.Copyable
-    % 
+    
     properties (GetAccess = public, SetAccess = protected)
         contractDuration 	% Mission time (years)
         initialPerf         % Initial perf of infrastructure: Assummed to be equal to MAX_PERF

@@ -1,5 +1,4 @@
 classdef EventList < matlab.mixin.Copyable
-    % 
     
     properties (Constant, GetAccess = protected)
         BLOCKSIZE = 100

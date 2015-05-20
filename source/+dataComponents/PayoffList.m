@@ -1,5 +1,4 @@
 classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
-    % 
     
     properties (Constant, GetAccess = protected)
         % Properties of payoff list

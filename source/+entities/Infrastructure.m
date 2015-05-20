@@ -1,5 +1,4 @@
 classdef Infrastructure < matlab.mixin.Copyable
-    % 
     
     properties (Constant)
         TIMESTEP = 20/365    % Resolution in years of the performance samples

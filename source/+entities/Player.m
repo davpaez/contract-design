@@ -1,5 +1,4 @@
 classdef Player < handle
-    % 
     
     properties (Constant, Abstract=true)
         NAME

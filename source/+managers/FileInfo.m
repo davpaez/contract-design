@@ -1,5 +1,4 @@
 classdef FileInfo < managers.ItemSetting
-    % 
     
     properties (Constant, Hidden = true)
         nameLogFile = 'log'

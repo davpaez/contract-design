@@ -1,6 +1,4 @@
 classdef TypedClass < handle
-    %TYPEDCLASS Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (SetAccess = protected, Hidden = true)
         listTypes

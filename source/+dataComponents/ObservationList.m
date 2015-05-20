@@ -1,5 +1,4 @@
 classdef ObservationList < matlab.mixin.Copyable
-    % 
     
     properties (Constant, GetAccess = protected)
         BLOCKSIZE = 1000
