@@ -1,5 +1,4 @@
 classdef Action < managers.ItemSetting & managers.TypedClass
-    % 
     %TODO Will be deprecated
     
     properties (Constant, Hidden = true)
@@ -358,25 +357,5 @@ assert(~isempty(strategyArray), ...
 end
 
 
-function strat = returnStrategyByIndex(stratArray, index)
-%{
-    *
-        Input
 
-        Output
-
-%}
-strat = [];
-
-for i=1:length(stratArray)
-    currentStrat = stratArray{i};
-    if index == currentStrat.index
-        strat = currentStrat;
-        break
-    end
-end
-
-assert(~isempty(strat), ...
-    'There are no strategies that coincide with the index specified')
-end
 
