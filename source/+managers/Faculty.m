@@ -1,5 +1,4 @@
 classdef Faculty < managers.ItemSetting
-    % 
     
     properties (Constant, Hidden = true)
         % Faculties of players
@@ -30,9 +29,11 @@ classdef Faculty < managers.ItemSetting
         decisionVars    % Cell (column cell) with ids for decision vars of this faculty
         
         decisionRuleList    % Cell with DecisionRule objects
-        customStratList
         
-        strategyList
+        customStratList
+        autoStratList
+        
+        selectedStrategy        % Selected strategy
     end
     
     methods (Static)
@@ -197,12 +198,12 @@ classdef Faculty < managers.ItemSetting
             n = length(ruleCombinations);
             strategies = cell(n,1);
             for i=1:n
-                s = Strategy(thisFaculty.decisionVars);
+                s = Strategy(['auto_',i], thisFaculty.decisionVars);
                 s.setDecisionRuleList(ruleCombinations{i});
                 strategies{i} = s;
             end
             
-            thisFaculty.strategyList = strategies;
+            thisFaculty.autoStratList = strategies;
         end
         
         
@@ -413,6 +414,52 @@ classdef Faculty < managers.ItemSetting
         end
         
         
+        function selectStrategy(thisFaculty, idStrat)
+        %{
+        * Selects a strategy object
+            
+            Input
+                idStrat: [string] Strategy identifier
+            Output
+                None
+        %}
+            
+            if nargin < 2
+                % When no id is provided
+                if ~isempty(thisFaculty.customStratList)
+                    % Selects random object from custom strategy list
+                    num = length(thisFaculty.customStratList);
+                    randomIndex = randi(num);
+                    thisFaculty.selectedStrategy = thisFaculty.customStratList{randomIndex};
+                else
+                    % Selects random object from automatic strategy list
+                    num = length(thisFaculty.autoStratList);
+                    randomIndex = randi(num);
+                    thisFaculty.selectedStrategy = thisFaculty.autoStratList{randomIndex};
+                end
+            else
+                % When id is provided: Selects from custom strategy list
+                strat = returnStrategyByIndex(thisFaculty.customStratList, idStrat);
+                thisFaculty.selectedStrategy = strat;
+            end
+        end
+        
+        
+        function strat = getSelectedStrategy(thisFaculty)
+        %{
+        * Retuns copy of selected strategy
+            
+            Input
+                
+            Output
+                
+        %}
+            
+            strat = copy(thisFaculty.selectedStrategy);
+            
+        end
+        
+        
     end
 end
 
@@ -432,7 +479,7 @@ function C = getCoverageMatrix(decVars, ruleList)
 numDecRules = length(ruleList);
 numDecVars = length(decVars);
 
-C = zeros(numDecRules, numDecVars);
+C = zeros(numDecVars, numDecRules);
 
 n = length(ruleList);
 
@@ -445,33 +492,31 @@ end
 end
 
 
-function sols = getCombinations(C)
+function sols = getCombinations(A)
 %{
 * 
     Input
+        A: [boolean] Coverate matrix of size [numDecVars, numDecRules]
 
     Output
 
 %}
 
 % Remove combinations 
-sumFilas = sum(C,2);
+sumFilas = sum(A,2);
 ix = find(sumFilas == 0);
 if ~isempty(ix)
     error('There is at least one rule that does not cover any dec var')
-    C(ix,:) = [];
+    A(ix,:) = [];
 end
 
 % Multiplicity of decision variables covered
-mdv = sum(C,1);
+mdv = sum(A,1);
 
 assert(all(mdv > 0), ...
     'At least one decision variable is not produced by any rule')
 
-[numDecRules, numDecVars] = size(C);
-
-% Matriz A is transpose of matrix C
-A = C';
+[numDecVars, numDecRules] = size(A);
 
 % Matrix X: Possible vectors x
 numPossible = 2^(numDecRules);
@@ -493,3 +538,26 @@ end
 
 end
 
+
+function strat = returnStrategyByIndex(stratArray, id)
+%{
+* Returns strategy object whose id matches the id passed as argument
+    Input
+
+    Output
+
+%}
+
+strat = [];
+
+for i=1:length(stratArray)
+    currentStrat = stratArray{i};
+    if strcmp(id, currentStrat.id)
+        strat = currentStrat;
+        break
+    end
+end
+
+assert(~isempty(strat), ...
+    'There are no strategies that coincide with the index specified')
+end

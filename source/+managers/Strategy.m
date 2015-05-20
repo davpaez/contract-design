@@ -1,15 +1,37 @@
 classdef Strategy < matlab.mixin.Copyable
-    %STRATEGY Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
+        id
         decisionVars
         decisionRuleList
     end
     
+    methods (Access = protected)
+        
+        function cpObj = copyElement(obj)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
+            cpObj = copyElement@matlab.mixin.Copyable(obj);
+            if ~isempty(obj.decisionRuleList)
+                n = length(obj.decisionRuleList);
+                for i=1:n
+                    cpObj.decisionRuleList{i} = copy(obj.decisionRuleList{i});
+                end
+            end
+        end
+        
+        
+    end
+    
     methods
         
-        function thisStrategy = Strategy(decVars)
+        function thisStrategy = Strategy(id, decVars)
         %{
         
             Input
@@ -17,9 +39,11 @@ classdef Strategy < matlab.mixin.Copyable
             Output
                 
         %}
+            thisStrategy.id = id;
             thisStrategy.decisionVars = decVars;
             thisStrategy.decisionRuleList = cell(0);
         end
+        
         
         function action = generateAction(thisStrategy)
         %{
@@ -32,6 +56,7 @@ classdef Strategy < matlab.mixin.Copyable
             % TODO
         end
         
+        
         function addDecisionRule(thisStrategy, rule)
         %{
         
@@ -42,6 +67,7 @@ classdef Strategy < matlab.mixin.Copyable
         %}
             thisStrategy.decisionRuleList{end+1, 1} = rule;
         end
+        
         
         function setDecisionRuleList(thisStrategy, decRuleList)
         %{
