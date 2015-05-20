@@ -45,7 +45,6 @@ progSet.add(fi);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TYPE_EXP);
-data.setAsGiven();
 data.value = Experiment.SING;
 
 progSet.add(data);
@@ -54,7 +53,6 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TIME_RES);
-data.setAsGiven();
 data.value = 1/365;
 
 progSet.add(data);
@@ -63,7 +61,6 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.DISC_RATE);
-data.setAsGiven();
 data.value = 0.04;
 
 progSet.add(data);
@@ -72,7 +69,6 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.DEMAND_FNC);
-fnc.setAsGiven();
 fnc.equation = @commonFnc.demandFunction;
 
 progSet.add(fnc);
@@ -83,7 +79,6 @@ progSet.add(fnc);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
-data.setAsGiven();
 data.value = 500;
 
 progSet.add(data);
@@ -94,7 +89,6 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.MAX_ITER);
-data.setAsGiven();
 data.value = 100;
 
 progSet.add(data);
@@ -103,7 +97,6 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TOL);
-data.setAsGiven();
 data.value = 0.005;
 
 progSet.add(data);
@@ -117,7 +110,6 @@ progSet.add(data);
 nullp = InputData();
 
 nullp.setIdentifier(ItemSetting.NULL_PERF);
-nullp.setAsGiven();
 nullp.value = 0;
 
 progSet.add(nullp);
@@ -126,7 +118,6 @@ progSet.add(nullp);
 maxp = InputData();
 
 maxp.setIdentifier(ItemSetting.MAX_PERF);
-maxp.setAsGiven();
 maxp.value = 100;
 
 progSet.add(maxp);
@@ -137,7 +128,6 @@ progSet.add(maxp);
 data = InputData();
 
 data.setIdentifier(ItemSetting.INITIAL_PERF);
-data.setAsGiven();
 data.value = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
 
 progSet.add(data);
@@ -146,7 +136,6 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.CONT_RESP_FNC);
-fnc.setAsGiven();
 fnc.equation = @continuousRespFunction;
 
 progSet.add(fnc);
@@ -155,24 +144,20 @@ progSet.add(fnc);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.SHOCK_RESP_FNC);
-fnc.setAsGiven();
 fnc.equation = @(currentPerf, forceValue)CommonFnc.shockResponseFunction( nullp.value, ...
-                                                                maxp.value, ...
-                                                                currentPerf, ...
-                                                                forceValue);
+    maxp.value, ...
+    currentPerf, ...
+    forceValue);
 
 progSet.add(fnc);
 
 
 %% Contract (46 - 60)
 
-
-
 % 49. Investment
 inv = InputData();
 
 inv.setIdentifier(ItemSetting.INV);
-inv.setAsGiven();
 inv.value = 875;
 
 progSet.add(inv);
@@ -184,7 +169,6 @@ progSet.add(inv);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NAT_HAZARD);
-data.setAsGiven();
 data.value = true;
 
 progSet.add(data);
@@ -193,9 +177,7 @@ progSet.add(data);
 faculty = Faculty(Faculty.SHOCK);
 
 faculty.setIdentifier(ItemSetting.STRATS_SHOCK)
-faculty.setAsGiven();
-faculty.selectStrategy(1);
-%faculty.setParamsValue_Random();
+faculty.selectStrategy('Test');
 
 progSet.add(faculty);
 
@@ -203,7 +185,6 @@ progSet.add(faculty);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.CONT_ENV_FORCE);
-fnc.setAsGiven();
 fnc.equation = @CommonFnc.continuousEnvForce;
 
 progSet.add(fnc);
@@ -215,18 +196,15 @@ progSet.add(fnc);
 faculty = Faculty(Faculty.CONTRACT_OFFER);
 
 faculty.setIdentifier(ItemSetting.STRATS_CONTRACT);
-faculty.setAsGiven();
-factulty.selectStrategy(1);
+faculty.selectStrategy('Standard');
 
-progSet.add(factulty);
+progSet.add(faculty);
 
 % 52. Strategies Penalty fee enforcement action
 faculty = Faculty(Faculty.PENALTY);
 
 faculty.setIdentifier(ItemSetting.PEN_POLICY);
-faculty.setAsGiven();
-faculty.selectStrategy(1);
-faculty.setParamsValue_Random();
+faculty.selectStrategy('Incremental');
 
 progSet.add(faculty);
 
@@ -234,9 +212,7 @@ progSet.add(faculty);
 faculty = Faculty(Faculty.INSPECTION);
 
 faculty.setIdentifier(ItemSetting.STRATS_INSP);
-faculty.setAsGiven();
-faculty.selectStrategy(2);
-%action.setParamsValue_Random();
+faculty.selectStrategy('Fixed');
 
 progSet.add(faculty);
 
@@ -244,7 +220,6 @@ progSet.add(faculty);
 data = InputData();
 
 data.setIdentifier(ItemSetting.COST_INSP);
-data.setAsGiven();
 data.value = progSet.returnItemSetting(ItemSetting.INV).value / 1000;
 
 progSet.add(data);
@@ -253,7 +228,6 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.PRINCIPAL_UTIL_FNC);
-fnc.setAsGiven();
 fnc.equation = @CommonFnc.principalUtility;
 
 progSet.add(fnc);
@@ -264,7 +238,6 @@ progSet.add(fnc);
 data = InputData();
 
 data.setIdentifier(InputData.PART_CONSTR);
-data.setAsGiven();
 data.value = 120;
 
 progSet.add(data);
@@ -273,9 +246,7 @@ progSet.add(data);
 faculty = Faculty(Faculty.VOL_MAINT);
 
 faculty.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
-faculty.setAsGiven();
-faculty.selectStrategy(4);
-%action.setParamsValue_Random();
+faculty.selectStrategy('Test_2');
 
 progSet.add(faculty);
 
@@ -283,9 +254,7 @@ progSet.add(faculty);
 faculty = Faculty(Faculty.MAND_MAINT);
 
 faculty.setIdentifier(ItemSetting.STRATS_MAND_MAINT);
-faculty.setAsGiven();
-faculty.selectStrategy(1);
-faculty.setParamsValue_Random();
+faculty.selectStrategy('Minimum');
 
 progSet.add(faculty);
 
@@ -293,7 +262,6 @@ progSet.add(faculty);
 fnc = Function();
 
 fnc.setIdentifier(InputData.MAINT_COST_FNC);
-fnc.setAsGiven();
 fnc.equation = @(current, goal)maintenanceCostFunction( inv.value, ...
                                                         nullp.value, ...
                                                         maxp.value, ...
@@ -306,7 +274,6 @@ progSet.add(fnc);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.AGENT_UTIL_FNC);
-fnc.setAsGiven();
 fnc.equation = @CommonFnc.agentUtility;
 
 progSet.add(fnc);
