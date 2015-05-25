@@ -150,8 +150,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(thisEvent.isValidType(type) ,...
-                'The type entered as argument is not valid')
             
             ids = find(strcmp(thisEvent.type, type), 1, 'last');
             if ~isempty(ids)
@@ -178,8 +176,6 @@ classdef EventList < matlab.mixin.Copyable
                 assert( time >= thisEvent.time(thisEvent.pt-1), ...
                      'The time of events must be non-decreasing.')
             end
-            assert(thisEvent.isValidType(type) ,...
-                'The type entered as argument is not valid')
             
             % Registers time, type, observation and payoff
             id = thisEvent.pt;

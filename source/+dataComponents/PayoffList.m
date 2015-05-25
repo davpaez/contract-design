@@ -182,7 +182,8 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             thisPff.time(id) = time;
             thisPff.value(id) = value;
             thisPff.type{id} = type;
-            thisPff.duration(id) = dur;
+            %thisPff.duration(id) = dur; % Duration will possibly be
+            %deprecated
             
             % Makes arrays bigger if necessary
             if thisPff.pt + (thisPff.BLOCKSIZE/10) > thisPff.listSize

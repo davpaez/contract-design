@@ -11,13 +11,13 @@ classdef Event < matlab.mixin.Copyable
         FINAL       = 'FINAL'
     end
     
-    properties (GetAccess = protected, SetAccess = protected)
+    properties (GetAccess = public, SetAccess = protected)
         % ----------- %
         % Attributes
         % ----------- %
         
         time
-        type
+        type % One of the constant attributes of Event class
         observation
         transaction
         

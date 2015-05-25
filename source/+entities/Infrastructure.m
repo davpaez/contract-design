@@ -37,7 +37,7 @@ classdef Infrastructure < matlab.mixin.Copyable
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisInfrastructure = Infrastructure(progSet)
+        function self = Infrastructure(progSet)
         %{
         
             Input
@@ -45,26 +45,26 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-            import dataComponents.Observation
+            import dataComponents.ObservationList
             import managers.*
             
             % Null, Maximum and Initial performance values
-            thisInfrastructure.nullPerf = progSet.returnItemSetting(ItemSetting.NULL_PERF).value;
-            thisInfrastructure.maxPerf = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
-            thisInfrastructure.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
+            self.nullPerf = progSet.returnItemSetting(ItemSetting.NULL_PERF).value;
+            self.maxPerf = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
+            self.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
             
             % Initial observation
             initialTime = 0;
-            thisInfrastructure.history = Observation();
-            thisInfrastructure.history.register(initialTime, thisInfrastructure.initialPerf);
+            self.history = ObservationList();
+            self.history.register(initialTime, self.initialPerf);
             
             % Continuous response function
             fnc = progSet.returnItemSetting(ItemSetting.CONT_RESP_FNC);
-            thisInfrastructure.contResponseFnc = fnc.equation;
+            self.contResponseFnc = fnc.equation;
             
             % Shock response function
             fnc = progSet.returnItemSetting(ItemSetting.SHOCK_RESP_FNC);
-            thisInfrastructure.shockResponseFunction = fnc.equation;
+            self.shockResponseFnc = fnc.equation;
         end
         
         
@@ -190,7 +190,6 @@ classdef Infrastructure < matlab.mixin.Copyable
                 performance: [class double] Value of performance
                 calculated.
         %}
-            error('hola')
             
             l = length(time);
             assert(l==1, 'The time parameter must be a scalar')

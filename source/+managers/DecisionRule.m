@@ -637,7 +637,7 @@ classdef DecisionRule < matlab.mixin.Copyable
         end
         
         
-        function answer = isSensitive(thisRule)
+        function answer = isSensitive(self)
         %{
         * 
             Input
@@ -645,7 +645,7 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            if strcmp(thisRule.typeRule_Sensitivity, managers.DecisionRule.SENSITIVE)
+            if strcmp(self.typeRule_Sensitivity, self.SENSITIVE)
                 answer = true;
             else
                 answer = false;
