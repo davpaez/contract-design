@@ -133,12 +133,8 @@ classdef Realization < matlab.mixin.Copyable
             
             while self.time < contractDuration
                 
-                self.fileInfo.printLog('   --------------------------------    \n\n');
-                self.fileInfo.printLog(['Current model time before request: ',num2str(self.time),'\n']);
-                
                 % Returns earliest submitted operation
                 operation = self.requestOperations();
-                self.fileInfo.printLog('Operation requested and returned\n')
                 nextTransaction = self.paymentSchedule.getNextTransaction();
                 
                 if operation.time >= contractDuration && nextTransaction.time >= contractDuration
@@ -147,28 +143,14 @@ classdef Realization < matlab.mixin.Copyable
                 
                 if operation.time < nextTransaction.time
                     
-                    self.fileInfo.printLog( ...
-                        ['Performance before operation execution ',num2str(self.nature.solvePerformanceForTime(operation.time)),'\n']);
-
                     assert(operation.time >= self.time)
-
-
-
-                    % Executes the earliest submitted operation
-                    self.executeOperation(operation);
-
-                    self.fileInfo.printLog( ...
-                        ['Current model time after request: ',num2str(self.time),'\n\n']);
-                    self.fileInfo.printLog( ...
-                        'Operation executed\n\n');
-                    self.fileInfo.printLog( ...
-                        ['Performance after operation ',num2str(self.nature.getCurrentPerformance()),'\n\n'])
                     
+                    % Executes the earliest submitted operation
+                    self.executeOperation(operation);                    
                 else
                     
                     self.executePayment(nextTransaction);
                 end
-                
             end
             
             self.finishRealization();
@@ -364,8 +346,6 @@ classdef Realization < matlab.mixin.Copyable
                 import dataComponents.Message
                 import managers.Information
                 
-                thisRlz.fileInfo.printLog('Violation detected: DETECTION EVENT\n')
-                
                 % Calculates penalty fee from contract
                 msg = Message(thisRlz.principal);
                 msg.setTypeRequestedInfo(Information.VALUE_PENALTY_FEE);
@@ -374,8 +354,6 @@ classdef Realization < matlab.mixin.Copyable
                 thisRlz.contract.penaltyAction.decide(msg);
                 
                 penaltyFee = msg.getOutput(Information.VALUE_PENALTY_FEE);
-                
-                thisRlz.fileInfo.printLog(['Penalty imposed: ',num2str(penaltyFee),'\n'])
                 
                 % Appending the income (penalty fee) to the principal's
                 % payoff struct
@@ -446,8 +424,6 @@ classdef Realization < matlab.mixin.Copyable
             pffAgent.value = -costMaintenance;
             pffAgent.type{1} = Transaction.MAINTENANCE;
             
-            thisRlz.fileInfo.printLog(['Cost voluntary maintenance: ',num2str(costMaintenance),'\n'])
-            
             % Applies maintenance operation to Infrastructure
             thisRlz.nature.applyOperation(operation);
             
@@ -483,8 +459,6 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Message
             import managers.Information
             
-            thisRlz.fileInfo.printLog('MANDATORY MAINTENANCE:\n')
-            
             timeDetection = thisRlz.principal.observation.getCurrentTime();
             perfDetection = thisRlz.principal.observation.getCurrentValue();
             
@@ -514,8 +488,6 @@ classdef Realization < matlab.mixin.Copyable
             pffAgent = struct();
             pffAgent.value = -costMaintenance;
             pffAgent.type{1} = Transaction.MAINTENANCE;
-            
-            thisRlz.fileInfo.printLog(['Cost mandatory maintenance: ',num2str(costMaintenance),'\n'])
             
             % Creates maintenance operation object
             mandMaintOperation = Operation(timeDetection, Operation.MAND_MAINT, true, ...
