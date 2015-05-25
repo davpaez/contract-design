@@ -45,15 +45,34 @@ classdef Strategy < matlab.mixin.Copyable
         end
         
         
-        function action = generateAction(thisStrategy)
+        function decide(self, theMsg)
         %{
-        
+        * 
             Input
                 
             Output
                 
         %}
-            % TODO
+            n = length(self.decisionRuleList);
+            
+            for i = 1:n
+                
+                currentRule = self.decisionRuleList{i};
+                
+                decVarsType_fromRule = currentRule.decisionVars_TypeInfo;
+                
+                [answer, ~] = ismember(decVarsType_fromRule, ...
+                    self.decisionVars);
+                
+                membershipTest = all(answer);
+                
+                if membershipTest == true
+                    currentRule.decide(theMsg);
+                else
+                    error('Every type of decision variable value produced by any rule must also be specified in the attribute decisionVars_TypeInfo of thisStrategy')
+                end
+                
+            end
         end
         
         
@@ -79,6 +98,27 @@ classdef Strategy < matlab.mixin.Copyable
         %}
             thisStrategy.decisionRuleList = decRuleList;
         end
+        
+        
+        function answer = isSensitive(self)
+        %{
+        *
+            Input
+                
+            Output
+                
+        %}
+            
+            n = length(self.decisionRuleList);
+            answer = false;
+            for i=1:n
+                if self.decisionRuleList{i}.isSensitive()
+                    answer = true;
+                    break
+                end
+            end
+        end
+        
     end
     
 end

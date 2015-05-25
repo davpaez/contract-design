@@ -26,7 +26,7 @@ classdef PaymentSchedule < handle
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function addTransaction(thisPaySch, time, value, type, emitter, receiver)
+        function addTransaction(thisPaySch, time, value, type)
         %{
         * Adds a payment schedule between a pair (emitter, receiver)
             
@@ -43,7 +43,7 @@ classdef PaymentSchedule < handle
         %}
             import dataComponents.Transaction
             
-            thisPaySch.listTransactions{end+1} = Transaction(time, value, type, emitter, receiver);
+            thisPaySch.listTransactions{end+1} = Transaction(time, value, type);
         end
         
         
@@ -60,7 +60,7 @@ classdef PaymentSchedule < handle
             
             for i=1:n
                 currentTran = thisPaySch.listTransactions{i};
-                if currentTran.isPending()
+                if ~currentTran.isExecuted()
                     nextTransaction = currentTran;
                     break
                 end

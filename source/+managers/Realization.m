@@ -21,6 +21,8 @@ classdef Realization < matlab.mixin.Copyable
         contract
         problem
         
+        paymentSchedule % Payment schedule object
+        
         fileInfo
         
         % Function handles
@@ -36,7 +38,7 @@ classdef Realization < matlab.mixin.Copyable
         %% Constructor
         
         
-        function thisRlz = Realization(progSet)
+        function self = Realization(progSet)
         %{
         * Constructor method of Realization class and builder of
         interactions
@@ -61,10 +63,10 @@ classdef Realization < matlab.mixin.Copyable
             import managers.*
             
             % Get fileInfo handle
-            thisRlz.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            self.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             
             % Problem object
-            thisRlz.problem = Problem(progSet);
+            self.problem = Problem(progSet);
             
 
             % Intial payoffs
@@ -73,15 +75,15 @@ classdef Realization < matlab.mixin.Copyable
             
             
             % Construction of principal, agent
-            thisRlz.principal = Principal(progSet, thisRlz.problem);
-            thisRlz.agent = Agent(progSet, thisRlz.problem);
+            self.principal = Principal(progSet, self.problem);
+            self.agent = Agent(progSet, self.problem);
                         
             % Creation and distribution of contract
-            con = thisRlz.principal.generateContract();
+            con = self.principal.generateContract(progSet);
             
-            thisRlz.contract = con;
-            thisRlz.principal.receiveContract(con);
-            thisRlz.agent.receiveContract(con);
+            self.contract = con;
+            self.principal.receiveContract(con);
+            self.agent.receiveContract(con);
             
             % Creating function handles
             %{
@@ -92,27 +94,29 @@ classdef Realization < matlab.mixin.Copyable
             %}
             
             % Contruction of nature
-            thisRlz.nature = Nature(progSet);
+            self.nature = Nature(progSet);
             
             % Initial observation
-            initObs = thisRlz.nature.infrastructure.getObservation();
+            initObs = self.nature.infrastructure.getObservation();
             
-            % Agent's investment transaction
-            data = progSet.returnItemSetting(ItemSetting.INV);
-            investment = Transaction(thisRlz.time, data.value, Transaction.INVESTMENT, Information.AGENT, []);
+            % Realization schedule
+            self.paymentSchedule = self.contract.paymentSchedule;
             
             % Construction of INIT event structs for principal and agent  
-            initEventPrincipal = Event(thisRlz.time, Event.INIT, initObs, []);
-            initEventAgent = Event(thisRlz.time, Event.INIT, initObs, investment);
+            initEventPrincipal = Event(self.time, Event.INIT, initObs, []);
+            initEventAgent = Event(self.time, Event.INIT, initObs, []);
             
             % Registration of INIT events for principal and agent
-            thisRlz.principal.registerEvent(initEventPrincipal);
-            thisRlz.agent.registerEvent(initEventAgent);
+            self.principal.registerEvent(initEventPrincipal);
+            self.agent.registerEvent(initEventAgent);
+            
+
+            
             
         end
         
         
-        function run(thisRlz)
+        function run(self)
         %{
         
             Input
@@ -123,44 +127,51 @@ classdef Realization < matlab.mixin.Copyable
             import entities.*
             import dataComponents.*
             
-            contractDuration = thisRlz.contract.getContractDuration();
+            contractDuration = self.contract.contractDuration;
             
             % Build interaction
             
-            while thisRlz.time < contractDuration
+            while self.time < contractDuration
                 
-                thisRlz.fileInfo.printLog('   --------------------------------    \n\n');
-                thisRlz.fileInfo.printLog(['Current model time before request: ',num2str(thisRlz.time),'\n']);
+                self.fileInfo.printLog('   --------------------------------    \n\n');
+                self.fileInfo.printLog(['Current model time before request: ',num2str(self.time),'\n']);
                 
                 % Returns earliest submitted operation
-                operation = thisRlz.requestOperations();
+                operation = self.requestOperations();
+                self.fileInfo.printLog('Operation requested and returned\n')
+                nextTransaction = self.paymentSchedule.getNextTransaction();
                 
-                thisRlz.fileInfo.printLog('Operation requested and returned\n')
-                
-                if operation.time >= contractDuration
+                if operation.time >= contractDuration && nextTransaction.time >= contractDuration
                     break
                 end
                 
-                thisRlz.fileInfo.printLog( ...
-                    ['Performance before operation execution ',num2str(thisRlz.nature.solvePerformanceForTime(operation.time)),'\n']);
-                
-                assert(operation.time > thisRlz.time)
-                
-                
-                
-                % Executes the earliest submitted operation
-                thisRlz.executeOperation(operation);
-                
-                thisRlz.fileInfo.printLog( ...
-                    ['Current model time after request: ',num2str(thisRlz.time),'\n\n']);
-                thisRlz.fileInfo.printLog( ...
-                    'Operation executed\n\n');
-                thisRlz.fileInfo.printLog( ...
-                    ['Performance after operation ',num2str(thisRlz.nature.getCurrentPerformance()),'\n\n'])
+                if operation.time < nextTransaction.time
+                    
+                    self.fileInfo.printLog( ...
+                        ['Performance before operation execution ',num2str(self.nature.solvePerformanceForTime(operation.time)),'\n']);
+
+                    assert(operation.time >= self.time)
+
+
+
+                    % Executes the earliest submitted operation
+                    self.executeOperation(operation);
+
+                    self.fileInfo.printLog( ...
+                        ['Current model time after request: ',num2str(self.time),'\n\n']);
+                    self.fileInfo.printLog( ...
+                        'Operation executed\n\n');
+                    self.fileInfo.printLog( ...
+                        ['Performance after operation ',num2str(self.nature.getCurrentPerformance()),'\n\n'])
+                    
+                else
+                    
+                    self.executePayment(nextTransaction);
+                end
                 
             end
             
-            thisRlz.finishRealization();
+            self.finishRealization();
         end
         
         
@@ -249,7 +260,9 @@ classdef Realization < matlab.mixin.Copyable
             
             % Evolve the system up to the time of the operation to be
             % executed
-            thisRlz.evolveContinuously(operation.time);
+            if operation.time > thisRlz.time
+                thisRlz.evolveContinuously(operation.time);
+            end
             
             % Execute the operation (execute discrete action)
             if isa(operation, 'Operation')
@@ -581,8 +594,7 @@ classdef Realization < matlab.mixin.Copyable
         
         function timeExecution = executePayment(thisRlz, transaction)
         %{
-        * TODO Deprecated. Execution of payments will be performed by
-        Player class.
+        * 
 
             Input
 
@@ -619,8 +631,8 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(operation.time > thisRlz.time, ...
-                'This operation must have an execution time greater than the current time in the realization')
+            assert(operation.time >= thisRlz.time, ...
+                'This operation must have an execution time greater or equal than the current time in the realization')
         end
         
         
@@ -788,7 +800,7 @@ classdef Realization < matlab.mixin.Copyable
             earliestOp = returnEarliestOperation( operationPrincipal, ...
                                                   operationAgent, ...
                                                   operationNature );
-            earliestOp.setAsPending();
+            %earliestOp.setAsPending();
         end
         
         

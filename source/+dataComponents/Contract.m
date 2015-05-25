@@ -5,7 +5,7 @@ classdef Contract < matlab.mixin.Copyable
         initialPerf         % Initial perf of infrastructure: Assummed to be equal to MAX_PERF
         perfThreshold       % Minimum perf required by principal
         revenueRate             % Function handle
-        investment          % Land purchase and construction cost
+        %investment          % Land purchase and construction cost
         paymentSchedule        % Government contributions Array[nx2] --> [time value]
         maxSumPenalties     % Maximum possible penalty
         penaltyStrategy       % Penalty policy (Strategy object)
@@ -16,44 +16,42 @@ classdef Contract < matlab.mixin.Copyable
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisContract = Contract(progSet, conDur, perfThreshold, ...
-                paymentSchedule, revRateFnc, penStrat)
+        function self = Contract(progSet, conDur, perfThreshold, ...
+                contributions, revRateFnc)
         %{
         * 
         
             Input
                 
+                ps: [nx2 array] time and value of payments from principal
+                to agent
             Output
                 
         %}
             
             import managers.*
+            import dataComponents.Transaction
+            import dataComponents.PaymentSchedule
             
             % Contract duration
-            thisContract.contractDuration = conDur;
+            self.contractDuration = conDur;
             
-            % Contribution
-            thisContract.paymentSchedule = paymentSchedule;
-            
-            % Revenue
-            thisContract.revenue = revRateFnc;
+            % revenueRate
+            self.revenueRate = revRateFnc;
             
             % Performance threshold
-            thisContract.perfThreshold = perfThreshold;
+            self.perfThreshold = perfThreshold;
             
             % Initial performance
-            thisContract.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
-
-            % Investment
-            thisContract.investment = progSet.returnItemSetting(ItemSetting.INV).value;
+            self.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
             
             % Penalty policy
-            strat = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
-            thisContract.penaltyStrategy = strat.returnCopy();
+            faculty = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
+            self.penaltyStrategy = faculty.getSelectedStrategy();
             
-            % Penalty policy strategy
-            thisContract.penaltyStrategy = penStrat;
-            
+            % Create payment schedule object: Investment and Contributions
+            inv = progSet.returnItemSetting(ItemSetting.INV).value;
+            self.createPaymentSchedule(inv, contributions);
         end
         
         
@@ -73,6 +71,43 @@ classdef Contract < matlab.mixin.Copyable
             
             obs = struct();
             obs.value = initPerf;
+        end
+        
+        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
+        
+        function createPaymentSchedule(self, investment, contributions)
+        %{
+        * 
+        
+            Input
+                inv: [double] Investment
+                contrib: [nx2 array] time and value of payments from principal
+                to agent
+            
+            Output
+                
+        %}
+            import dataComponents.PaymentSchedule
+            import dataComponents.Transaction
+            
+            self.paymentSchedule = PaymentSchedule();
+            
+            % Investment
+            self.paymentSchedule.addTransaction(...
+                0, ...
+                investment, ...
+                Transaction.INVESTMENT);
+            
+            % ContributionS
+            numberPayments = size(contributions, 1);
+            for i=1:numberPayments
+                self.paymentSchedule.addTransaction(...
+                    contributions(i,1), ...
+                    contributions(i,2), ...
+                    Transaction.CONTRIBUTION);
+            end
         end
         
         

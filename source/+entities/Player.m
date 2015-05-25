@@ -98,7 +98,7 @@ classdef Player < handle
         end
         
         
-        function idPff = registerPayoff(thisPlayer, time, pff)
+        function idPff = registerPayoff(thisPlayer, time, value, type)
         %{
         * Append newPayoff to the payoff linked-list attribute of
         thisPlayer
@@ -110,14 +110,8 @@ classdef Player < handle
                 None
         
         %}
-            numPff = length(pff.value);
-            idPff = zeros(1,numPff);
             
-            for i=1:numPff
-                idPff(i) = thisPlayer.payoffList.register(  time, ...
-                    pff.value(i), ...
-                    pff.type{i});
-            end
+            idPff = thisPlayer.payoffList.register(time, value, type);
         end
         
         
@@ -152,7 +146,7 @@ classdef Player < handle
             % Register transaction in thisPlayer
             if ~isempty(evt.transaction)
                 [value, role] = evt.transaction.getPayoffValue(thisPlayer);
-                idPff = thisPlayer.registerPayoff(timeNewEvent, value);
+                idPff = thisPlayer.registerPayoff(timeNewEvent, value, evt.transaction.type);
                 evt.transaction.confirmExecutionBy(role);
             else
                 idPff = [];

@@ -6,8 +6,8 @@ classdef Transaction < handle
         RECEIVER = 'RECEIVER'
         
         % Types of cash flow/actions
-        CONTRIBUTION = 'CONTRIBUTION'
         INVESTMENT = 'INVESTMENT'
+        CONTRIBUTION = 'CONTRIBUTION'
         MAINTENANCE = 'MAINTENANCE'
         INSPECTION = 'INSPECTION'
         PENALTY = 'PENALTY'
@@ -30,7 +30,7 @@ classdef Transaction < handle
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisTran = Transaction(t, v, tp, em, r)
+        function thisTran = Transaction(t, v, tp)
         %{
         
             Input
@@ -39,19 +39,41 @@ classdef Transaction < handle
                 v: [class double] Value of transaction. Always positive
                 from emitter to receiver
             
-                em: [class string] ID of emitter
+                tp: [class string] Type of transaction. See constants
+                Transaction class.
             
-                r: [class string] ID of receiver
             Output
                 
         %}
-            % Check that at least one party (emitter or receiver) is passed
-            assert(~isempty(em) || ~isempty(r) == true, ...
-                'At least one (emitter or receiver) must be non-empty')
+            import dataComponents.Transaction
+            import managers.Information
             
-            % Check that emitter is different from receiver
-            assert(strcmp(em,r) == false, ...
-                'The emitter and the receiver must be different')
+            switch tp
+                case Transaction.INVESTMENT
+                    em = Information.AGENT;
+                    r = [];
+                
+                case Transaction.CONTRIBUTION
+                    em = Information.PRINCIPAL;
+                    r = Information.AGENT;
+                    
+                case Transaction.MAINTENANCE
+                    em = Information.AGENT;
+                    r = [];
+                    
+                case Transaction.INSPECTION
+                    em = Information.PRINCIPAL;
+                    r = [];
+                    
+                case Transaction.PENALTY
+                    em = Information.AGENT;
+                    r = Information.PRINCIPAL;
+                
+                case Transaction.FINAL
+                    em = Information.AGENT;
+                    r = Information.PRINCIPAL;
+                    v = 0;
+            end
             
             thisTran.time = t;
             thisTran.value = v;
@@ -199,9 +221,9 @@ classdef Transaction < handle
             
             switch role
                 case thisTran.EMITTER
-                    thisTran.confirmationEmitter = true;
-                case thisTrans.RECEIVER
-                    thisTran.confirmationReceiver = true;
+                    thisTran.completedEmitterSide();
+                case thisTran.RECEIVER
+                    thisTran.completedReceiverSide;
                 otherwise
                     warning('The role does not coincide with neither emitter nor reciever')
             end
