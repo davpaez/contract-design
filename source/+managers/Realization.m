@@ -110,9 +110,6 @@ classdef Realization < matlab.mixin.Copyable
             self.principal.registerEvent(initEventPrincipal);
             self.agent.registerEvent(initEventAgent);
             
-
-            
-            
         end
         
         
@@ -282,7 +279,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function [timeExecution, mandMaintFlag] = executeInspection(thisRlz, operation)
+        function [timeExecution, mandMaintFlag] = executeInspection(self, operation)
         %{
         * Executes inspection operation object passed in argument
         
@@ -301,88 +298,73 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Event
             
             % Inform the Principal that this inspection operation was executed
-            thisRlz.principal.confirmExecutionSubmittedOperation(operation);
+            self.principal.confirmExecutionSubmittedOperation(operation);
             
             timeInspection = operation.time;
             mandMaintFlag = false;
             
             % Creates payoff struct for the Principal
-            inspectionCost = thisRlz.principal.costSingleInspection;
-
-            pffPrincipal = struct();
-            pffPrincipal.value = -inspectionCost;
-            pffPrincipal.type{1} = Transaction.INSPECTION;
+            inspectionCost = self.principal.costSingleInspection;
+            
+            tran = Transaction(...
+                timeInspection, ...
+                inspectionCost, ...
+                Transaction.INSPECTION);
             
             % Creates observation struct
-            perf = thisRlz.nature.solvePerformanceForTime(timeInspection);
-
-            obs = struct();
-            obs.value = perf;
+            perf = self.nature.solvePerformanceForTime(timeInspection);
+            
+            obs = Observation(timeInspection, perf);
             
             % Normal inspection or detection
-            perfThreshold = thisRlz.contract.getPerfThreshold();
-            
-            if perf >= perfThreshold  % It is a regular inspection
+            if perf >= self.contract.perfThreshold  % It is a regular inspection
                 
-                % Inspection event for the principal
-                inspectionEvent_Principal = struct();
-                inspectionEvent_Principal.time = timeInspection;
-                inspectionEvent_Principal.type = Event.INSPECTION;
-                inspectionEvent_Principal.obs = obs;
-                inspectionEvent_Principal.pff = pffPrincipal;
+                % Inspection event
+                inspectionEvent = Event(...
+                    timeInspection, ...
+                    Event.INSPECTION, ...
+                    obs, ...
+                    tran);
                 
-                thisRlz.principal.registerEvent(inspectionEvent_Principal);
-                
-                % Inspection event for the agent
-                inspectionEvent_Agent = struct();
-                inspectionEvent_Agent.time = timeInspection;
-                inspectionEvent_Agent.type = Event.INSPECTION;
-                inspectionEvent_Agent.obs = obs;
-                
-                % Register the event for the agent
-                thisRlz.agent.registerEvent(inspectionEvent_Agent);
+                % Register event for principal and agent
+                self.principal.registerEvent(inspectionEvent);
+                self.agent.registerEvent(inspectionEvent);
                 
             else  % It is a detection
                 import dataComponents.Message
                 import managers.Information
                 
                 % Calculates penalty fee from contract
-                msg = Message(thisRlz.principal);
+                msg = Message(self.principal);
                 msg.setTypeRequestedInfo(Information.VALUE_PENALTY_FEE);
                 msg.setExtraInfo(Message.TIME_DETECTION, timeInspection);
                 
-                thisRlz.contract.penaltyAction.decide(msg);
+                self.contract.penaltyAction.decide(msg);
                 
                 penaltyFee = msg.getOutput(Information.VALUE_PENALTY_FEE);
                 
                 % Appending the income (penalty fee) to the principal's
                 % payoff struct
+                
+                %TODONEXT: How to add two transactions into an event?
                 pffPrincipal.value(end+1) = penaltyFee;
                 pffPrincipal.type{end+1} = Transaction.PENALTY;
                 
-                
-                % Creation payoff struct for the agent
-                pffAgent = struct();
-                pffAgent.value = -penaltyFee;
-                pffAgent.type{1} = Transaction.PENALTY;
+                penaltyTran = Transaction(...
+                    timeInspection, ...
+                    penaltyFee, ...
+                    Transaction.PENALTY);
                 
                 % Creates and registers detection event for the principal
-                detectionEvent_Principal = struct();
-                detectionEvent_Principal.time = timeInspection;
-                detectionEvent_Principal.type = Event.DETECTION;
-                detectionEvent_Principal.obs = obs;
-                detectionEvent_Principal.pff = pffPrincipal;
+                detectionEvent = Event(...
+                    timeInspection, ...
+                    Event.DETECTION, ...
+                    obs, ...
+                    penaltyTran);
                 
-                thisRlz.principal.registerEvent(detectionEvent_Principal);
-                
-                % Creates and registers detection event for the agent
-                detectionEvent_Agent = struct();
-                detectionEvent_Agent.time = timeInspection;
-                detectionEvent_Agent.type = Event.DETECTION;
-                detectionEvent_Agent.obs = obs;
-                detectionEvent_Agent.pff = pffAgent;
-                
-                thisRlz.agent.registerEvent(detectionEvent_Agent);
+                % Registers detection event for the principal and agent
+                self.principal.registerEvent(detectionEvent);
+                self.agent.registerEvent(detectionEvent);
                 
                 mandMaintFlag = true;
             end
@@ -413,32 +395,31 @@ classdef Realization < matlab.mixin.Copyable
             
             perfBeforeMaint = thisRlz.nature.solvePerformanceForTime(timeVolMaint);
             
-            % Creates observation struct before and after Maintenance
-            obs = struct();
-            obs.value = [perfBeforeMaint, perfGoal];
+            % Creates observation object before and after Maintenance
+            obs = Observation(timeVolMaint, [perfBeforeMaint, perfGoal]);
             
             % Creates the outcome payoff struct of the agent
             costMaintenance = thisRlz.agent.maintCostFunction(perfBeforeMaint, perfGoal);
             
-            pffAgent = struct();
-            pffAgent.value = -costMaintenance;
-            pffAgent.type{1} = Transaction.MAINTENANCE;
+            maintTransaction = Transaction(...
+                timeVolMaint, ...
+                costMaintenance, ...
+                Transaction.MAINTENANCE);
             
             % Applies maintenance operation to Infrastructure
             thisRlz.nature.applyOperation(operation);
             
             % Creates and registers voluntary maintenance event for the
             % agent
-            volMaintEvent_Agent = struct();
-            volMaintEvent_Agent.time = timeVolMaint;
-            volMaintEvent_Agent.type = Event.VOL_MAINT;
-            volMaintEvent_Agent.obs = obs;
-            volMaintEvent_Agent.pff = pffAgent;
+            volMaintEvent_Agent = Event(...
+                timeVolMaint, ...
+                Event.VOL_MAINT, ...
+                obs, ...
+                maintTransaction);
             
             thisRlz.agent.registerEvent(volMaintEvent_Agent);
             
             timeExecution = timeVolMaint;
-            
         end
         
         
@@ -543,19 +524,21 @@ classdef Realization < matlab.mixin.Copyable
             thisRlz.nature.confirmExecutionSubmittedOperation(operation);
             
             % Creates observation object
-            perf = thisRlz.nature.solvePerformanceForTime(operation.time);
+            perfBeforeShock = thisRlz.nature.solvePerformanceForTime(operation.time);
             
-            obs = struct();
-            obs.value = perf;
+            obs = Observation(...
+                operation.time, ...
+                perfBeforeShock);
             
             % Applies shock operation to Infrastructure
             thisRlz.nature.applyOperation(operation);
             
             % Creates and registers shock event for the agent
-            shockEvent = struct();
-            shockEvent.time = operation.time;
-            shockEvent.type = Event.SHOCK;
-            shockEvent.obs = obs;
+            shockEvent = Event(...
+                operation.time, ...
+                Event.SHOCK, ...
+                obs, ...
+                []);
             
             thisRlz.agent.registerEvent(shockEvent);
             

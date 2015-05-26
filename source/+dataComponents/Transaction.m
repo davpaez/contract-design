@@ -174,6 +174,9 @@ classdef Transaction < handle
                 case thisTran.receiver
                     value = thisTran.getValueReceiver();
                     role = thisTran.RECEIVER;
+                otherwise
+                    value = 0;
+                    role = [];
             end
         end
         

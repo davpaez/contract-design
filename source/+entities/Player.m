@@ -146,8 +146,12 @@ classdef Player < handle
             % Register transaction in thisPlayer
             if ~isempty(evt.transaction)
                 [value, role] = evt.transaction.getPayoffValue(thisPlayer);
-                idPff = thisPlayer.registerPayoff(timeNewEvent, value, evt.transaction.type);
-                evt.transaction.confirmExecutionBy(role);
+                if ~isempty(role)
+                    idPff = thisPlayer.registerPayoff(timeNewEvent, value, evt.transaction.type);
+                    evt.transaction.confirmExecutionBy(role);
+                else
+                    idPff = [];
+                end
             else
                 idPff = [];
             end
