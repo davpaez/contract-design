@@ -161,7 +161,7 @@ classdef Nature < handle
             else % For shock operations, the force value must be translated into perfGoal
                 perfBeforeShock = thisNature.solvePerformanceForTime(operation.time);
                 forceValue = operation.forceValue;
-                perfGoal = thisNature.infrastructure.shockResponseFunction(perfBeforeShock, forceValue);
+                perfGoal = thisNature.infrastructure.shockResponseFnc(perfBeforeShock, forceValue);
                 
                 thisNature.infrastructure.registerObservation(operation.time, perfGoal);
                 
