@@ -55,7 +55,7 @@ classdef Realization < matlab.mixin.Copyable
                 initialPerformance: [class double] performance V at time=0
                 
             Output
-                thisRlz: [class Realization] Realization object
+                self: [class Realization] Realization object
         %}
         
             import entities.*
@@ -87,10 +87,10 @@ classdef Realization < matlab.mixin.Copyable
             
             % Creating function handles
             %{
-            thisRlz.fh.contEnvForce = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            thisRlz.fh.demandRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            thisRlz.fh.revenueRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            thisRlz.fh.contResponse = progSet.returnItemSetting(ItemSetting.CONT_RESP_FNC);
+            self.fh.contEnvForce = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            self.fh.demandRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            self.fh.revenueRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            self.fh.contResponse = progSet.returnItemSetting(ItemSetting.CONT_RESP_FNC);
             %}
             
             % Contruction of nature
@@ -164,19 +164,19 @@ classdef Realization < matlab.mixin.Copyable
         % ----------------------------------------------------------------
         
         
-        function time = getTime(thisRlz)
+        function time = getTime(self)
         %{
-        * Returns the current time attribute of thisRlz
+        * Returns the current time attribute of self
         
             Input
                 None
                 
             Output
                 time: [class double] Value of time attribute of
-                thisRlz
+                self
         %}
         
-            time = thisRlz.time;
+            time = self.time;
         end
         
         
@@ -185,7 +185,7 @@ classdef Realization < matlab.mixin.Copyable
         % ----------------------------------------------------------------
         
         
-        function setTime(thisRlz, time)
+        function setTime(self, time)
         %{
         * Updates time of the Realization object only
         
@@ -196,13 +196,13 @@ classdef Realization < matlab.mixin.Copyable
                 None
         %}
         
-            if time > thisRlz.time
-                thisRlz.time = time;
+            if time > self.time
+                self.time = time;
             end
         end
         
         
-        function updateTimeAll(thisRlz, newTime)
+        function updateTimeAll(self, newTime)
         %{
         * Updates time of ALL objects of model including Realization
         
@@ -213,15 +213,15 @@ classdef Realization < matlab.mixin.Copyable
                 None
         %}
         
-            thisRlz.setTime(newTime);
+            self.setTime(newTime);
             
-            thisRlz.agent.setTime(newTime);
-            thisRlz.principal.setTime(newTime);
-            thisRlz.nature.setTime(newTime);
+            self.agent.setTime(newTime);
+            self.principal.setTime(newTime);
+            self.nature.setTime(newTime);
         end
         
         
-        function executeOperation(thisRlz, operation)
+        function executeOperation(self, operation)
         %{
         * Executes operation passed by argument
         %TODO Inform the strategies whether their last output was executed!
@@ -239,8 +239,8 @@ classdef Realization < matlab.mixin.Copyable
             
             % Evolve the system up to the time of the operation to be
             % executed
-            if operation.time > thisRlz.time
-                thisRlz.evolveContinuously(operation.time);
+            if operation.time > self.time
+                self.evolveContinuously(operation.time);
             end
             
             % Execute the operation (execute discrete action)
@@ -249,13 +249,13 @@ classdef Realization < matlab.mixin.Copyable
                 switch operation.type
                     case Operation.INSPECTION
                         [timeExecution , mandMaintFlag] = ...
-                            thisRlz.executeInspection(operation);
+                            self.executeInspection(operation);
                         
                     case Operation.VOL_MAINT
-                        timeExecution = thisRlz.executeVolMaint(operation);
+                        timeExecution = self.executeVolMaint(operation);
                         
                     case Operation.SHOCK
-                        timeExecution = thisRlz.executeShock(operation);
+                        timeExecution = self.executeShock(operation);
                         
                 end
                 
@@ -267,15 +267,15 @@ classdef Realization < matlab.mixin.Copyable
             end
             
             % Update time for ALL entities
-            thisRlz.updateTimeAll(timeExecution);
+            self.updateTimeAll(timeExecution);
             
             if mandMaintFlag == true
                 
-                timeExecutionMandMaint = thisRlz.executeMandMaint();
+                timeExecutionMandMaint = self.executeMandMaint();
                 
                 % Update time for ALL entities having executed the
                 % mandatory maintenance
-                thisRlz.updateTimeAll(timeExecutionMandMaint);
+                self.updateTimeAll(timeExecutionMandMaint);
             end
         end
         
@@ -374,7 +374,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function timeExecution = executeVolMaint(thisRlz, operation)
+        function timeExecution = executeVolMaint(self, operation)
         %{
         * 
         
@@ -389,18 +389,18 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Event
             
             % Inform the Agent that this volMaint operation was executed
-            thisRlz.agent.confirmExecutionSubmittedOperation(operation);
+            self.agent.confirmExecutionSubmittedOperation(operation);
             
             timeVolMaint = operation.time;
             perfGoal = operation.perfGoal;
             
-            perfBeforeMaint = thisRlz.nature.solvePerformanceForTime(timeVolMaint);
+            perfBeforeMaint = self.nature.solvePerformanceForTime(timeVolMaint);
             
             % Creates observation object before and after Maintenance
             obs = Observation(timeVolMaint, [perfBeforeMaint, perfGoal]);
             
             % Creates the outcome payoff struct of the agent
-            costMaintenance = thisRlz.agent.maintCostFunction(perfBeforeMaint, perfGoal);
+            costMaintenance = self.agent.maintCostFunction(perfBeforeMaint, perfGoal);
             
             maintTransaction = Transaction(...
                 timeVolMaint, ...
@@ -408,7 +408,7 @@ classdef Realization < matlab.mixin.Copyable
                 Transaction.MAINTENANCE);
             
             % Applies maintenance operation to Infrastructure
-            thisRlz.nature.applyOperation(operation);
+            self.nature.applyOperation(operation);
             
             % Creates and registers voluntary maintenance event for the
             % agent
@@ -418,13 +418,13 @@ classdef Realization < matlab.mixin.Copyable
                 obs, ...
                 maintTransaction);
             
-            thisRlz.agent.registerEvent(volMaintEvent_Agent);
+            self.agent.registerEvent(volMaintEvent_Agent);
             
             timeExecution = timeVolMaint;
         end
         
         
-        function timeExecution = executeMandMaint(thisRlz)
+        function timeExecution = executeMandMaint(self)
         %{
         * 
         
@@ -441,20 +441,20 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Message
             import managers.Information
             
-            timeDetection = thisRlz.principal.observation.getCurrentTime();
-            perfDetection = thisRlz.principal.observation.getCurrentValue();
+            timeDetection = self.principal.observation.getCurrentTime();
+            perfDetection = self.principal.observation.getCurrentValue();
             
-            maxPerf = thisRlz.nature.infrastructure.maxPerf;
-            perfThreshold = thisRlz.contract.getPerfThreshold();
+            maxPerf = self.nature.infrastructure.maxPerf;
+            perfThreshold = self.contract.getPerfThreshold();
             
             % Strategy calculates performance goal
-            msg = Message(thisRlz.agent);
+            msg = Message(self.agent);
             msg.setTypeRequestedInfo(Information.PERF_MAND_MAINT);
             msg.setExtraInfo(   Message.MAX_PERF, maxPerf, ...
                                 Message.TIME_DETECTION, timeDetection, ...
                                 Message.PERF_DETECTION, perfDetection);
             
-            thisRlz.agent.mandMaintAction.decide(msg);
+            self.agent.mandMaintAction.decide(msg);
             
             deltaPerfAboveThreshold = msg.getOutput(Information.PERF_MAND_MAINT);
             
@@ -465,7 +465,7 @@ classdef Realization < matlab.mixin.Copyable
                 'The value of the performance goal must be within [nullPerf, maxPerf]')
             
             % Creates the outcome payoff object of the agent
-            costMaintenance = thisRlz.agent.maintCostFunction(perfDetection, perfGoal);
+            costMaintenance = self.agent.maintCostFunction(perfDetection, perfGoal);
 
             pffAgent = struct();
             pffAgent.value = -costMaintenance;
@@ -476,10 +476,10 @@ classdef Realization < matlab.mixin.Copyable
                 perfGoal);
             
             % Applies maintenance operation to Infrastructure
-            thisRlz.nature.applyOperation(mandMaintOperation);
+            self.nature.applyOperation(mandMaintOperation);
             
             % Creates observation objects (at current time) for the principal
-            perfAfterMaint = thisRlz.nature.getCurrentPerformance();
+            perfAfterMaint = self.nature.getCurrentPerformance();
             assert(perfAfterMaint == perfGoal, ...
                 'The observed performance must be equal to the perfGoal of the applied mandatory maintenance operation');
             
@@ -492,7 +492,7 @@ classdef Realization < matlab.mixin.Copyable
             mandMaintEvent_Principal.type = Event.MAND_MAINT;
             mandMaintEvent_Principal.obs = obs;
             
-            thisRlz.principal.registerEvent(mandMaintEvent_Principal);
+            self.principal.registerEvent(mandMaintEvent_Principal);
             
             % Creates and registers mandatory maintenance event for the
             % agent
@@ -502,13 +502,13 @@ classdef Realization < matlab.mixin.Copyable
             mandMaintEvent_Agent.obs = obs;
             mandMaintEvent_Agent.pff = pffAgent;
             
-            thisRlz.agent.registerEvent(mandMaintEvent_Agent);
+            self.agent.registerEvent(mandMaintEvent_Agent);
             
             timeExecution = timeDetection;
         end
         
         
-        function timeExecution = executeShock(thisRlz, operation)
+        function timeExecution = executeShock(self, operation)
         %{
         * 
         
@@ -522,17 +522,17 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Event
             
             % Inform Nature that this shock operation was executed
-            thisRlz.nature.confirmExecutionSubmittedOperation(operation);
+            self.nature.confirmExecutionSubmittedOperation(operation);
             
             % Creates observation object
-            perfBeforeShock = thisRlz.nature.solvePerformanceForTime(operation.time);
+            perfBeforeShock = self.nature.solvePerformanceForTime(operation.time);
             
             obs = Observation(...
                 operation.time, ...
                 perfBeforeShock);
             
             % Applies shock operation to Infrastructure
-            thisRlz.nature.applyOperation(operation);
+            self.nature.applyOperation(operation);
             
             % Creates and registers shock event for the agent
             shockEvent = Event(...
@@ -541,14 +541,14 @@ classdef Realization < matlab.mixin.Copyable
                 obs, ...
                 []);
             
-            thisRlz.agent.registerEvent(shockEvent);
+            self.agent.registerEvent(shockEvent);
             
             timeExecution = operation.time;
             
         end
         
         
-        function timeExecution = executePayment(thisRlz, transaction)
+        function timeExecution = executePayment(self, transaction)
         %{
         * 
 
@@ -561,13 +561,13 @@ classdef Realization < matlab.mixin.Copyable
             
             % Evolve the system up to the time of the operation to be
             % executed
-            if transaction.time > thisRlz.time
-                thisRlz.evolveContinuously(transaction.time);
+            if transaction.time > self.time
+                self.evolveContinuously(transaction.time);
             end
             
-            assert(thisRlz.time == transaction.time)
+            assert(self.time == transaction.time)
             
-            [emitter, receiver] = transaction.returnEmitterReceiver(thisRlz.principal, thisRlz.agent);
+            [emitter, receiver] = transaction.returnEmitterReceiver(self.principal, self.agent);
             
             ev = Event(transaction.time, Event.CONTRIBUTION, [], transaction);
             
@@ -583,7 +583,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function validateOperation(thisRlz, operation)
+        function validateOperation(self, operation)
         %{
         * 
         
@@ -593,12 +593,12 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(operation.time >= thisRlz.time, ...
+            assert(operation.time >= self.time, ...
                 'This operation must have an execution time greater or equal than the current time in the realization')
         end
         
         
-        function evolveContinuously(thisRlz, tf)
+        function evolveContinuously(self, tf)
         %{
         * 
         %TODONEXT Implement this function properly so that is imports
@@ -636,22 +636,22 @@ classdef Realization < matlab.mixin.Copyable
             
             fun = @(t,x) [v_f(t,x(1));  d_f(x(1)); ba_f(x(1))];
             
-            currentPerf = thisRlz.nature.infrastructure.getPerformance();
+            currentPerf = self.nature.infrastructure.getPerformance();
             initialDemand = 0; %TODO Current value of demand
             currentAgentBalance = -400; % TODO Current agent's balance
             
-            [t,x] = ode45(fun, [thisRlz.time, tf], [currentPerf; initialDemand; currentAgentBalance]);
+            [t,x] = ode45(fun, [self.time, tf], [currentPerf; initialDemand; currentAgentBalance]);
             
             perf = x(:,1);
             demand = x(:,2);
             agentBalance = x(:,3);
             
-            thisRlz.nature.infrastructure.evolve(t, perf);
-            thisRlz.updateTimeAll(tf);
+            self.nature.infrastructure.evolve(t, perf);
+            self.updateTimeAll(tf);
         end
         
         
-        function finishRealization(thisRlz)
+        function finishRealization(self)
         %{
         * 
         
@@ -666,7 +666,7 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Transaction
             import dataComponents.Event
             
-            contractDuration = thisRlz.contract.getContractDuration();
+            contractDuration = self.contract.getContractDuration();
             
             % Final (fictitious) payoff
             finalPff = struct();
@@ -681,11 +681,11 @@ classdef Realization < matlab.mixin.Copyable
             finalEvent.pff = finalPff;
             
             % Finalize history infrastructure
-            thisRlz.nature.finalizeHistory(contractDuration);
+            self.nature.finalizeHistory(contractDuration);
             
             % Register FINAL event for Principal and Agent
-            thisRlz.principal.registerEvent(finalEvent);
-            thisRlz.agent.registerEvent(finalEvent);
+            self.principal.registerEvent(finalEvent);
+            self.agent.registerEvent(finalEvent);
             
         end
         
@@ -694,22 +694,22 @@ classdef Realization < matlab.mixin.Copyable
         % ----------------------------------------------------------------
         
         
-        function [emitter, receiver] = getEmitterReceiver(thisRlz, transaction)
+        function [emitter, receiver] = getEmitterReceiver(self, transaction)
             import managers.Information
             
             if strcmp(transaction.emitter, Information.PRINCIPAL)
-                emitter = thisRlz.principal;
+                emitter = self.principal;
             elseif strcmp(transaction.emitter, Information.AGENT)
-                emitter = thisRlz.agent;
+                emitter = self.agent;
             else
                 error('Emitter should be either PRINCIPAL or AGENT')
             end
             
             
             if strcmp(transaction.receiver, Information.PRINCIPAL)
-                receiver = thisRlz.principal;
+                receiver = self.principal;
             elseif strcmp(transaction.receiver, Information.AGENT)
-                receiver = thisRlz.agent;
+                receiver = self.agent;
             else
                 error('Receiver should be either PRINCIPAL or AGENT')
             end
@@ -717,7 +717,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function [ua, up] = utilityPlayers(thisRlz)
+        function [ua, up] = utilityPlayers(self)
         %{
         * 
         
@@ -727,12 +727,12 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
-            ua = thisRlz.agent.getUtility();
-            up = thisRlz.principal.getUtility();
+            ua = self.agent.getUtility();
+            up = self.principal.getUtility();
         end
         
         
-        function earliestOp = requestOperations(thisRlz)
+        function earliestOp = requestOperations(self)
         %{
         * Requests players to submit their next action. Returns the
         player name and time of the earliest action submitted.
@@ -744,24 +744,24 @@ classdef Realization < matlab.mixin.Copyable
                 earliestOp: [class Operation] Operation object with earliest
                 time
         %}
-            currentPerf = thisRlz.nature.getCurrentPerformance();
+            currentPerf = self.nature.getCurrentPerformance();
             
-            maxPerf = thisRlz.nature.infrastructure.maxPerf;
-            nullPerf = thisRlz.nature.infrastructure.nullPerf;
+            maxPerf = self.nature.infrastructure.maxPerf;
+            nullPerf = self.nature.infrastructure.nullPerf;
             
             % Asking players to submit operations
-            operationPrincipal = thisRlz.principal.submitOperation();
-            thisRlz.validateOperation(operationPrincipal);
+            operationPrincipal = self.principal.submitOperation();
+            self.validateOperation(operationPrincipal);
             
-            copyInfra = copy(thisRlz.nature.infrastructure);
-            operationAgent = thisRlz.agent.submitOperation(currentPerf, ...
-                @thisRlz.solvePerformanceForTime, ...
-                @thisRlz.solveTimeForPerformance, ...
+            copyInfra = copy(self.nature.infrastructure);
+            operationAgent = self.agent.submitOperation(currentPerf, ...
+                @self.solvePerformanceForTime, ...
+                @self.solveTimeForPerformance, ...
                 [nullPerf maxPerf], copyInfra);
-            thisRlz.validateOperation(operationAgent);
+            self.validateOperation(operationAgent);
             
-            operationNature = thisRlz.nature.submitOperation();
-            thisRlz.validateOperation(operationNature);
+            operationNature = self.nature.submitOperation();
+            self.validateOperation(operationNature);
             
             earliestOp = returnEarliestOperation( operationPrincipal, ...
                                                   operationAgent, ...
@@ -770,7 +770,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function performance = solvePerformanceForTime(thisRlz, time)
+        function performance = solvePerformanceForTime(self, time)
         %{
         * Solves performance of infrastructure for a given time
         
@@ -781,11 +781,11 @@ classdef Realization < matlab.mixin.Copyable
                 performance: [class double] Performance of infrastructure
                 for a given time
         %}
-            performance = thisRlz.nature.solvePerformanceForTime(time);
+            performance = self.nature.solvePerformanceForTime(time);
         end
         
         
-        function time = solveTimeForPerformance(thisRlz, perf)
+        function time = solveTimeForPerformance(self, perf)
         %{
         * Solves time for a given infrastructure state
         
@@ -796,11 +796,11 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 time: [class double] Time to solve performance for
         %}
-            time = thisRlz.nature.solveTimeForPerformance(perf);
+            time = self.nature.solveTimeForPerformance(perf);
         end
         
         
-        function data = report(thisRlz)
+        function data = report(self)
         %{
         * 
         
@@ -811,25 +811,25 @@ classdef Realization < matlab.mixin.Copyable
         %}
             import dataComponents.Event
             
-            [utilityAgent, utilityPrincipal] = thisRlz.utilityPlayers();
-            contractDuration = thisRlz.contract.getContractDuration();
+            [utilityAgent, utilityPrincipal] = self.utilityPlayers();
+            contractDuration = self.contract.getContractDuration();
             
             data = struct(...
                 'ua',                       utilityAgent, ...
                 'up',                       utilityPrincipal, ...
                 'contractDuration',         contractDuration, ...
-                'threshold',                thisRlz.contract.getPerfThreshold(), ...
-                'maxPerf',                  thisRlz.nature.infrastructure.maxPerf, ...
-                'nullPerf',                 thisRlz.nature.infrastructure.nullPerf, ...
-                'perfHistory' ,             thisRlz.nature.infrastructure.history.getData(), ...
-                'inspectionMarker',         thisRlz.principal.eventList.getMarkersInfo(Event.INSPECTION, thisRlz.principal.observation), ...
-                'detectionMarker',          thisRlz.principal.eventList.getMarkersInfo(Event.DETECTION, thisRlz.principal.observation), ...
-                'volMaintMarker',           thisRlz.agent.eventList.getMarkersInfo(Event.VOL_MAINT, thisRlz.agent.observation), ...
-                'shockMarker',              thisRlz.agent.eventList.getMarkersInfo(Event.SHOCK, thisRlz.agent.observation), ...
-                'realPerfMeanValue',        thisRlz.nature.infrastructure.history.getMeanValueHistory(), ...
-                'perceivedPerfMeanValue',   thisRlz.principal.observation.getMeanValueHistory(), ...
-                'balP',                     thisRlz.principal.payoff.getBalanceHistory(contractDuration), ...
-                'balA',                     thisRlz.agent.payoff.getBalanceHistory(contractDuration) );
+                'threshold',                self.contract.getPerfThreshold(), ...
+                'maxPerf',                  self.nature.infrastructure.maxPerf, ...
+                'nullPerf',                 self.nature.infrastructure.nullPerf, ...
+                'perfHistory' ,             self.nature.infrastructure.history.getData(), ...
+                'inspectionMarker',         self.principal.eventList.getMarkersInfo(Event.INSPECTION, self.principal.observation), ...
+                'detectionMarker',          self.principal.eventList.getMarkersInfo(Event.DETECTION, self.principal.observation), ...
+                'volMaintMarker',           self.agent.eventList.getMarkersInfo(Event.VOL_MAINT, self.agent.observation), ...
+                'shockMarker',              self.agent.eventList.getMarkersInfo(Event.SHOCK, self.agent.observation), ...
+                'realPerfMeanValue',        self.nature.infrastructure.history.getMeanValueHistory(), ...
+                'perceivedPerfMeanValue',   self.principal.observation.getMeanValueHistory(), ...
+                'balP',                     self.principal.payoff.getBalanceHistory(contractDuration), ...
+                'balA',                     self.agent.payoff.getBalanceHistory(contractDuration) );
         end
         
     end
