@@ -260,8 +260,9 @@ classdef Realization < matlab.mixin.Copyable
                 end
                 
             elseif isa(operation, 'Transaction')
-                
-                timeExecution = thisRlz.executePayment(operation);
+                %TODO This elseif option should be removed when certain
+                %that it never enters
+                error('This should not happen')
                 
             end
             
@@ -558,6 +559,12 @@ classdef Realization < matlab.mixin.Copyable
         %}
             import dataComponents.Event
             
+            % Evolve the system up to the time of the operation to be
+            % executed
+            if transaction.time > thisRlz.time
+                thisRlz.evolveContinuously(transaction.time);
+            end
+            
             assert(thisRlz.time == transaction.time)
             
             [emitter, receiver] = transaction.returnEmitterReceiver(thisRlz.principal, thisRlz.agent);
@@ -594,7 +601,10 @@ classdef Realization < matlab.mixin.Copyable
         function evolveContinuously(thisRlz, tf)
         %{
         * 
-        
+        %TODONEXT Implement this function properly so that is imports
+        functions from the settings objects and updates all components of
+        the model accordingly.
+            
             Input
                 
             
@@ -637,6 +647,7 @@ classdef Realization < matlab.mixin.Copyable
             agentBalance = x(:,3);
             
             thisRlz.nature.infrastructure.evolve(t, perf);
+            thisRlz.updateTimeAll(tf);
         end
         
         
