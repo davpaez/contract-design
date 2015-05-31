@@ -28,7 +28,7 @@ classdef Event < matlab.mixin.Copyable
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisEvent = Event(t, tp, obs, trn)
+        function self = Event(t, tp, obs, trn)
         %{
         * 
 		
@@ -37,10 +37,10 @@ classdef Event < matlab.mixin.Copyable
             Output
                 
         %}
-            thisEvent.time = t;
-            thisEvent.type = tp;
-            thisEvent.observation = obs;
-            thisEvent.transaction = trn;
+            self.time = t;
+            self.type = tp;
+            self.observation = obs;
+            self.transaction = trn;
             
         end
 		

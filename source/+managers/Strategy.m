@@ -31,7 +31,7 @@ classdef Strategy < matlab.mixin.Copyable
     
     methods
         
-        function thisStrategy = Strategy(id, decVars)
+        function self = Strategy(id, decVars)
         %{
         
             Input
@@ -39,9 +39,9 @@ classdef Strategy < matlab.mixin.Copyable
             Output
                 
         %}
-            thisStrategy.id = id;
-            thisStrategy.decisionVars = decVars;
-            thisStrategy.decisionRuleList = cell(0);
+            self.id = id;
+            self.decisionVars = decVars;
+            self.decisionRuleList = cell(0);
         end
         
         
@@ -69,14 +69,14 @@ classdef Strategy < matlab.mixin.Copyable
                 if membershipTest == true
                     currentRule.decide(theMsg);
                 else
-                    error('Every type of decision variable value produced by any rule must also be specified in the attribute decisionVars_TypeInfo of thisStrategy')
+                    error('Every type of decision variable value produced by any rule must also be specified in the attribute decisionVars_TypeInfo of self')
                 end
                 
             end
         end
         
         
-        function addDecisionRule(thisStrategy, rule)
+        function addDecisionRule(self, rule)
         %{
         
             Input
@@ -84,11 +84,11 @@ classdef Strategy < matlab.mixin.Copyable
             Output
                 
         %}
-            thisStrategy.decisionRuleList{end+1, 1} = rule;
+            self.decisionRuleList{end+1, 1} = rule;
         end
         
         
-        function setDecisionRuleList(thisStrategy, decRuleList)
+        function setDecisionRuleList(self, decRuleList)
         %{
         
             Input
@@ -96,7 +96,7 @@ classdef Strategy < matlab.mixin.Copyable
             Output
                 
         %}
-            thisStrategy.decisionRuleList = decRuleList;
+            self.decisionRuleList = decRuleList;
         end
         
         

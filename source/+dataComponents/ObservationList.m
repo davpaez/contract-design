@@ -42,7 +42,7 @@ classdef ObservationList < matlab.mixin.Copyable
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisObs = ObservationList()
+        function self = ObservationList()
         %{
         * 
         
@@ -52,36 +52,36 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            thisObs.pt = 1;
-            thisObs.listSize = thisObs.BLOCKSIZE;
-            thisObs.listJumpsSize = thisObs.BLOCKSIZE/5;
+            self.pt = 1;
+            self.listSize = self.BLOCKSIZE;
+            self.listJumpsSize = self.BLOCKSIZE/5;
             
             % Registered lists
-            thisObs.time = zeros(thisObs.BLOCKSIZE,1);
-            thisObs.value = zeros(thisObs.BLOCKSIZE,1);
+            self.time = zeros(self.BLOCKSIZE,1);
+            self.value = zeros(self.BLOCKSIZE,1);
             
             % Calculated lists                                     Number
-            thisObs.cumSum = zeros(thisObs.BLOCKSIZE,1);            %(1)
-            thisObs.area = zeros(thisObs.BLOCKSIZE,1);              %(2)
-            thisObs.average = zeros(thisObs.BLOCKSIZE,1);           %(3)
-            thisObs.meanValue = zeros(thisObs.BLOCKSIZE,1);         %(4)
-            thisObs.deviation = zeros(thisObs.BLOCKSIZE,1);         %(5)
+            self.cumSum = zeros(self.BLOCKSIZE,1);            %(1)
+            self.area = zeros(self.BLOCKSIZE,1);              %(2)
+            self.average = zeros(self.BLOCKSIZE,1);           %(3)
+            self.meanValue = zeros(self.BLOCKSIZE,1);         %(4)
+            self.deviation = zeros(self.BLOCKSIZE,1);         %(5)
             
             % Update if more calculated lists are added!
             numberCalculatedLists = 5;
             
             % State list: Contains update status of calculated lists
-            thisObs.state = false(thisObs.BLOCKSIZE, numberCalculatedLists);
+            self.state = false(self.BLOCKSIZE, numberCalculatedLists);
             
             % Auxiliary lists
-            thisObs.jumpsIndex = zeros(thisObs.JUMPBLOCKSIZE, 1);
+            self.jumpsIndex = zeros(self.JUMPBLOCKSIZE, 1);
         end
         
         
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
         
-        function currentTime = getCurrentTime(thisObs)
+        function currentTime = getCurrentTime(self)
         %{
         * 
         
@@ -91,11 +91,11 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            currentTime = thisObs.time(thisObs.pt-1);
+            currentTime = self.time(self.pt-1);
         end
         
         
-        function currentValue = getCurrentValue(thisObs)
+        function currentValue = getCurrentValue(self)
         %{
         * 
         
@@ -105,11 +105,11 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            currentValue = thisObs.value(thisObs.pt-1);
+            currentValue = self.value(self.pt-1);
         end
         
         
-        function val = getValue(thisObs, id)
+        function val = getValue(self, id)
         %{
         * 
         
@@ -119,11 +119,11 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            val = thisObs.value(id);
+            val = self.value(id);
         end
         
         
-        function st = getData(thisObs, ids)
+        function st = getData(self, ids)
         %{
         * 
         
@@ -134,24 +134,24 @@ classdef ObservationList < matlab.mixin.Copyable
         %}
             
             if nargin < 2
-                lastValidIndex = thisObs.pt - 1;
+                lastValidIndex = self.pt - 1;
                 ids = 1:lastValidIndex;
             end
             
             st = struct();
             
-            st.time = thisObs.time(ids);
-            st.value = thisObs.value(ids);
-            st.cumSum = thisObs.cumSum(ids);
-            st.area = thisObs.area(ids);
-            st.average = thisObs.average(ids);
-            st.meanValue = thisObs.meanValue(ids);
-            st.deviation = thisObs.deviation(ids);
+            st.time = self.time(ids);
+            st.value = self.value(ids);
+            st.cumSum = self.cumSum(ids);
+            st.area = self.area(ids);
+            st.average = self.average(ids);
+            st.meanValue = self.meanValue(ids);
+            st.deviation = self.deviation(ids);
             
-            st.state = thisObs.state(ids);
+            st.state = self.state(ids);
             
             if nargin == 1
-                st.jumpsIndex = thisObs.jumpsIndex(1:thisObs.jumpsCounter);
+                st.jumpsIndex = self.jumpsIndex(1:self.jumpsCounter);
             end
         end
         
@@ -159,7 +159,7 @@ classdef ObservationList < matlab.mixin.Copyable
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function pointer = register(thisObs, time, value)
+        function pointer = register(self, time, value)
         %{
         * 
         
@@ -168,35 +168,35 @@ classdef ObservationList < matlab.mixin.Copyable
             Output
                 
         %}
-            pointer = thisObs.pt;
+            pointer = self.pt;
             lastEntry = pointer-1;
             
             if pointer > 1
                 % Checks validity of entry
-                assert(time >= thisObs.time(lastEntry), ...
+                assert(time >= self.time(lastEntry), ...
                     'The time of observations must be non-decreasing.')
                 
                 % Registers if current entry creates a jump
-                if time == thisObs.time(lastEntry)
-                    thisObs.registerJump();
+                if time == self.time(lastEntry)
+                    self.registerJump();
                 end
             end
             
             % Registers time and value
-            thisObs.time(pointer) = time;
-            thisObs.value(pointer) = value;
+            self.time(pointer) = time;
+            self.value(pointer) = value;
             
             % Makes arrays bigger if necessary
-            if (pointer + thisObs.SLACK) > thisObs.listSize
-                thisObs.extendArrays();
+            if (pointer + self.SLACK) > self.listSize
+                self.extendArrays();
             end
             
             % Updates pointer
-            thisObs.pt = pointer + 1;
+            self.pt = pointer + 1;
         end
         
         
-        function extendArrays(thisObs)
+        function extendArrays(self)
         %{
         * Extends all arrays of thisObservation
         
@@ -207,25 +207,25 @@ classdef ObservationList < matlab.mixin.Copyable
         %}
             
             % Increments register or list size
-            thisObs.listSize = thisObs.listSize + thisObs.BLOCKSIZE;
+            self.listSize = self.listSize + self.BLOCKSIZE;
             
             % Extends registers lists
-            thisObs.time(thisObs.pt+1:thisObs.listSize, :) = 0;
-            thisObs.value(thisObs.pt+1:thisObs.listSize, :) = 0;
+            self.time(self.pt+1:self.listSize, :) = 0;
+            self.value(self.pt+1:self.listSize, :) = 0;
             
             % Extends calculated lists
-            thisObs.cumSum(thisObs.pt+1:thisObs.listSize, :) = 0;
-            thisObs.area(thisObs.pt+1:thisObs.listSize, :) = 0;
-            thisObs.average(thisObs.pt+1:thisObs.listSize, :) = 0;
-            thisObs.meanValue(thisObs.pt+1:thisObs.listSize, :) = 0;
-            thisObs.deviation(thisObs.pt+1:thisObs.listSize, :) = 0;
+            self.cumSum(self.pt+1:self.listSize, :) = 0;
+            self.area(self.pt+1:self.listSize, :) = 0;
+            self.average(self.pt+1:self.listSize, :) = 0;
+            self.meanValue(self.pt+1:self.listSize, :) = 0;
+            self.deviation(self.pt+1:self.listSize, :) = 0;
             
             % Extends state matrix for all lists (columns)
-            thisObs.state(thisObs.pt+1:thisObs.listSize, :) = false;
+            self.state(self.pt+1:self.listSize, :) = false;
         end
         
         
-        function extendJumpsArray(thisObs)
+        function extendJumpsArray(self)
         %{
         * Extends array of jumpsIndex
         
@@ -235,15 +235,15 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            thisObs.listJumpsSize = thisObs.listJumpsSize + thisObs.JUMPBLOCKSIZE;
-            thisObs.jumpsIndex(thisObs.jumpsCounter+1:thisObs.listJumpsSize, :) = 0;
+            self.listJumpsSize = self.listJumpsSize + self.JUMPBLOCKSIZE;
+            self.jumpsIndex(self.jumpsCounter+1:self.listJumpsSize, :) = 0;
         end
         
         
-        function registerJump(thisObs)
+        function registerJump(self)
         %{
         * Register the index of the pre-jump observation in the jumpsIndex
-        attribute of thisObs. The index is assumed to be the index 
+        attribute of self. The index is assumed to be the index 
         previous to the pointer to the last free position (i.e.,  pt-1  )
         
             Input
@@ -252,18 +252,18 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            thisObs.jumpsCounter = thisObs.jumpsCounter + 1;
+            self.jumpsCounter = self.jumpsCounter + 1;
             
             % Registers the pre-jump index!
-            thisObs.jumpsIndex(thisObs.jumpsCounter) = thisObs.pt-1;
+            self.jumpsIndex(self.jumpsCounter) = self.pt-1;
             
-            if thisObs.jumpsCounter + (thisObs.JUMPBLOCKSIZE/10) > thisObs.listJumpsSize
-                thisObs.extendJumpsArray();
+            if self.jumpsCounter + (self.JUMPBLOCKSIZE/10) > self.listJumpsSize
+                self.extendJumpsArray();
             end
         end
         
         
-        function cumSumValue = getCumSum(thisObs, index)
+        function cumSumValue = getCumSum(self, index)
         %{
         * 
         
@@ -279,23 +279,23 @@ classdef ObservationList < matlab.mixin.Copyable
             
             stateColNumber = 1;
             
-            lastValidIndex = thisObs.pt-1;
+            lastValidIndex = self.pt-1;
             
             if index > lastValidIndex
                 index = lastValidIndex;
             end
             
-            if thisObs.state(index,stateColNumber) == true
-                cumSumValue = thisObs.cumSum(index);
+            if self.state(index,stateColNumber) == true
+                cumSumValue = self.cumSum(index);
             else
-                cumSumValue = sum(thisObs.value(1:index));
-                thisObs.cumSum(index) = cumSumValue;
-                thisObs.state(index,stateColNumber) = true;
+                cumSumValue = sum(self.value(1:index));
+                self.cumSum(index) = cumSumValue;
+                self.state(index,stateColNumber) = true;
             end
         end
         
         
-        function a = getArea(thisObs, index)
+        function a = getArea(self, index)
         %{
         * 
         
@@ -311,27 +311,27 @@ classdef ObservationList < matlab.mixin.Copyable
             
             stateColNumber = 2;
             
-            lastValidIndex = thisObs.pt-1;
+            lastValidIndex = self.pt-1;
             
             if index > lastValidIndex
                 index = lastValidIndex;
             end
             
-            if thisObs.state(index,stateColNumber) == true
-                a = thisObs.area(index);
+            if self.state(index,stateColNumber) == true
+                a = self.area(index);
             else
                 if index == 1
                     a = 0;
                 else
-                    a = trapz(thisObs.time(1:index), thisObs.value(1:index));
-                    thisObs.area(index) = a;
-                    thisObs.state(index,stateColNumber) = true;
+                    a = trapz(self.time(1:index), self.value(1:index));
+                    self.area(index) = a;
+                    self.state(index,stateColNumber) = true;
                 end
             end
         end
         
         
-        function av = getAverage(thisObs, index)
+        function av = getAverage(self, index)
         %{
         * 
         
@@ -347,23 +347,23 @@ classdef ObservationList < matlab.mixin.Copyable
             
             stateColNumber = 3;
             
-            lastValidIndex = thisObs.pt-1;
+            lastValidIndex = self.pt-1;
             
             if index > lastValidIndex
                 index = lastValidIndex;
             end
             
-            if thisObs.state(index,stateColNumber) == true
-                av = thisObs.average(index);
+            if self.state(index,stateColNumber) == true
+                av = self.average(index);
             else
-                av = mean(thisObs.value(1:index));
-                thisObs.average(index) = av;
-                thisObs.state(index,stateColNumber) = true;
+                av = mean(self.value(1:index));
+                self.average(index) = av;
+                self.state(index,stateColNumber) = true;
             end
         end
         
         
-        function m = getMeanValue(thisObs, index)
+        function m = getMeanValue(self, index)
         %{
         * 
         
@@ -379,27 +379,27 @@ classdef ObservationList < matlab.mixin.Copyable
             
             stateColNumber = 4;
             
-            lastValidIndex = thisObs.pt-1;
+            lastValidIndex = self.pt-1;
             
             if index > lastValidIndex
                 index = lastValidIndex;
             end
             
-            if thisObs.state(index,stateColNumber) == true
-                m = thisObs.meanValue(index);
+            if self.state(index,stateColNumber) == true
+                m = self.meanValue(index);
             else
                 if index == 1
-                    m = thisObs.getValue(index);
+                    m = self.getValue(index);
                 else
-                    m = thisObs.getArea(index)/(thisObs.time(index)-thisObs.time(1));
+                    m = self.getArea(index)/(self.time(index)-self.time(1));
                 end
-                thisObs.meanValue(index) = m;
-                thisObs.state(index,stateColNumber) = true;
+                self.meanValue(index) = m;
+                self.state(index,stateColNumber) = true;
             end
         end
         
         
-        function dev = getDeviation(thisObs, index)
+        function dev = getDeviation(self, index)
         %{
         * 
         
@@ -415,18 +415,18 @@ classdef ObservationList < matlab.mixin.Copyable
             
             stateColNumber = 5;
             
-            lastValidIndex = thisObs.pt-1;
+            lastValidIndex = self.pt-1;
             
             if index > lastValidIndex
                 index = lastValidIndex;
             end
             
-            if thisObs.state(index,stateColNumber) == true
-                dev = thisObs.deviation(index);
+            if self.state(index,stateColNumber) == true
+                dev = self.deviation(index);
             else
-                dev = std(thisObs.value(1:index));
-                thisObs.deviation(index) = dev;
-                thisObs.state(index,stateColNumber) = true;
+                dev = std(self.value(1:index));
+                self.deviation(index) = dev;
+                self.state(index,stateColNumber) = true;
             end
         end
         
@@ -434,7 +434,7 @@ classdef ObservationList < matlab.mixin.Copyable
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function l = getLength(thisObs)
+        function l = getLength(self)
         %{
         * 
         
@@ -443,11 +443,11 @@ classdef ObservationList < matlab.mixin.Copyable
             Output
                 
         %}
-            l = thisObs.pt - 1;
+            l = self.pt - 1;
         end
         
         
-        function [index, extra] = timeToIndex(thisobs, time)
+        function [index, extra] = timeToIndex(self, time)
         %{
         * 
         
@@ -457,14 +457,14 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            index = find(thisobs.time <= time, 1, 'last');
+            index = find(self.time <= time, 1, 'last');
             assert(~isempty(index), 'No registry was found')
             
-            extra = time - thisobs.time(index);
+            extra = time - self.time(index);
         end
         
         
-        function sumValue = getSumBetween(thisObs, indexFirst, indexLast)
+        function sumValue = getSumBetween(self, indexFirst, indexLast)
         %{
         * 
         
@@ -474,7 +474,7 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            lastValidIndex = thisObs.pt-1;
+            lastValidIndex = self.pt-1;
             
             assert( nargin == 3, 'The index arguments are required.')
             assert( indexFirst >= 1, 'First index must be greater or equal than 1.')
@@ -482,11 +482,11 @@ classdef ObservationList < matlab.mixin.Copyable
             
             finalIndex = min(lastValidIndex,indexLast);
             
-            sumValue = sum(thisObs.value(indexFirst:finalIndex));
+            sumValue = sum(self.value(indexFirst:finalIndex));
         end
         
         
-        function st = getMeanValueHistory(thisObs)
+        function st = getMeanValueHistory(self)
         %{
         * Returns a struct containing the fields time and meanValue
         
@@ -497,20 +497,20 @@ classdef ObservationList < matlab.mixin.Copyable
                 st: [class struct] 
         %}
             
-            lastValidIndex = thisObs.pt-1;
+            lastValidIndex = self.pt-1;
             
             st = struct();
             st.time = zeros(lastValidIndex,1);
             st.area = zeros(lastValidIndex,1);
             
             for i=1:lastValidIndex
-                st.time(i) = thisObs.time(i);
-                st.meanValue(i) = thisObs.getMeanValue(i);
+                st.time(i) = self.time(i);
+                st.meanValue(i) = self.getMeanValue(i);
             end
         end
         
 
-        function jumpPair = extractLastJumpPair(thisObs, time)
+        function jumpPair = extractLastJumpPair(self, time)
         %{
         * Searches from tail to head looking for the first
         pair of values whose timestamp is less or equal than
@@ -535,19 +535,19 @@ classdef ObservationList < matlab.mixin.Copyable
             jumpPair = [];
             
             % Maximum index of jumpsIndex list
-            i = thisObs.jumpsCounter;
+            i = self.jumpsCounter;
             
             while i >= 1
                 
-                origIndex = thisObs.jumpsIndex(i);
-                timeJump = thisObs.time(origIndex);
+                origIndex = self.jumpsIndex(i);
+                timeJump = self.time(origIndex);
                 
                 if timeJump <= time
                     jumpPair = struct();
                     jumpPair.indexPreJump = origIndex;
                     jumpPair.time = timeJump;
-                    jumpPair.valuePreJump = thisObs.value(origIndex);
-                    jumpPair.valuePostJump = thisObs.value(origIndex+1);
+                    jumpPair.valuePreJump = self.value(origIndex);
+                    jumpPair.valuePostJump = self.value(origIndex+1);
                     break
                 else
                     i = i-1;
@@ -557,7 +557,7 @@ classdef ObservationList < matlab.mixin.Copyable
         end
         
         
-        function value = interpolate(thisObs, time)
+        function value = interpolate(self, time)
         %{
         * 
         
@@ -566,10 +566,10 @@ classdef ObservationList < matlab.mixin.Copyable
             Output
                 
         %}
-            lastEntry = thisObs.pt - 1;
+            lastEntry = self.pt - 1;
             
-            t = thisObs.time(1:lastEntry);
-            v = thisObs.value(1:lastEntry);
+            t = self.time(1:lastEntry);
+            v = self.value(1:lastEntry);
             %TODO Do not use interp1. It does not work because the time
             %vector is not strict monotonically increasing
             value = interp1(t, v, time);

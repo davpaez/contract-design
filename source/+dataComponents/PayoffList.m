@@ -45,7 +45,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisPff = PayoffList(discountRate)
+        function self = PayoffList(discountRate)
         %{
         * 
         
@@ -64,37 +64,37 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 Transaction.FINAL };
             
         
-            thisPff@managers.TypedClass(listTypes);
+            self@managers.TypedClass(listTypes);
             
-            thisPff.pt = 1;
-            thisPff.listSize = thisPff.BLOCKSIZE;
-            thisPff.listJumpsSize = thisPff.BLOCKSIZE/5;
-            thisPff.discRate = discountRate;
+            self.pt = 1;
+            self.listSize = self.BLOCKSIZE;
+            self.listJumpsSize = self.BLOCKSIZE/5;
+            self.discRate = discountRate;
             
             % Registered lists
-            thisPff.time = zeros(thisPff.BLOCKSIZE,1);
-            thisPff.value = zeros(thisPff.BLOCKSIZE,1);
-            thisPff.duration = zeros(thisPff.BLOCKSIZE,1);
-            thisPff.type = cell(thisPff.BLOCKSIZE,1);
+            self.time = zeros(self.BLOCKSIZE,1);
+            self.value = zeros(self.BLOCKSIZE,1);
+            self.duration = zeros(self.BLOCKSIZE,1);
+            self.type = cell(self.BLOCKSIZE,1);
             
             % Calculated lists                                      Number
-            thisPff.balance = zeros(thisPff.BLOCKSIZE,1);            %(1)
+            self.balance = zeros(self.BLOCKSIZE,1);            %(1)
             
             % Update if more calculated lists are added!
             numberCalculatedLists = 1;
             
             % State list: Contains update status of calculated lists
-            thisPff.state = false(thisPff.BLOCKSIZE, numberCalculatedLists);
+            self.state = false(self.BLOCKSIZE, numberCalculatedLists);
             
             % Auxiliary lists
-            thisPff.jumpsIndex = zeros(thisPff.JUMPBLOCKSIZE, 1);
+            self.jumpsIndex = zeros(self.JUMPBLOCKSIZE, 1);
         end
         
         
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
         
-        function currentTime = getCurrentTime(thisPff)
+        function currentTime = getCurrentTime(self)
         %{
         * 
         
@@ -103,11 +103,11 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-            currentTime = thisPff.time(thisPff.pt-1);
+            currentTime = self.time(self.pt-1);
         end
         
         
-        function currentValue = getCurrentValue(thisPff)
+        function currentValue = getCurrentValue(self)
         %{
         * 
         
@@ -116,11 +116,11 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-            currentValue = thisPff.value(thisPff.pt-1);
+            currentValue = self.value(self.pt-1);
         end
         
 
-        function st = getData(thisPff, ids)
+        function st = getData(self, ids)
         %{
         * 
         
@@ -130,22 +130,22 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 
         %}
             if nargin < 2
-                lastValidIndex = thisPff.pt - 1;
+                lastValidIndex = self.pt - 1;
                 ids = 1:lastValidIndex;
             end
             
             st = struct();
             
-            st.time = thisPff.time(ids);
-            st.value = thisPff.value(ids);
-            st.duration = thisPff.duration(ids);
-            st.type = thisPff.type(ids);
-            st.balance = thisPff.balance(ids);
+            st.time = self.time(ids);
+            st.value = self.value(ids);
+            st.duration = self.duration(ids);
+            st.type = self.type(ids);
+            st.balance = self.balance(ids);
             
-            st.state = thisPff.state(ids);
+            st.state = self.state(ids);
             
             if nargin == 1
-                st.jumpsIndex = thisPff.jumpsIndex(1:thisPff.jumpsCounter);
+                st.jumpsIndex = self.jumpsIndex(1:self.jumpsCounter);
             end
         end
         
@@ -153,7 +153,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function id = register(thisPff, time, value, type)
+        function id = register(self, time, value, type)
         %{
         * 
         
@@ -164,38 +164,38 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         %}
             % Check validity of arguments
             
-            if thisPff.pt > 1
-                assert(time >= thisPff.time(thisPff.pt-1), ...
+            if self.pt > 1
+                assert(time >= self.time(self.pt-1), ...
                     'The time of observations must be non-decreasing.')
-                if time == thisPff.time(thisPff.pt-1)
-                    thisPff.registerJump();
+                if time == self.time(self.pt-1)
+                    self.registerJump();
                 end
             end
             
             
             % Validate type
-            assert(thisPff.isValidType(type) ,...
+            assert(self.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
             % Registers time, value, type, duration
-            id = thisPff.pt;
-            thisPff.time(id) = time;
-            thisPff.value(id) = value;
-            thisPff.type{id} = type;
-            %thisPff.duration(id) = dur; % Duration will possibly be
+            id = self.pt;
+            self.time(id) = time;
+            self.value(id) = value;
+            self.type{id} = type;
+            %self.duration(id) = dur; % Duration will possibly be
             %deprecated
             
             % Makes arrays bigger if necessary
-            if thisPff.pt + (thisPff.BLOCKSIZE/10) > thisPff.listSize
-                thisPff.extendArrays();
+            if self.pt + (self.BLOCKSIZE/10) > self.listSize
+                self.extendArrays();
             end
             
             % Updates pointer
-            thisPff.pt = thisPff.pt + 1;
+            self.pt = self.pt + 1;
         end
         
         
-        function extendArrays(thisPff)
+        function extendArrays(self)
         %{
         * Sets all measures out-of-date
         
@@ -205,23 +205,23 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 
         %}
             % Increments list size
-            thisPff.listSize = thisPff.listSize + thisPff.BLOCKSIZE;
+            self.listSize = self.listSize + self.BLOCKSIZE;
             
             % Extends registers lists
-            thisPff.time(thisPff.pt+1:thisPff.listSize, :) = 0;
-            thisPff.value(thisPff.pt+1:thisPff.listSize, :) = 0;
-            thisPff.type{thisPff.listSize,1} = [];
-            thisPff.duration(thisPff.pt+1:thisPff.listSize, :) = 0;
+            self.time(self.pt+1:self.listSize, :) = 0;
+            self.value(self.pt+1:self.listSize, :) = 0;
+            self.type{self.listSize,1} = [];
+            self.duration(self.pt+1:self.listSize, :) = 0;
             
             % Extends calculated lists
-            thisPff.balance(thisPff.pt+1:thisPff.listSize, :) = 0;
+            self.balance(self.pt+1:self.listSize, :) = 0;
             
             % Extends state matrix for all lists (columns)
-            thisPff.state(thisPff.pt+1:thisPff.listSize, :) = false;
+            self.state(self.pt+1:self.listSize, :) = false;
         end
         
         
-        function extendJumpsArray(thisPff)
+        function extendJumpsArray(self)
         %{
         * 
         
@@ -230,12 +230,12 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-            thisPff.listJumpsSize = thisPff.listJumpsSize + thisPff.JUMPBLOCKSIZE;
-            thisPff.jumpsIndex(thisPff.jumpsCounter+1:thisPff.listJumpsSize, :) = 0;
+            self.listJumpsSize = self.listJumpsSize + self.JUMPBLOCKSIZE;
+            self.jumpsIndex(self.jumpsCounter+1:self.listJumpsSize, :) = 0;
         end
         
         
-        function registerJump(thisPff)
+        function registerJump(self)
         %{
         * 
         
@@ -244,13 +244,13 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-            thisPff.jumpsCounter = thisPff.jumpsCounter + 1;
+            self.jumpsCounter = self.jumpsCounter + 1;
             
             % Register the pre-jump index!
-            thisPff.jumpsIndex(thisPff.jumpsCounter) = thisPff.pt - 1;
+            self.jumpsIndex(self.jumpsCounter) = self.pt - 1;
             
-            if thisPff.jumpsCounter + (thisPff.JUMPBLOCKSIZE/10) > thisPff.listJumpsSize
-                thisPff.extendJumpsArray();
+            if self.jumpsCounter + (self.JUMPBLOCKSIZE/10) > self.listJumpsSize
+                self.extendJumpsArray();
             end
         end
         
@@ -397,7 +397,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
-        function st = returnPayoffsOfType(thisPff, type)
+        function st = returnPayoffsOfType(self, type)
         %{
         * 
         
@@ -407,22 +407,22 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 
             % TODO This method generates some error
         %}
-            assert(thisPff.isValidType(type), 'The type is not valid')
+            assert(self.isValidType(type), 'The type is not valid')
             
-            lastValidIndex = thisPff.pt - 1;
+            lastValidIndex = self.pt - 1;
             
             % Cell array of strings type
-            stringCell = thisPff.type(1:lastValidIndex);
+            stringCell = self.type(1:lastValidIndex);
             
             % Boolean indices
             ids = strcmp(type, stringCell);
             
             % Call getData for boolean indices
-            st = thisPff.getData(ids);
+            st = self.getData(ids);
         end
         
         
-        function presentValue = getNPV(thisPff, tm)
+        function presentValue = getNPV(self, tm)
         %{
         *Calculates and returns the NPV of the linked-list of payoffs up
         until (and including) thisPayoff
@@ -434,23 +434,23 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 time t = 0
         %}
             
-            t = max(thisPff.time + thisPff.duration);
+            t = max(self.time + self.duration);
             deltaTime = tm - t;
             
             if deltaTime > 0
-                postFlowBalance = thisPff.getBalancePostFlow();
-                currentBalance = futureValueFlow(postFlowBalance, deltaTime, thisPff.discRate);
+                postFlowBalance = self.getBalancePostFlow();
+                currentBalance = futureValueFlow(postFlowBalance, deltaTime, self.discRate);
             elseif deltaTime == 0
-                currentBalance = thisPff.getBalancePostFlow();
+                currentBalance = self.getBalancePostFlow();
             else
                 error('This should not happen')
             end
             
-            presentValue = presentValueFlow(currentBalance, tm, thisPff.discRate);
+            presentValue = presentValueFlow(currentBalance, tm, self.discRate);
         end
         
         
-        function st = getBalanceHistory(thisPff, finalTime)
+        function st = getBalanceHistory(self, finalTime)
         %{
         * 
         
@@ -459,26 +459,26 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-            lastValidIndex = thisPff.pt - 1;
+            lastValidIndex = self.pt - 1;
             st = struct();
             cont = 0;
             
             for i=1:lastValidIndex
                 
-                balBefore = thisPff.getBalancePreFlow('index',i);
+                balBefore = self.getBalancePreFlow('index',i);
                 
-                if i==1 || ~ismember(i-1, thisPff.jumpsIndex)
+                if i==1 || ~ismember(i-1, self.jumpsIndex)
                     % Point before flow (jump)
                     cont = cont + 1;
-                    st.time(cont) = thisPff.time(i);
+                    st.time(cont) = self.time(i);
                     st.balance(cont) = balBefore;
                 end
                 
-                if thisPff.duration(i) == 0
+                if self.duration(i) == 0
                     % Point after flow (jump)
                     cont = cont + 1;
-                    st.time(cont) = thisPff.time(i);
-                    st.balance(cont) = balBefore + thisPff.value(i);
+                    st.time(cont) = self.time(i);
+                    st.balance(cont) = balBefore + self.value(i);
                 end
             end
             

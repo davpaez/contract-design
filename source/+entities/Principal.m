@@ -27,7 +27,7 @@ classdef Principal <  entities.Player
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisPrincipal = Principal (progSet, problem)
+        function self = Principal (progSet, problem)
         %{
         
             Input
@@ -38,23 +38,23 @@ classdef Principal <  entities.Player
             import managers.*
             
             % Creates instance of object of the superclass Player
-            thisPrincipal@entities.Player(problem);
+            self@entities.Player(problem);
             
             % Cost single inspection
             cinsp = progSet.returnItemSetting(ItemSetting.COST_INSP);
-            thisPrincipal.costSingleInspection = cinsp.value;
+            self.costSingleInspection = cinsp.value;
             
             % Assigns contract offer strategy attribute
             faculty = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
-            thisPrincipal.contractStrategy = faculty.getSelectedStrategy();
+            self.contractStrategy = faculty.getSelectedStrategy();
             
             % Assigns inspection strategy attribute
             faculty = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
-            thisPrincipal.inspectionStrategy = faculty.getSelectedStrategy();
+            self.inspectionStrategy = faculty.getSelectedStrategy();
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.PRINCIPAL_UTIL_FNC);
-            thisPrincipal.utilityFunction = fnc.equation;    
+            self.utilityFunction = fnc.equation;    
             
         end
         
@@ -62,7 +62,7 @@ classdef Principal <  entities.Player
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function contract = generateContract(thisPrincipal, progSet)
+        function contract = generateContract(self, progSet)
         %{
         
             Input
@@ -74,13 +74,13 @@ classdef Principal <  entities.Player
             import dataComponents.Contract
             import managers.Information
             
-            msg = Message(thisPrincipal);
+            msg = Message(self);
             msg.setTypeRequestedInfo(Information.CONTRACT_DURATION, ...
                 Information.PERFORMANCE_THRESHOLD, ...
                 Information.PAYMENT_SCHEDULE, ...
                 Information.REVENUE_RATE_FUNC);
             
-            thisPrincipal.contractStrategy.decide(msg);
+            self.contractStrategy.decide(msg);
             
             conDur = msg.getOutput(Information.CONTRACT_DURATION);
             perfThreshold = msg.getOutput(Information.PERFORMANCE_THRESHOLD);
@@ -92,7 +92,7 @@ classdef Principal <  entities.Player
         end
         
         
-        function operation = submitOperation(thisPrincipal)
+        function operation = submitOperation(self)
         %{
         
             Input
@@ -106,28 +106,28 @@ classdef Principal <  entities.Player
             import managers.Strategy
             import managers.Information
             
-            if isempty(thisPrincipal.submittedOperation)
+            if isempty(self.submittedOperation)
                 
-                msg = Message(thisPrincipal);
+                msg = Message(self);
                 msg.setTypeRequestedInfo(Information.TIME_INSPECTION);
                 
-                thisPrincipal.inspectionStrategy.decide(msg);
+                self.inspectionStrategy.decide(msg);
                 
                 timeNextInspection = msg.getOutput(Information.TIME_INSPECTION);
                 
-                isSens = thisPrincipal.inspectionStrategy.isSensitive();
+                isSens = self.inspectionStrategy.isSensitive();
                 
                 operation = Operation(timeNextInspection, Operation.INSPECTION, isSens, []);
-                thisPrincipal.setSubmittedOperation(operation);
+                self.setSubmittedOperation(operation);
                 
             else
-                operation = thisPrincipal.submittedOperation;
+                operation = self.submittedOperation;
             end
             
         end
         
         
-        function operation = submitFinalInspection(thisPrincipal)
+        function operation = submitFinalInspection(self)
         %{
         * 
             Input
@@ -142,10 +142,10 @@ classdef Principal <  entities.Player
             
             import dataComponents.Operation
             
-            finalTimeContract = thisPrincipal.contract.getContractDuration();
+            finalTimeContract = self.contract.getContractDuration();
             
             operation = Operation(finalTimeContract, Operation.INSPECTION, false, [] );
-            thisPrincipal.setSubmittedOperation(operation);
+            self.setSubmittedOperation(operation);
         end
         
         

@@ -33,11 +33,11 @@ classdef EventList < matlab.mixin.Copyable
         %{
         Explanation:
         The attributes idObservation and idPayoff at the creation of 
-        thisEvent object will temporarily store a structure of the
+        self object will temporarily store a structure of the
         information of the observation or payoff.
         
         These structures will remain there until the player owning
-        thisEvent, registers the event. He has the responsability of
+        self, registers the event. He has the responsability of
         replacing the structures with the indices or id of the observation
         and/or payoff as stored in his Observation and/or Payoff objects.
         
@@ -74,7 +74,7 @@ classdef EventList < matlab.mixin.Copyable
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
 		
-		function currentTime = getCurrentTime(thisEvent)
+		function currentTime = getCurrentTime(self)
         %{
         * 
 		
@@ -83,11 +83,11 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-			currentTime = thisEvent.time(thisEvent.pt-1);
+			currentTime = self.time(self.pt-1);
         end
         
         
-        function currentType = getCurrentType(thisEvent)
+        function currentType = getCurrentType(self)
         %{
         *  
             Input
@@ -95,11 +95,11 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-            currentType = thisEvent.type{thisEvent.pt-1};
+            currentType = self.type{self.pt-1};
         end
         
         
-        function st = getData(thisEvent, ids)
+        function st = getData(self, ids)
         %{
         *  
             Input
@@ -108,20 +108,20 @@ classdef EventList < matlab.mixin.Copyable
                 
         %}
             if nargin < 2
-                lastValidIndex = thisEvent.pt - 1;
+                lastValidIndex = self.pt - 1;
                 ids = 1:lastValidIndex;
             end
             
             st = struct();
             
-            st.time = thisEvent.time(ids);
-            st.type = thisEvent.type(ids);
-            st.idObservation = thisEvent.idObservation(ids);
-            st.idPayoff = thisEvent.idPayoff(ids);
+            st.time = self.time(ids);
+            st.type = self.type(ids);
+            st.idObservation = self.idObservation(ids);
+            st.idPayoff = self.idPayoff(ids);
         end
 		
 		
-        function st = getEventsOfType(thisEvent, type)
+        function st = getEventsOfType(self, type)
         %{
         *  
             Input
@@ -129,19 +129,19 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(thisEvent.isValidType(type) ,...
+            assert(self.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
-            ids = strcmp(thisEvent.type, type);
+            ids = strcmp(self.type, type);
             if any(ids)
-                st = thisEvent.getData(ids);
+                st = self.getData(ids);
             else
                 st = [];
             end
         end
         
         
-        function st = getLastEventOfType(thisEvent, type)
+        function st = getLastEventOfType(self, type)
         %{
         * 
         
@@ -151,9 +151,9 @@ classdef EventList < matlab.mixin.Copyable
                 
         %}
             
-            ids = find(strcmp(thisEvent.type, type), 1, 'last');
+            ids = find(strcmp(self.type, type), 1, 'last');
             if ~isempty(ids)
-                st = thisEvent.getData(ids);
+                st = self.getData(ids);
             else
                 st = [];
             end
@@ -163,7 +163,7 @@ classdef EventList < matlab.mixin.Copyable
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function id = register(thisEvent, time, type, idObs, idPff)
+        function id = register(self, time, type, idObs, idPff)
         %{
         * 
         
@@ -172,29 +172,29 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-            if thisEvent.pt > 1
-                assert( time >= thisEvent.time(thisEvent.pt-1), ...
+            if self.pt > 1
+                assert( time >= self.time(self.pt-1), ...
                      'The time of events must be non-decreasing.')
             end
             
             % Registers time, type, observation and payoff
-            id = thisEvent.pt;
-            thisEvent.time(id) = time;
-            thisEvent.type{id} = type;
-            thisEvent.idObservation{id} = idObs;
-            thisEvent.idPayoff{id} = idPff;
+            id = self.pt;
+            self.time(id) = time;
+            self.type{id} = type;
+            self.idObservation{id} = idObs;
+            self.idPayoff{id} = idPff;
             
             % Makes array bigger if necessary
-            if thisEvent.pt + (thisEvent.BLOCKSIZE/10) > thisEvent.listSize
-                thisEvent.extendArrays();
+            if self.pt + (self.BLOCKSIZE/10) > self.listSize
+                self.extendArrays();
             end
             
             % Updates pointer
-            thisEvent.pt = thisEvent.pt + 1;
+            self.pt = self.pt + 1;
         end
         
         
-        function extendArrays(thisEvent)
+        function extendArrays(self)
         %{
         * 
         
@@ -204,20 +204,20 @@ classdef EventList < matlab.mixin.Copyable
                 
         %}
             % Increments register or list size
-            thisEvent.listSize = thisEvent.listSize + thisEvent.BLOCKSIZE;
+            self.listSize = self.listSize + self.BLOCKSIZE;
             
             % Extends registers lists
-            thisEvent.time(thisEvent.pt+1:thisEvent.listSize, :) = 0;
-            thisEvent.type{thisEvent.listSize,1} = [];
-            thisEvent.idObservation{thisEvent.listSize,1} = [];
-            thisEvent.idPayoff{thisEvent.listSize,1} = [];
+            self.time(self.pt+1:self.listSize, :) = 0;
+            self.type{self.listSize,1} = [];
+            self.idObservation{self.listSize,1} = [];
+            self.idPayoff{self.listSize,1} = [];
         end
         
         
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function st = getMarkersInfo(thisEvent, type, theObs)
+        function st = getMarkersInfo(self, type, theObs)
         %{
         * 
         
@@ -226,7 +226,7 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-            st = thisEvent.getEventsOfType(type);
+            st = self.getEventsOfType(type);
             if ~isempty(st)
                 numEvents = length(st.time);
                 st.value = zeros(numEvents,1);

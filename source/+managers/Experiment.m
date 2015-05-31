@@ -27,7 +27,7 @@ classdef Experiment < managers.TypedClass
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisEx = Experiment(progSet)
+        function self = Experiment(progSet)
         %{
         * 
             Input
@@ -43,37 +43,37 @@ classdef Experiment < managers.TypedClass
                 Experiment.SENS, ...
                 Experiment.OPT};
             
-            thisEx@managers.TypedClass(listTypes);
+            self@managers.TypedClass(listTypes);
             
             disp('Creating Experiment object:')
             
             tp = progSet.returnItemSetting(ItemSetting.TYPE_EXP).value;
-            assert(thisEx.isValidType(tp), ...
+            assert(self.isValidType(tp), ...
                 'The type entered as argument is not valid');
             
-            thisEx.programSettings = progSet;
+            self.programSettings = progSet;
             
             % Type of experiment
-            thisEx.typeExp = tp;
+            self.typeExp = tp;
             
             % Call customized constructors
             switch tp
                 case Experiment.SING
-                    thisEx.single();
+                    self.single();
                 
                 case Experiment.DISP
-                    thisEx.dispersion();
+                    self.dispersion();
                 
                 case Experiment.SENS
-                    thisEx.sensitivity();
+                    self.sensitivity();
                     
                 case Experiment.OPT
-                    thisEx.optimization();
+                    self.optimization();
             end
         end
         
         
-        function single(thisEx)
+        function single(self)
         %{
         * 
             Input
@@ -83,12 +83,12 @@ classdef Experiment < managers.TypedClass
         %}
             import managers.*
             
-            thisEx.gameEvals = GameEvaluation(thisEx.programSettings);
+            self.gameEvals = GameEvaluation(self.programSettings);
             disp('    Game evaluation object created')
         end
         
         
-        function dispersion(thisEx)
+        function dispersion(self)
         %{
         * 
             Input
@@ -98,12 +98,12 @@ classdef Experiment < managers.TypedClass
         %}
             import managers.*
             
-            thisEx.gameEvals = GameEvaluation(thisEx.programSettings);
+            self.gameEvals = GameEvaluation(self.programSettings);
             disp('    Game evaluation object created')
         end
         
         
-        function sensitivity(thisEx)
+        function sensitivity(self)
         %{
         * 
             Input
@@ -115,7 +115,7 @@ classdef Experiment < managers.TypedClass
         end
         
         
-        function optimization(thisEx)
+        function optimization(self)
         %{
         * 
             Input
@@ -130,7 +130,7 @@ classdef Experiment < managers.TypedClass
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function run(thisEx)
+        function run(self)
         %{
         * 
             Input
@@ -141,27 +141,27 @@ classdef Experiment < managers.TypedClass
             import managers.*
             
             % Load experiment's file info
-            fi = thisEx.programSettings.returnItemSetting(ItemSetting.FILE_INFO);
+            fi = self.programSettings.returnItemSetting(ItemSetting.FILE_INFO);
             fi.createOutputFolder();
             
             % Open log file (if necessary)
             fi.openLogFile();
             
             % Type of experiment
-            tp = thisEx.typeExp;
+            tp = self.typeExp;
             
             switch tp
                 case Experiment.SING
-                    thisEx.runSingle();
+                    self.runSingle();
                 
                 case Experiment.DISP
-                    thisEx.runDispersion();
+                    self.runDispersion();
                 
                 case Experiment.SENS
-                    thisEx.runSensitivity();
+                    self.runSensitivity();
                     
                 case Experiment.OPT
-                    thisEx.runOptimization();
+                    self.runOptimization();
             end
             
             % Close log file (if necessary)
@@ -171,29 +171,29 @@ classdef Experiment < managers.TypedClass
         end
         
         
-        function data = report(thisEx)
+        function data = report(self)
             import managers.*
             
             % Type of experiment
-            tp = thisEx.typeExp;
+            tp = self.typeExp;
             
             switch tp
                 case Experiment.SING
-                    data = thisEx.reportSingle();
+                    data = self.reportSingle();
                 
                 case Experiment.DISP
-                    data = thisEx.reportDispersion();
+                    data = self.reportDispersion();
                 
                 case Experiment.SENS
-                    thisEx.reportSensitivity();
+                    self.reportSensitivity();
                     
                 case Experiment.OPT
-                    thisEx.reportOptimization();
+                    self.reportOptimization();
             end
         end
         
         
-        function runSingle(thisEx)
+        function runSingle(self)
         %{
         * 
             Input
@@ -203,14 +203,14 @@ classdef Experiment < managers.TypedClass
         %}
             import managers.*
             
-            r = Realization(thisEx.programSettings);
+            r = Realization(self.programSettings);
             r.run()
             
-            thisEx.gameEvals = r;
+            self.gameEvals = r;
         end
         
         
-        function runDispersion(thisEx)
+        function runDispersion(self)
         %{
         * 
             Input
@@ -218,11 +218,11 @@ classdef Experiment < managers.TypedClass
             Output
                 
         %}
-            thisEx.gameEvals.runGame();
+            self.gameEvals.runGame();
         end
         
         
-        function runSensitivity(thisEx)
+        function runSensitivity(self)
         %{
         * 
             Input
@@ -234,7 +234,7 @@ classdef Experiment < managers.TypedClass
         end
         
         
-        function runOptimization(thisEx)
+        function runOptimization(self)
         %{
         * 
             Input
@@ -249,7 +249,7 @@ classdef Experiment < managers.TypedClass
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function data = reportSingle(thisEx)
+        function data = reportSingle(self)
         %{
         * 
             Input
@@ -257,11 +257,11 @@ classdef Experiment < managers.TypedClass
             Output
                 
         %}
-            data = thisEx.gameEvals.report();
+            data = self.gameEvals.report();
         end
         
         
-        function data = reportDispersion(thisEx)
+        function data = reportDispersion(self)
         %{
         * 
             Input
@@ -269,11 +269,11 @@ classdef Experiment < managers.TypedClass
             Output
                 
         %}
-            data = thisEx.gameEvals.report();
+            data = self.gameEvals.report();
         end
         
         
-        function reportSensitivity(thisEx)
+        function reportSensitivity(self)
         %{
         * 
             Input
@@ -285,7 +285,7 @@ classdef Experiment < managers.TypedClass
         end
         
         
-        function reportOptimization(thisEx)
+        function reportOptimization(self)
         %{
         * 
             Input

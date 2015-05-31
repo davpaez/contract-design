@@ -35,7 +35,7 @@ classdef Optimization
                 thisOptimization: [class Optimization] Optimization object
                 
         %}
-        function thisOptimization = Optimization(programSettings)
+        function self = Optimization(programSettings)
             
             
             
@@ -67,7 +67,7 @@ classdef Optimization
         % ---------- Mutator methods -------------------------------------        
         % ----------------------------------------------------------------
         
-        function run(thisOptimization)
+        function run(self)
             
         end
         
@@ -87,7 +87,7 @@ classdef Optimization
                 problem: [classs struct] Problem structure (ready for the
                 optimizer)
         %}
-        function problem = problemSetup(thisOptimization, pars)
+        function problem = problemSetup(self, pars)
             nSim = pars.nSim;
             
             % Equality constraints
@@ -120,9 +120,9 @@ classdef Optimization
             Output
                 
         %}
-        function outerProblem = returnOuterProblem(thisInputData)
+        function outerProblem = returnOuterProblem(self)
             
-            [indicesOuterVars, numOuterVars] = thisInputData.getNumberControlledVars(InputData.PRINCIPAL);
+            [indicesOuterVars, numOuterVars] = self.getNumberControlledVars(InputData.PRINCIPAL);
             
             % Row vector for lower and upper bounds
             lb = zeros(1, numOuterVars);
@@ -133,26 +133,26 @@ classdef Optimization
             for i=1:numOuterVars
                 k = indicesOuterVars(i);
                 
-                bounds = thisInputData(k).value_bounds;
+                bounds = self(k).value_bounds;
                 lb(i) = bounds(1);
                 ub(i) = bounds(2);
                 
                 % Specify integer variables
-                if thisInputData(k).isInteger()
+                if self(k).isInteger()
                     IntCon(end+1) = i;
                 end
                 
                 
             end
             
-            MaxIter = thisInputData.returnInputDataObject(InputData.MAX_ITER).value;
+            MaxIter = self.returnInputDataObject(InputData.MAX_ITER).value;
             
             options = gaoptimset('Generations', MaxIter, ...
                                  'PlotFcns', @gaplotpareto , ...
                                  'PlotInterval', 10);
             
             outerProblem = struct();
-            outerProblem.fitnessfcn = @(x) outerFitnessFunction(x, thisInputData);
+            outerProblem.fitnessfcn = @(x) outerFitnessFunction(x, self);
             outerProblem.nvars = numOuterVars;
             outerProblem.Aineq = [];
             outerProblem.bineq = [];
@@ -175,11 +175,11 @@ classdef Optimization
             Output
                 
         %}
-        function innerProblem = returnInnerProblem(thisInputData)
+        function innerProblem = returnInnerProblem(self)
             
             import managers.ItemSetting
             
-            [indicesInnerVars , numInnerVars] = thisInputData.getNumberControlledVars(ItemSetting.AGENT);
+            [indicesInnerVars , numInnerVars] = self.getNumberControlledVars(ItemSetting.AGENT);
             
             % Row vector for lower and upper bounds
             lb = zeros(1, numInnerVars);
@@ -189,7 +189,7 @@ classdef Optimization
             for i=1:numInnerVars
                 k = indicesInnerVars(i);
                 
-                bounds = thisInputData(k).value_bounds;
+                bounds = self(k).value_bounds;
                 lb(i) = bounds(1);
                 ub(i) = bounds(2);
                 
@@ -199,12 +199,12 @@ classdef Optimization
                 end
             end
             
-            MaxIter = thisInputData.returnInputDataObject(ItemSetting.MAX_ITER).value;
+            MaxIter = self.returnInputDataObject(ItemSetting.MAX_ITER).value;
             
             options = gaoptimset('Generations', MaxIter);
             
             innerProblem = struct();
-            innerProblem.fitnessfcn = @(x) innerFitnessFunction(x, thisInputData);
+            innerProblem.fitnessfcn = @(x) innerFitnessFunction(x, self);
             innerProblem.nvars = numInnerVars;
             innerProblem.Aineq = [];
             innerProblem.Bineq = [];

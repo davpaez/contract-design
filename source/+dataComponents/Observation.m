@@ -16,7 +16,7 @@ classdef Observation < matlab.mixin.Copyable
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisObs = Observation(t, v)
+        function self = Observation(t, v)
         %{
         * 
         
@@ -25,8 +25,8 @@ classdef Observation < matlab.mixin.Copyable
             Output
                 
         %}
-            thisObs.time = t;
-            thisObs.value = v;
+            self.time = t;
+            self.value = v;
 
         end
         

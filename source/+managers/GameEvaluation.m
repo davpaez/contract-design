@@ -24,7 +24,7 @@ classdef GameEvaluation < handle
         %% Constructor
         
         
-        function thisGame = GameEvaluation(progSet)
+        function self = GameEvaluation(progSet)
         % It is the responsibility of this class to construct all objects
         % that are passed as argument to each realization constructor.
         % The reason is that these objects are the same for all realization
@@ -33,10 +33,10 @@ classdef GameEvaluation < handle
             import managers.ItemSetting
             import dataComponents.*
             
-            thisGame.programSettings = copy(progSet);
+            self.programSettings = copy(progSet);
             
             nrealiz = progSet.returnItemSetting(ItemSetting.NUM_REALIZ);
-            thisGame.numRealizations = nrealiz.value;
+            self.numRealizations = nrealiz.value;
 
         end
         
@@ -57,7 +57,7 @@ classdef GameEvaluation < handle
         % ----------------------------------------------------------------
         
 
-        function runGame(thisGame)
+        function runGame(self)
         %{
         
             Input
@@ -70,13 +70,13 @@ classdef GameEvaluation < handle
             import utils.*
             
             % Run num_realiz realizations of the game
-            r = cell(thisGame.numRealizations, 1);
-            n = thisGame.numRealizations;
+            r = cell(self.numRealizations, 1);
+            n = self.numRealizations;
             
             %parfor_progress(N);
             p = ProgressBar(n);
             
-            progSet = thisGame.programSettings;
+            progSet = self.programSettings;
             tic
             parfor i=1:n
                 r{i} = Realization(progSet);
@@ -88,7 +88,7 @@ classdef GameEvaluation < handle
             %parfor_progress(0);
             p.stop();
             
-            thisGame.realizations = r;
+            self.realizations = r;
             toc
         end
         
@@ -97,7 +97,7 @@ classdef GameEvaluation < handle
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
         
-        function data = report(thisGame)
+        function data = report(self)
         %{
         
             Input
@@ -106,15 +106,15 @@ classdef GameEvaluation < handle
                 
         %}
             
-            if length(thisGame.realizations) > 1
-                data = thisGame.reportDispersion();
+            if length(self.realizations) > 1
+                data = self.reportDispersion();
             else
-                data = thisGame.reportRealization();
+                data = self.reportRealization();
             end
         end
         
         
-        function data = reportRealization(thisGame)
+        function data = reportRealization(self)
         %{
         
             Input
@@ -122,11 +122,11 @@ classdef GameEvaluation < handle
             Output
                 
         %}
-            data = thisGame.realizations.report();
+            data = self.realizations.report();
         end
         
         
-        function data = reportDispersion(thisGame)
+        function data = reportDispersion(self)
         %{
         
             Input
@@ -134,12 +134,12 @@ classdef GameEvaluation < handle
             Output
                 
         %}
-            n = thisGame.numRealizations;
+            n = self.numRealizations;
             ua = zeros(n, 1);
             up = zeros(n, 1);
             
             for i = 1:n
-                [ua(i) up(i)] = thisGame.realizations{i}.utilityPlayers();
+                [ua(i) up(i)] = self.realizations{i}.utilityPlayers();
             end
             
             data = struct('ua', ua, ...

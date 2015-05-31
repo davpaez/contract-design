@@ -29,7 +29,7 @@ classdef Player < handle
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisPlayer = Player(problem)
+        function self = Player(problem)
         %{
         * 
         
@@ -42,19 +42,19 @@ classdef Player < handle
             import dataComponents.PayoffList
             import dataComponents.ObservationList
             
-            thisPlayer.problem = problem;
-            thisPlayer.eventList = EventList();
-            thisPlayer.observationList = ObservationList();
-            thisPlayer.payoffList = PayoffList(problem.discountRate);
+            self.problem = problem;
+            self.eventList = EventList();
+            self.observationList = ObservationList();
+            self.payoffList = PayoffList(problem.discountRate);
         end
         
         
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function setTime(thisPlayer, time)
+        function setTime(self, time)
         %{
-        * Set new time for thisPlayer and adds a PV snapshot
+        * Set new time for self and adds a PV snapshot
         
             Input
                 time: [class double] New value of time
@@ -62,13 +62,13 @@ classdef Player < handle
             Output
                 None
         %}
-            if time > thisPlayer.time
-                thisPlayer.time = time;    % Updates time
+            if time > self.time
+                self.time = time;    % Updates time
             end
         end
         
         
-        function receiveContract(thisPlayer, con)
+        function receiveContract(self, con)
         %{
         
             Input
@@ -76,11 +76,11 @@ classdef Player < handle
             Output
                 
         %}
-            thisPlayer.contract = con;
+            self.contract = con;
         end
         
         
-        function idObs = registerObservation(thisPlayer, time, obs)
+        function idObs = registerObservation(self, time, obs)
         %{
         * 
             Input
@@ -93,15 +93,15 @@ classdef Player < handle
             numObs = length(obs.value);
             idObs = zeros(1,numObs);
             for i=1:numObs
-                idObs(i) = thisPlayer.observationList.register(time, obs.value(i));
+                idObs(i) = self.observationList.register(time, obs.value(i));
             end
         end
         
         
-        function idPff = registerPayoff(thisPlayer, time, value, type)
+        function idPff = registerPayoff(self, time, value, type)
         %{
         * Append newPayoff to the payoff linked-list attribute of
-        thisPlayer
+        self
         
             Input
                 newPayoff: [class Payoff] New payoff object to be appended
@@ -111,19 +111,19 @@ classdef Player < handle
         
         %}
             
-            idPff = thisPlayer.payoffList.register(time, value, type);
+            idPff = self.payoffList.register(time, value, type);
         end
         
         
-        function registerEvent(thisPlayer, evt)
+        function registerEvent(self, evt)
         %{
         * Registers an Event object to the eventList attribute of
-        thisPlayer. After adding the event, the time of thisPlayer is updated
+        self. After adding the event, the time of self is updated
         to the time of the event just added.
         
             Input
                 oneEvent: [class Event] Event object to be added to the
-                eventList attribute of thisPlayer
+                eventList attribute of self
             
             Output
                 None
@@ -136,18 +136,18 @@ classdef Player < handle
             
             timeNewEvent = evt.time;
             
-            % Register observation in thisPlayer
+            % Register observation in self
             if ~isempty(evt.observation)
-                idObs = thisPlayer.registerObservation(timeNewEvent, evt.observation);
+                idObs = self.registerObservation(timeNewEvent, evt.observation);
             else
                 idObs = [];
             end
             
-            % Register transaction in thisPlayer
+            % Register transaction in self
             if ~isempty(evt.transaction)
-                [value, role] = evt.transaction.getPayoffValue(thisPlayer);
+                [value, role] = evt.transaction.getPayoffValue(self);
                 if ~isempty(role)
-                    idPff = thisPlayer.registerPayoff(timeNewEvent, value, evt.transaction.type);
+                    idPff = self.registerPayoff(timeNewEvent, value, evt.transaction.type);
                     evt.transaction.confirmExecutionBy(role);
                 else
                     idPff = [];
@@ -157,20 +157,20 @@ classdef Player < handle
             end
             
             % Register event
-            thisPlayer.eventList.register(timeNewEvent, evt.type, idObs, idPff);
+            self.eventList.register(timeNewEvent, evt.type, idObs, idPff);
             
 			% Clear submitted operation
-			if ~isempty(thisPlayer.submittedOperation) && thisPlayer.submittedOperation.sensitive
-				thisPlayer.clearSubmittedOperation();
+			if ~isempty(self.submittedOperation) && self.submittedOperation.sensitive
+				self.clearSubmittedOperation();
 			end
 			
 			% Set time of player to the time of the newEvent
-			thisPlayer.setTime(timeNewEvent);
+			self.setTime(timeNewEvent);
             
         end
         
         
-        function confirmExecutionSubmittedOperation(thisPlayer, operation)
+        function confirmExecutionSubmittedOperation(self, operation)
         %{
         * 
             Input
@@ -178,17 +178,17 @@ classdef Player < handle
             Output
                 
         %}
-            assert(~isempty(thisPlayer.submittedOperation), ...
+            assert(~isempty(self.submittedOperation), ...
                 'The attribute submitted operation should not be empty.')
             
-            assert(thisPlayer.submittedOperation.eq(operation), ...
+            assert(self.submittedOperation.eq(operation), ...
                 'The operation executed does not coincide with the operation submitted.')
             
-            thisPlayer.clearSubmittedOperation();
+            self.clearSubmittedOperation();
         end
         
 
-        function setSubmittedOperation(thisPlayer, operation)
+        function setSubmittedOperation(self, operation)
         %{
         * 
             Input
@@ -196,11 +196,11 @@ classdef Player < handle
             Output
                 
         %}
-            thisPlayer.submittedOperation = operation;
+            self.submittedOperation = operation;
         end
         
         
-        function clearSubmittedOperation(thisPlayer)
+        function clearSubmittedOperation(self)
         %{
         * 
             Input
@@ -208,14 +208,14 @@ classdef Player < handle
             Output
                 
         %}
-            thisPlayer.submittedOperation = [];
+            self.submittedOperation = [];
         end
         
         
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function u = getUtility(thisPlayer)
+        function u = getUtility(self)
         %{
         * 
             Input
@@ -223,11 +223,11 @@ classdef Player < handle
             Output
                 
         %}
-            u = thisPlayer.utilityFunction(thisPlayer);
+            u = self.utilityFunction(self);
         end
         
         
-        function answer = isPrincipal(thisPlayer)
+        function answer = isPrincipal(self)
         %{
         * 
             Input
@@ -237,11 +237,11 @@ classdef Player < handle
         %}
             import entities.Principal
             
-            answer = isa(thisPlayer, 'Principal');
+            answer = isa(self, 'Principal');
         end
         
         
-        function answer = isAgent(thisPlayer)
+        function answer = isAgent(self)
         %{
         * 
             Input
@@ -251,7 +251,7 @@ classdef Player < handle
         %}
             import entities.Agent
             
-            answer = isa(thisPlayer, 'Agent');
+            answer = isa(self, 'Agent');
         end
         
         

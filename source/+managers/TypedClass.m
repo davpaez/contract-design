@@ -7,12 +7,12 @@ classdef TypedClass < handle
     methods
         
         
-        function thisTypedClass = TypedClass(list)
-            thisTypedClass.listTypes = list;
+        function self = TypedClass(list)
+            self.listTypes = list;
         end
         
         
-        function answer = isValidType(thisTypedClass, str)
+        function answer = isValidType(self, str)
         %{
         * 
         
@@ -22,7 +22,7 @@ classdef TypedClass < handle
                 
         %}
             
-            answer = any(strcmp(thisTypedClass.listTypes, str));
+            answer = any(strcmp(self.listTypes, str));
             
         end
         

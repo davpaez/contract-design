@@ -75,7 +75,7 @@ classdef Agent < entities.Player
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisAgent = Agent(progSet, problem)
+        function self = Agent(progSet, problem)
         %{
         * Constructor method of Agent class
         
@@ -84,29 +84,29 @@ classdef Agent < entities.Player
                 specified properties of the current contract
             
             Output
-                thisAgent: [class Agent] Agent object
+                self: [class Agent] Agent object
         %}
             
             import managers.*
             
             % Creates instance of object of the superclass Player
-            thisAgent@entities.Player(problem);
+            self@entities.Player(problem);
             
             % Assigns voluntary maintenance action
             faculty = progSet.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
-            thisAgent.volMaintStrategy = faculty.getSelectedStrategy();
+            self.volMaintStrategy = faculty.getSelectedStrategy();
             
             % Assigns mandatory maintenance action
             faculty = progSet.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
-            thisAgent.mandMaintStrategy = faculty.getSelectedStrategy();
+            self.mandMaintStrategy = faculty.getSelectedStrategy();
             
             % Maintenance cost function
             fnc = progSet.returnItemSetting(ItemSetting.MAINT_COST_FNC);
-            thisAgent.maintCostFunction = fnc.equation;
+            self.maintCostFunction = fnc.equation;
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.AGENT_UTIL_FNC);
-            thisAgent.utilityFunction = fnc.equation;
+            self.utilityFunction = fnc.equation;
             
         end
         
@@ -114,7 +114,7 @@ classdef Agent < entities.Player
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function operation = submitOperation(thisAgent, currentPerf, ...
+        function operation = submitOperation(self, currentPerf, ...
                 solvePerformanceForTime, solveTimeForPerformance, ...
                 perfRange, infra)
         %{
@@ -135,18 +135,18 @@ classdef Agent < entities.Player
             import managers.Strategy
             import managers.Information
             
-            thisAgent.solvePerformanceForTime = solvePerformanceForTime;
-            thisAgent.solveTimeForPerformance = solveTimeForPerformance;
+            self.solvePerformanceForTime = solvePerformanceForTime;
+            self.solveTimeForPerformance = solveTimeForPerformance;
             
-            msg = Message(thisAgent);
+            msg = Message(self);
             msg.setTypeRequestedInfo(Information.TIME_VOL_MAINT, ...
                                      Information.PERF_VOL_MAINT);
             
             msg.setExtraInfo(Message.MAX_PERF, infra.maxPerf)
             
-            thisAgent.volMaintStrategy.decide(msg);
+            self.volMaintStrategy.decide(msg);
             
-            isSens = thisAgent.volMaintStrategy.isSensitive();
+            isSens = self.volMaintStrategy.isSensitive();
             
             timeMaint = msg.getOutput(Information.TIME_VOL_MAINT);
             perfGoal = msg.getOutput(Information.PERF_VOL_MAINT);
@@ -154,7 +154,7 @@ classdef Agent < entities.Player
             operation = Operation(timeMaint, Operation.VOL_MAINT, isSens, perfGoal);
             
             % Stores Operation object
-            thisAgent.setSubmittedOperation(operation);
+            self.setSubmittedOperation(operation);
             
         end
         
@@ -162,7 +162,7 @@ classdef Agent < entities.Player
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function utility = calculateUtility(thisAgent)
+        function utility = calculateUtility(self)
         %{
         
             Input
@@ -171,7 +171,7 @@ classdef Agent < entities.Player
                 
         %}
             
-           utility = thisAgent.getPresentValue();
+           utility = self.getPresentValue();
            
         end
         

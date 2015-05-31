@@ -30,7 +30,7 @@ classdef Transaction < handle
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisTran = Transaction(t, v, tp)
+        function self = Transaction(t, v, tp)
         %{
         
             Input
@@ -75,18 +75,18 @@ classdef Transaction < handle
                     v = 0;
             end
             
-            thisTran.time = t;
-            thisTran.value = v;
-            thisTran.type = tp;
-            thisTran.emitter = em;
-            thisTran.receiver = r;
+            self.time = t;
+            self.value = v;
+            self.type = tp;
+            self.emitter = em;
+            self.receiver = r;
             
             if isempty(em)
-                thisTran.completedEmitterSide();
+                self.completedEmitterSide();
             end
             
             if isempty(r)
-                thisTran.completedReceiverSide();
+                self.completedReceiverSide();
             end
         end
         
@@ -94,7 +94,7 @@ classdef Transaction < handle
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
         
-        function ve = getValueEmitter(thisTran)
+        function ve = getValueEmitter(self)
         %{
         * 
         
@@ -103,11 +103,11 @@ classdef Transaction < handle
             Output
                 
         %}
-            ve = - thisTran.value;
+            ve = - self.value;
         end
         
         
-        function vr = getValueReceiver(thisTran)
+        function vr = getValueReceiver(self)
         %{
         * 
         
@@ -116,11 +116,11 @@ classdef Transaction < handle
             Output
                 
         %}
-            vr = thisTran.value;
+            vr = self.value;
         end
         
         
-        function [em, r] = returnEmitterReceiver(thisTran, thePrincipal, theAgent)
+        function [em, r] = returnEmitterReceiver(self, thePrincipal, theAgent)
         %{
         * 
         
@@ -132,8 +132,8 @@ classdef Transaction < handle
             
             import managers.Information
             
-            if ~isempty(thisTran.emitter)
-                switch thisTran.emitter
+            if ~isempty(self.emitter)
+                switch self.emitter
                     case Information.PRINCIPAL
                         em = thePrincipal;
                     case Information.AGENT
@@ -144,8 +144,8 @@ classdef Transaction < handle
             end
             
             
-            if ~isempty(thisTran.receiver)
-                switch thisTran.receiver
+            if ~isempty(self.receiver)
+                switch self.receiver
                     case Information.PRINCIPAL
                         r = thePrincipal;
                     case Information.AGENT
@@ -157,7 +157,7 @@ classdef Transaction < handle
         end
         
         
-        function [value, role] = getPayoffValue(thisTran, thePlayer)
+        function [value, role] = getPayoffValue(self, thePlayer)
         %{
         * 
         
@@ -168,12 +168,12 @@ classdef Transaction < handle
         %}
             
             switch thePlayer.NAME
-                case thisTran.emitter
-                    value = thisTran.getValueEmitter();
-                    role = thisTran.EMITTER;
-                case thisTran.receiver
-                    value = thisTran.getValueReceiver();
-                    role = thisTran.RECEIVER;
+                case self.emitter
+                    value = self.getValueEmitter();
+                    role = self.EMITTER;
+                case self.receiver
+                    value = self.getValueReceiver();
+                    role = self.RECEIVER;
                 otherwise
                     value = 0;
                     role = [];
@@ -184,7 +184,7 @@ classdef Transaction < handle
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function completedEmitterSide(thisTran)
+        function completedEmitterSide(self)
         %{
         * 
         
@@ -194,11 +194,11 @@ classdef Transaction < handle
                 
         %}
             
-            thisTran.confirmationEmitter = true;
+            self.confirmationEmitter = true;
         end
         
         
-        function completedReceiverSide(thisTran)
+        function completedReceiverSide(self)
         %{
         * 
         
@@ -208,11 +208,11 @@ classdef Transaction < handle
                 
         %}
             
-            thisTran.confirmationReceiver = true;
+            self.confirmationReceiver = true;
         end
         
         
-        function confirmExecutionBy(thisTran, role)
+        function confirmExecutionBy(self, role)
         %{
         * 
         
@@ -223,10 +223,10 @@ classdef Transaction < handle
         %}
             
             switch role
-                case thisTran.EMITTER
-                    thisTran.completedEmitterSide();
-                case thisTran.RECEIVER
-                    thisTran.completedReceiverSide;
+                case self.EMITTER
+                    self.completedEmitterSide();
+                case self.RECEIVER
+                    self.completedReceiverSide;
                 otherwise
                     warning('The role does not coincide with neither emitter nor reciever')
             end
@@ -236,7 +236,7 @@ classdef Transaction < handle
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function answer = isExecuted(thisTran)
+        function answer = isExecuted(self)
         %{
         * 
         
@@ -246,7 +246,7 @@ classdef Transaction < handle
                 
         %}
             
-            answer = thisTran.confirmationEmitter && thisTran.confirmationReceiver;
+            answer = self.confirmationEmitter && self.confirmationReceiver;
         end
         
         

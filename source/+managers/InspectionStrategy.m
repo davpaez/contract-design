@@ -16,21 +16,21 @@ classdef InspectionStrategy < managers.Strategy
     methods
         %% Constructor
         
-        function thisStrategy = InspectionStrategy()
+        function self = InspectionStrategy()
             
-            thisStrategy@managers.Strategy();
+            self@managers.Strategy();
             
             import managers.*
             import behavior.principal.*
             
 			% Set type action
-			thisStrategy.typeAction = Action.INSPECTION;
+			self.typeAction = Action.INSPECTION;
             
             % One decision variable: Time of inspection
-            thisStrategy.setDecisionVars_Number(1);
+            self.setDecisionVars_Number(1);
             
             % Nature of decision vars
-            thisStrategy.setDecisionVars_TypeInfo({ Information.TIME_INSPECTION });
+            self.setDecisionVars_TypeInfo({ Information.TIME_INSPECTION });
             
         end
         

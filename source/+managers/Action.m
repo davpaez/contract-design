@@ -85,7 +85,7 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisAction = Action(type, nameExecutor)
+        function self = Action(type, nameExecutor)
         %{
         
             Input
@@ -102,11 +102,11 @@ classdef Action < managers.ItemSetting & managers.TypedClass
                 Action.SHOCK, ...
                 Action.PENALTY};
             
-            thisAction@managers.TypedClass(listTypes);
+            self@managers.TypedClass(listTypes);
             
-            thisAction@managers.ItemSetting();
+            self@managers.ItemSetting();
             
-            assert(thisAction.isValidType(type), ...
+            assert(self.isValidType(type), ...
                 'The type entered as argument is not valid');
             
             assert(Action.isValidExecutor(nameExecutor), ...
@@ -114,10 +114,10 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             
             
             
-            thisAction.actionType = type;
-            thisAction.nameExecutor = nameExecutor;
+            self.actionType = type;
+            self.nameExecutor = nameExecutor;
             
-            thisAction.proactive = thisAction.isProactive();
+            self.proactive = self.isProactive();
             
         end
         
@@ -125,7 +125,7 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         %% ::::::::::::::::::::    Getter methods    ::::::::::::::::::::::
         % *****************************************************************
         
-        function answer = get.determinedAction(thisAction)
+        function answer = get.determinedAction(self)
         %{
         
             Input
@@ -137,9 +137,9 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             answer = false;
             
             % Check that a selected strategy exists
-            if ~isempty(thisAction.strategy)
+            if ~isempty(self.strategy)
                 % Check that the strategy selected is determined
-                if thisAction.strategy.determinedStrategy
+                if self.strategy.determinedStrategy
                     answer = true;
                 end
             end
@@ -149,7 +149,7 @@ classdef Action < managers.ItemSetting & managers.TypedClass
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
         
-        function ca = returnCopy(thisAction)
+        function ca = returnCopy(self)
         %{
         
             Input
@@ -157,11 +157,11 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            ca = copy(thisAction);
+            ca = copy(self);
         end
         
         
-        function index = getIndexSelectedStrategy(thisAction)
+        function index = getIndexSelectedStrategy(self)
         %{
         
             Input
@@ -169,14 +169,14 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            index = thisAction.indexSelectedStrategy;
+            index = self.indexSelectedStrategy;
         end
         
         
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function selectStrategy(thisAction, index)
+        function selectStrategy(self, index)
         %{
         
             Input
@@ -184,16 +184,16 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            stratArray = returnStrategyArray(thisAction.actionType);
+            stratArray = returnStrategyArray(self.actionType);
             
-            thisAction.strats_Number = length(stratArray);
+            self.strats_Number = length(stratArray);
             
-            thisAction.strategy = returnStrategyByIndex(stratArray, index);
-            thisAction.indexSelectedStrategy = index;
+            self.strategy = returnStrategyByIndex(stratArray, index);
+            self.indexSelectedStrategy = index;
         end
         
         
-        function setParamsValue_Random(thisAction)
+        function setParamsValue_Random(self)
         %{
         
             Input
@@ -201,15 +201,15 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            assert(~isempty(thisAction.indexSelectedStrategy), ...
-                ['No strategy index has been specified for this action, identified as ',thisAction.identifier])
+            assert(~isempty(self.indexSelectedStrategy), ...
+                ['No strategy index has been specified for this action, identified as ',self.identifier])
             
-            thisAction.strategy.setParamsValue_Random();
+            self.strategy.setParamsValue_Random();
             
         end
         
         
-        function setParamsValue_UserInput(thisAction)
+        function setParamsValue_UserInput(self)
         %{
         
             Input
@@ -217,17 +217,17 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            assert(~isempty(thisAction.indexSelectedStrategy), ...
-                ['No strategy index has been specified for this action, identified as ',thisAction.identifier])
+            assert(~isempty(self.indexSelectedStrategy), ...
+                ['No strategy index has been specified for this action, identified as ',self.identifier])
             
-            thisAction.strategy.setParamsValue_UserInput();
+            self.strategy.setParamsValue_UserInput();
         end
         
         
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function decide(thisAction, theMsg)
+        function decide(self, theMsg)
         %{
         
             Input
@@ -235,12 +235,12 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            assert(thisAction.determinedAction, ...
+            assert(self.determinedAction, ...
                 'The strategy must be determined before it can be executed');
             
-            thisAction.strategy.decide(theMsg);
+            self.strategy.decide(theMsg);
             
-            if thisAction.isProactive()
+            if self.isProactive()
                 theExecutor = theMsg.getExecutor();
                 currentTime = theExecutor.time;
                 containsTime = ~cellfun(@isempty,strfind(theMsg.typeRequestedInfo,'TIME'));
@@ -255,7 +255,7 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         end
         
         
-        function checkValidity(thisAction)
+        function checkValidity(self)
         %{
         
             Input
@@ -264,12 +264,12 @@ classdef Action < managers.ItemSetting & managers.TypedClass
                 
         %}
         %TODO
-            assert(thisAction.determined, ...
+            assert(self.determined, ...
                             'This itemSetting must be determined')
         end
         
         
-        function answer = isProactive(thisAction)
+        function answer = isProactive(self)
         %{
         
             Input
@@ -277,13 +277,13 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            if ~isempty(thisAction.proactive)
-                answer = thisAction.proactive;
+            if ~isempty(self.proactive)
+                answer = self.proactive;
             else
-                proactiveTypes = {  thisAction.INSPECTION, ...
-                                    thisAction.VOL_MAINT, ...
-                                    thisAction.SHOCK};
-                if ismember(thisAction.actionType, proactiveTypes)
+                proactiveTypes = {  self.INSPECTION, ...
+                                    self.VOL_MAINT, ...
+                                    self.SHOCK};
+                if ismember(self.actionType, proactiveTypes)
                     answer = true;
                 else
                     answer = false;
@@ -292,7 +292,7 @@ classdef Action < managers.ItemSetting & managers.TypedClass
         end
         
         
-        function answer = isSensitive(thisAction)
+        function answer = isSensitive(self)
         %{
         
             Input
@@ -300,7 +300,7 @@ classdef Action < managers.ItemSetting & managers.TypedClass
             Output
                 
         %}
-            answer = thisAction.strategy.isSensitive();
+            answer = self.strategy.isSensitive();
         end
         
         

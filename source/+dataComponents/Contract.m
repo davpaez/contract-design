@@ -58,7 +58,7 @@ classdef Contract < matlab.mixin.Copyable
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
         
-        function obs = getInitialPerfObs(thisContract)
+        function obs = getInitialPerfObs(self)
         %{
         * 
         
@@ -67,7 +67,7 @@ classdef Contract < matlab.mixin.Copyable
             Output
                 
         %}
-            initPerf = thisContract.initialPerf;
+            initPerf = self.initialPerf;
             
             obs = struct();
             obs.value = initPerf;
@@ -114,7 +114,7 @@ classdef Contract < matlab.mixin.Copyable
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function answer = isViolation(thisContract, currentPerf)
+        function answer = isViolation(self, currentPerf)
         %{
         * 
         
@@ -123,7 +123,7 @@ classdef Contract < matlab.mixin.Copyable
             Output
                 
         %}
-            if currentPerf < thisContract.getThresholdPerf()
+            if currentPerf < self.getThresholdPerf()
                 answer = true;
             else
                 answer = false;
@@ -131,7 +131,7 @@ classdef Contract < matlab.mixin.Copyable
         end
         
         
-        function [time, value] = getNextPayment(thisContract, currentTime)
+        function [time, value] = getNextPayment(self, currentTime)
         %{
         * 
         
@@ -140,11 +140,11 @@ classdef Contract < matlab.mixin.Copyable
             Output
                 
         %}
-            index = find(thisContract.paymentSchedule >= currentTime, 1, 'first');
+            index = find(self.paymentSchedule >= currentTime, 1, 'first');
             
             if ~isempty(index)
-                time = thisContract.paymentSchedule(index, 1);
-                value = thisContract.paymentSchedule(index, 2);
+                time = self.paymentSchedule(index, 1);
+                value = self.paymentSchedule(index, 2);
             end
             
         end

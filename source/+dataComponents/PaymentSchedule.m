@@ -10,7 +10,7 @@ classdef PaymentSchedule < handle
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisPaymentSch = PaymentSchedule()
+        function self = PaymentSchedule()
         %{
         *   
             Input
@@ -18,7 +18,7 @@ classdef PaymentSchedule < handle
             Output
                 
         %}
-            thisPaymentSch.listTransactions = cell(0,1);
+            self.listTransactions = cell(0,1);
             
         end
         

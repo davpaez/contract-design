@@ -88,7 +88,7 @@ classdef Faculty < managers.ItemSetting
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisFaculty = Faculty(type)
+        function self = Faculty(type)
         %{
         
             Input
@@ -98,30 +98,30 @@ classdef Faculty < managers.ItemSetting
         %}
             
             switch type
-                case thisFaculty.CONTRACT_OFFER
-                    thisFaculty.setFacultyContractOffer();
+                case self.CONTRACT_OFFER
+                    self.setFacultyContractOffer();
                     
-                case thisFaculty.INSPECTION
-                    thisFaculty.setFacultyInspection();
+                case self.INSPECTION
+                    self.setFacultyInspection();
                     
-                case thisFaculty.VOL_MAINT
-                    thisFaculty.setFacultyVolMaint();
+                case self.VOL_MAINT
+                    self.setFacultyVolMaint();
                     
-                case thisFaculty.MAND_MAINT
-                    thisFaculty.setFacultyMandMaint();
+                case self.MAND_MAINT
+                    self.setFacultyMandMaint();
                     
-                case thisFaculty.SHOCK
-                    thisFaculty.setFacultyShock();
+                case self.SHOCK
+                    self.setFacultyShock();
                     
-                case thisFaculty.PENALTY
-                    thisFaculty.setFacultyPenalty();
+                case self.PENALTY
+                    self.setFacultyPenalty();
                     
                 otherwise
                     error('Type is not valid')
             end
             
-            thisFaculty.getDecisionRuleAndCustomStratList();
-            thisFaculty.createStrategies();
+            self.getDecisionRuleAndCustomStratList();
+            self.createStrategies();
             
         end
         
@@ -129,7 +129,7 @@ classdef Faculty < managers.ItemSetting
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function getDecisionRuleAndCustomStratList(thisFaculty)
+        function getDecisionRuleAndCustomStratList(self)
         %{
         
             Input
@@ -142,7 +142,7 @@ classdef Faculty < managers.ItemSetting
             % and create a list containing one object for each of these
             % classes.
             
-            spl = strsplit(thisFaculty.packageAddress,'.');
+            spl = strsplit(self.packageAddress,'.');
             
             mainFolder = spl{1};
             playerFolder = spl{2};
@@ -162,21 +162,21 @@ classdef Faculty < managers.ItemSetting
             for i = 1:numRules
                 ruleName = queryRules(i).name;
                 className = strrep(ruleName, '.m', '');
-                listRules{i} = feval([thisFaculty.packageAddress,'.',className]);
+                listRules{i} = feval([self.packageAddress,'.',className]);
             end
             
             for i = 1:numStrats
                 stratName = queryStrats(i).name;
                 className = strrep(stratName, '.m', '');
-                listStrats{i} = feval([thisFaculty.packageAddress,'.',className], thisFaculty);
+                listStrats{i} = feval([self.packageAddress,'.',className], self);
             end
             
-            thisFaculty.decisionRuleList = listRules;
-            thisFaculty.customStratList = listStrats;
+            self.decisionRuleList = listRules;
+            self.customStratList = listStrats;
         end
         
         
-        function strategies = createStrategies(thisFaculty)
+        function strategies = createStrategies(self)
         %{
         
             Input
@@ -188,26 +188,26 @@ classdef Faculty < managers.ItemSetting
             import managers.Strategy
             
             coverageMatrix = getCoverageMatrix(...
-                thisFaculty.decisionVars, ...
-                thisFaculty.decisionRuleList);
+                self.decisionVars, ...
+                self.decisionRuleList);
             
             % Returns cell with rule arrays
             vectors = getCombinations(coverageMatrix);
-            ruleCombinations = thisFaculty.getRuleCombinations(vectors);
+            ruleCombinations = self.getRuleCombinations(vectors);
             
             n = length(ruleCombinations);
             strategies = cell(n,1);
             for i=1:n
-                s = Strategy(['auto_',i], thisFaculty.decisionVars);
+                s = Strategy(['auto_',i], self.decisionVars);
                 s.setDecisionRuleList(ruleCombinations{i});
                 strategies{i} = s;
             end
             
-            thisFaculty.autoStratList = strategies;
+            self.autoStratList = strategies;
         end
         
         
-        function combinationArray = getRuleCombinations(thisFaculty, vectors)
+        function combinationArray = getRuleCombinations(self, vectors)
         %{
         
             Input
@@ -225,7 +225,7 @@ classdef Faculty < managers.ItemSetting
 
                 for j=1:numDecRules
                     if v(j) == true
-                        ruleArray{end+1,1} = copy(thisFaculty.decisionRuleList{j});
+                        ruleArray{end+1,1} = copy(self.decisionRuleList{j});
                     end
                 end
 
@@ -234,7 +234,7 @@ classdef Faculty < managers.ItemSetting
         end
         
         
-        function setFacultyContractOffer(thisFaculty)
+        function setFacultyContractOffer(self)
         %{
         
             Input
@@ -245,26 +245,26 @@ classdef Faculty < managers.ItemSetting
             
             import managers.Information
             
-            assert(thisFaculty.lock == false, ...
+            assert(self.lock == false, ...
             'The lock is on!')
             
 			% Set idFaculty
-			thisFaculty.idFaculty = thisFaculty.CONTRACT_OFFER;
+			self.idFaculty = self.CONTRACT_OFFER;
             
             % Set folder behavior
-            thisFaculty.packageAddress = thisFaculty.folder_contractOffer;
+            self.packageAddress = self.folder_contractOffer;
             
             % Set executor
-            thisFaculty.nameExecutor = Information.PRINCIPAL;
+            self.nameExecutor = Information.PRINCIPAL;
             
             % Nature of decision vars
-            thisFaculty.decisionVars = thisFaculty.getInfoDecVars(thisFaculty.idFaculty);
+            self.decisionVars = self.getInfoDecVars(self.idFaculty);
             
-            thisFaculty.lock = true;
+            self.lock = true;
         end
         
         
-        function setFacultyInspection(thisFaculty)
+        function setFacultyInspection(self)
         %{
         
             Input
@@ -275,26 +275,26 @@ classdef Faculty < managers.ItemSetting
             
             import managers.Information
             
-            assert(thisFaculty.lock == false, ...
+            assert(self.lock == false, ...
             'The lock is on!')
             
 			% Set idFaculty
-			thisFaculty.idFaculty = thisFaculty.INSPECTION;
+			self.idFaculty = self.INSPECTION;
             
             % Set folder behavior
-            thisFaculty.packageAddress = thisFaculty.folder_inspection;
+            self.packageAddress = self.folder_inspection;
             
             % Set executor
-            thisFaculty.nameExecutor = Information.PRINCIPAL;
+            self.nameExecutor = Information.PRINCIPAL;
             
             % Nature of decision vars
-            thisFaculty.decisionVars = thisFaculty.getInfoDecVars(thisFaculty.idFaculty);
+            self.decisionVars = self.getInfoDecVars(self.idFaculty);
             
-            thisFaculty.lock = true;
+            self.lock = true;
         end
         
         
-        function setFacultyVolMaint(thisFaculty)
+        function setFacultyVolMaint(self)
         %{
         
             Input
@@ -305,26 +305,26 @@ classdef Faculty < managers.ItemSetting
             
             import managers.Information
             
-            assert(thisFaculty.lock == false, ...
+            assert(self.lock == false, ...
             'The lock is on!')
             
 			% Set idFaculty
-			thisFaculty.idFaculty = thisFaculty.VOL_MAINT;
+			self.idFaculty = self.VOL_MAINT;
             
             % Set folder behavior
-            thisFaculty.packageAddress = thisFaculty.folder_volMaint;
+            self.packageAddress = self.folder_volMaint;
             
             % Set executor
-            thisFaculty.nameExecutor = Information.AGENT;
+            self.nameExecutor = Information.AGENT;
             
             % Nature of decision vars
-            thisFaculty.decisionVars = thisFaculty.getInfoDecVars(thisFaculty.idFaculty);
+            self.decisionVars = self.getInfoDecVars(self.idFaculty);
             
-            thisFaculty.lock = true;
+            self.lock = true;
         end
         
         
-        function setFacultyMandMaint(thisFaculty)
+        function setFacultyMandMaint(self)
         %{
         
             Input
@@ -335,26 +335,26 @@ classdef Faculty < managers.ItemSetting
             
             import managers.Information
             
-            assert(thisFaculty.lock == false, ...
+            assert(self.lock == false, ...
             'The lock is on!')
         
 			% Set idFaculty
-			thisFaculty.idFaculty = thisFaculty.MAND_MAINT;
+			self.idFaculty = self.MAND_MAINT;
             
             % Set folder behavior
-            thisFaculty.packageAddress = thisFaculty.folder_mandMaint;
+            self.packageAddress = self.folder_mandMaint;
             
             % Set executor
-            thisFaculty.nameExecutor = Information.AGENT;
+            self.nameExecutor = Information.AGENT;
             
             % Nature of decision vars
-            thisFaculty.decisionVars = thisFaculty.getInfoDecVars(thisFaculty.idFaculty);
+            self.decisionVars = self.getInfoDecVars(self.idFaculty);
             
-            thisFaculty.lock = true;
+            self.lock = true;
         end
         
         
-        function setFacultyShock(thisFaculty)
+        function setFacultyShock(self)
         %{
         
             Input
@@ -365,26 +365,26 @@ classdef Faculty < managers.ItemSetting
             
             import managers.Information
             
-            assert(thisFaculty.lock == false, ...
+            assert(self.lock == false, ...
             'The lock is on!')
             
 			% Set idFaculty
-			thisFaculty.idFaculty = thisFaculty.SHOCK;
+			self.idFaculty = self.SHOCK;
             
             % Set folder behavior
-            thisFaculty.packageAddress = thisFaculty.folder_shock;
+            self.packageAddress = self.folder_shock;
             
             % Set executor
-            thisFaculty.nameExecutor = Information.NATURE;
+            self.nameExecutor = Information.NATURE;
             
             % Nature of decision vars
-            thisFaculty.decisionVars = thisFaculty.getInfoDecVars(thisFaculty.idFaculty);
+            self.decisionVars = self.getInfoDecVars(self.idFaculty);
             
-            thisFaculty.lock = true;
+            self.lock = true;
         end
         
         
-        function setFacultyPenalty(thisFaculty)
+        function setFacultyPenalty(self)
         %{
         
             Input
@@ -395,26 +395,26 @@ classdef Faculty < managers.ItemSetting
             
             import managers.Information
             
-            assert(thisFaculty.lock == false, ...
+            assert(self.lock == false, ...
             'The lock is on!')
             
 			% Set idFaculty
-			thisFaculty.idFaculty = thisFaculty.PENALTY;
+			self.idFaculty = self.PENALTY;
             
             % Set folder behavior
-            thisFaculty.packageAddress = thisFaculty.folder_penalty;
+            self.packageAddress = self.folder_penalty;
             
             % Set executor
-            thisFaculty.nameExecutor = Information.COURT;
+            self.nameExecutor = Information.COURT;
             
             % Nature of decision vars
-            thisFaculty.decisionVars = thisFaculty.getInfoDecVars(thisFaculty.idFaculty);
+            self.decisionVars = self.getInfoDecVars(self.idFaculty);
             
-            thisFaculty.lock = true;
+            self.lock = true;
         end
         
         
-        function selectStrategy(thisFaculty, idStrat)
+        function selectStrategy(self, idStrat)
         %{
         * Selects a strategy object
             
@@ -426,26 +426,26 @@ classdef Faculty < managers.ItemSetting
             
             if nargin < 2
                 % When no id is provided
-                if ~isempty(thisFaculty.customStratList)
+                if ~isempty(self.customStratList)
                     % Selects random object from custom strategy list
-                    num = length(thisFaculty.customStratList);
+                    num = length(self.customStratList);
                     randomIndex = randi(num);
-                    thisFaculty.selectedStrategy = thisFaculty.customStratList{randomIndex};
+                    self.selectedStrategy = self.customStratList{randomIndex};
                 else
                     % Selects random object from automatic strategy list
-                    num = length(thisFaculty.autoStratList);
+                    num = length(self.autoStratList);
                     randomIndex = randi(num);
-                    thisFaculty.selectedStrategy = thisFaculty.autoStratList{randomIndex};
+                    self.selectedStrategy = self.autoStratList{randomIndex};
                 end
             else
                 % When id is provided: Selects from custom strategy list
-                strat = returnStrategyByIndex(thisFaculty.customStratList, idStrat);
-                thisFaculty.selectedStrategy = strat;
+                strat = returnStrategyByIndex(self.customStratList, idStrat);
+                self.selectedStrategy = strat;
             end
         end
         
         
-        function strat = getSelectedStrategy(thisFaculty)
+        function strat = getSelectedStrategy(self)
         %{
         * Retuns copy of selected strategy
             
@@ -455,7 +455,7 @@ classdef Faculty < managers.ItemSetting
                 
         %}
             
-            strat = copy(thisFaculty.selectedStrategy);
+            strat = copy(self.selectedStrategy);
             
         end
         

@@ -71,20 +71,20 @@ classdef Infrastructure < matlab.mixin.Copyable
         %% ::::::::::::::::::::    Getter methods    ::::::::::::::::::::::
         % *****************************************************************
         
-        function p = get.performance(thisInfrastructure)
-            p = thisInfrastructure.history.getCurrentValue();   % Last value of history
+        function p = get.performance(self)
+            p = self.history.getCurrentValue();   % Last value of history
         end
         
         
-        function t = get.time(thisInfrastructure)
-            t = thisInfrastructure.history.getCurrentTime();    % Last value of time
+        function t = get.time(self)
+            t = self.history.getCurrentTime();    % Last value of time
         end
         
         
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
 
-        function performance = getPerformance(thisInfrastructure)
+        function performance = getPerformance(self)
         %{
         
             Input
@@ -92,11 +92,11 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-            performance = thisInfrastructure.performance;
+            performance = self.performance;
         end
         
         
-        function obs = getObservation(thisInfra)
+        function obs = getObservation(self)
         %{
         
             Input
@@ -107,14 +107,14 @@ classdef Infrastructure < matlab.mixin.Copyable
             
             import dataComponents.Observation
             
-            obs = Observation(thisInfra.time, thisInfra.performance);
+            obs = Observation(self.time, self.performance);
         end
         
         
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function setTime(thisInfra, newTime)
+        function setTime(self, newTime)
         %{
         * This method must be called BEFORE a jump action is applied!
         
@@ -123,29 +123,29 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-            if newTime > thisInfra.time
-                currentTime =  thisInfra.time;
-                currentPerf = thisInfra.performance;
+            if newTime > self.time
+                currentTime =  self.time;
+                currentPerf = self.performance;
                 
                 deltaTime = newTime - currentTime;
-                f = (deltaTime/thisInfra.TIMESTEP);
+                f = (deltaTime/self.TIMESTEP);
                 n = max([3,floor(f)]);
                 
-                [t,v] = ode45(thisInfra.detRate, linspace(currentTime, newTime, n), currentPerf);
+                [t,v] = ode45(self.detRate, linspace(currentTime, newTime, n), currentPerf);
                 
                 % Truncate performance values lower than null perf
-                v(v<thisInfra.nullPerf) = thisInfra.nullPerf;
+                v(v<self.nullPerf) = self.nullPerf;
                 
                 n = length(t);
                 
                 for i=2:n
-                    thisInfra.history.register(t(i), v(i));
+                    self.history.register(t(i), v(i));
                 end
             end
         end
         
         
-        function evolve(thisInfra, t, v)
+        function evolve(self, t, v)
         %{
         * 
             
@@ -157,12 +157,12 @@ classdef Infrastructure < matlab.mixin.Copyable
             n = length(t);
             
             for i = 2:n
-                thisInfra.history.register(t(i), v(i));
+                self.history.register(t(i), v(i));
             end
         end
         
         
-        function registerObservation(thisInfrastructure, time, perf)
+        function registerObservation(self, time, perf)
         %{
         *
         
@@ -171,15 +171,15 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-            %thisInfrastructure.setTime(time);
-            thisInfrastructure.history.register(time, perf);
+            %self.setTime(time);
+            self.history.register(time, perf);
         end
         
         
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function perf = solvePerformanceForTime(thisInfra, time)
+        function perf = solvePerformanceForTime(self, time)
         %{
         
             Input
@@ -194,16 +194,16 @@ classdef Infrastructure < matlab.mixin.Copyable
             l = length(time);
             assert(l==1, 'The time parameter must be a scalar')
             
-            currentTime = thisInfra.time;
-            currentPerf = thisInfra.performance;
+            currentTime = self.time;
+            currentPerf = self.performance;
             
             if time > currentTime
-                [t,v] = ode45(thisInfra.detRate, [currentTime, time], currentPerf);
+                [t,v] = ode45(self.detRate, [currentTime, time], currentPerf);
                 perf = v(end);
                 
                 % Truncate performance values lower than null perf
-                if perf < thisInfra.nullPerf
-                    perf = thisInfra.nullPerf;
+                if perf < self.nullPerf
+                    perf = self.nullPerf;
                 end
                 
             elseif time == currentTime
@@ -215,7 +215,7 @@ classdef Infrastructure < matlab.mixin.Copyable
         end
         
         
-        function time = solveTimeForPerformance(thisInfrastructure, performance)
+        function time = solveTimeForPerformance(self, performance)
         %{
         * This method returns the value of the deterioration function for a
         given value of time.

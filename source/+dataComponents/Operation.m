@@ -30,7 +30,7 @@ classdef Operation < managers.TypedClass
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisOp = Operation(time, type, sens, param)
+        function self = Operation(time, type, sens, param)
         %{
         * 
         
@@ -46,12 +46,12 @@ classdef Operation < managers.TypedClass
                 Operation.SHOCK, ...
                 Operation.INSPECTION };
             
-            thisOp@managers.TypedClass(listTypes);
+            self@managers.TypedClass(listTypes);
             
             % Validation of Input Data
             assert(time >= 0 , ...
                 'Time argument must be greater or equal than zero')
-            assert(thisOp.isValidType(type) == true, ...
+            assert(self.isValidType(type) == true, ...
                 'The type parameter is not valid')
             assert(islogical(sens), ...
                 'Adaptiveness parameter must be boolean');
@@ -67,26 +67,26 @@ classdef Operation < managers.TypedClass
             %}
             
             % Object construction
-            thisOp.time = time;
-            thisOp.setType(type);
-            thisOp.sensitive = sens;
+            self.time = time;
+            self.setType(type);
+            self.sensitive = sens;
             
             if isMaintenance == true
-                thisOp.perfGoal = param;
+                self.perfGoal = param;
             end
             
             if strcmp(type, Operation.SHOCK)
-                thisOp.forceValue = param;
+                self.forceValue = param;
             end
             
             % Validation of constructed object
-            if thisOp.isType(Operation.INSPECTION)
-                assert(isempty(thisOp.perfGoal) && isempty(thisOp.forceValue), ...
+            if self.isType(Operation.INSPECTION)
+                assert(isempty(self.perfGoal) && isempty(self.forceValue), ...
                     'An inspection operation must have an empty perfGoal and forceValue attributes')
             end
             
-            if thisOp.isDeltaOperation()
-                assert(~isempty(thisOp.perfGoal) || ~isempty(thisOp.forceValue), ...
+            if self.isDeltaOperation()
+                assert(~isempty(self.perfGoal) || ~isempty(self.forceValue), ...
                     'A  delta operation (maintenances or shock) operation  must have a non-empty either perfGoal or forceValue attribute')
             end
             
@@ -96,24 +96,24 @@ classdef Operation < managers.TypedClass
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function setType(thisOp, type)
+        function setType(self, type)
         %{
-        * Sets the type attribute of thisOperation if type argument is valid
+        * Sets the type attribute of self if type argument is valid
         
             Input
                 type: [class String] 
             Output
                 answer: [class Boolean]
         %}
-            if thisOp.isValidType(type)
-                thisOp.type = type;
+            if self.isValidType(type)
+                self.type = type;
             else
                 error('The type entered as argument is not valid')
             end
         end
         
         
-        function setAsPending(thisOperation)
+        function setAsPending(self)
         %{
         * 
             Input
@@ -121,14 +121,14 @@ classdef Operation < managers.TypedClass
             Output
                 
         %}
-            thisOperation.pendingExecution = true;
+            self.pendingExecution = true;
         end
         
         
         %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
         % *****************************************************************
         
-        function answer = isDeltaOperation(thisOperation)
+        function answer = isDeltaOperation(self)
         %{
         * 
             Input
@@ -138,13 +138,13 @@ classdef Operation < managers.TypedClass
         %}
             import dataComponents.Operation
             
-            answer = thisOperation.isType(Operation.VOL_MAINT) || ...
-                thisOperation.isType(Operation.MAND_MAINT) || ...
-                thisOperation.isType(Operation.SHOCK) ;
+            answer = self.isType(Operation.VOL_MAINT) || ...
+                self.isType(Operation.MAND_MAINT) || ...
+                self.isType(Operation.SHOCK) ;
         end
         
         
-        function answer = isType(thisOp, type)
+        function answer = isType(self, type)
         %{
         * 
             Input
@@ -152,9 +152,9 @@ classdef Operation < managers.TypedClass
             Output
                 
         %}
-            assert(thisOp.isValidType(type), 'The type entered as argument is not valid')
+            assert(self.isValidType(type), 'The type entered as argument is not valid')
             
-            if strcmp(thisOp.type, type)
+            if strcmp(self.type, type)
                 answer = true;
             else
                 answer = false;
