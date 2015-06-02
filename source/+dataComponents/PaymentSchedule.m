@@ -3,6 +3,7 @@ classdef PaymentSchedule < handle
     
     properties
         listTransactions
+        allExecuted = false
     end
     
     methods
@@ -47,7 +48,7 @@ classdef PaymentSchedule < handle
         end
         
         
-        function nextTransaction = getNextTransaction(thisPaySch)
+        function nextTransaction = getNextTransaction(self)
         %{
         * 
         
@@ -56,15 +57,35 @@ classdef PaymentSchedule < handle
             Output
                 
         %}
-            n = length(thisPaySch.listTransactions);
             
-            for i=1:n
-                currentTran = thisPaySch.listTransactions{i};
-                if ~currentTran.isExecuted()
-                    nextTransaction = currentTran;
-                    break
+            if self.allExecuted == true
+                nextTransaction = [];
+            else
+                import dataComponents.Transaction
+                
+                n = length(self.listTransactions);
+                
+                transactionPending = false;
+                
+                for i=1:n
+                    currentTran = self.listTransactions{i};
+                    if ~currentTran.isExecuted()
+                        nextTransaction = currentTran;
+                        transactionPending = true;
+                        break
+                    end
+                end
+                
+                if transactionPending == false
+                    nextTransaction = [];
+                    self.setAsExecuted();
                 end
             end
+        end
+        
+        
+        function setAsExecuted(self)
+            self.allExecuted = true;
         end
         
         

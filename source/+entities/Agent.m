@@ -37,37 +37,6 @@ classdef Agent < entities.Player
     
     methods (Static)
         
-        function contract = submitContract(progSet, contractStrategy)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            
-            import dataComponents.*
-            import managers.*
-            
-            
-            msg = Message();
-            msg.setTypeRequestedInfo(Information.CONTRACT_DURATION, ...
-                Information.PAYMENT_SCHEDULE, ...
-                Information.REVENUE_RATE_FUNC, ...
-                Information.PERFORMANCE_THRESHOLD);
-            
-            contractStrategy.decide(msg);
-            
-            conDur = msg.getOutput(Information.CONTRACT_DURATION);
-            paymentSch = msg.getOutput(Information.PAYMENT_SCHEDULE);
-            revRateFnc = msg.getOutput(Information.REVENUE_RATE_FUNC);
-            threshold = msg.getOutput(Information.PERFORMANCE_THRESHOLD);
-            
-            contract = Contract(progSet, conDur, paymentSch, revRateFnc, threshold);
-            
-        end
-        
-        
     end
         
     methods
