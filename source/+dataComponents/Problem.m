@@ -4,6 +4,7 @@ classdef Problem < matlab.mixin.Copyable
     
     properties
         discountRate
+        demandFnc
     end
     
     methods
@@ -11,7 +12,7 @@ classdef Problem < matlab.mixin.Copyable
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function thisProblem = Problem(progSettings)
+        function self = Problem(progSettings)
         %{
         
             Input
@@ -22,7 +23,13 @@ classdef Problem < matlab.mixin.Copyable
             % Discount rate
             import managers.ItemSetting
 
-            thisProblem.discountRate = progSettings.returnItemSetting(ItemSetting.DISC_RATE).value;
+            item = progSettings.returnItemSetting(ItemSetting.DISC_RATE);
+            self.discountRate = item.value;
+            
+            item = progSettings.returnItemSetting(ItemSetting.DEMAND_FNC);
+            self.demandFnc = item.equation;
+            
+            
         end
         
         

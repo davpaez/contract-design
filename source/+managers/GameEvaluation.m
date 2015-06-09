@@ -17,6 +17,7 @@ classdef GameEvaluation < handle
         % ----------- %
         programSettings
         realizations
+        problem         %[class Problem] It is common for all realizations
         
     end
     
@@ -37,6 +38,8 @@ classdef GameEvaluation < handle
             
             nrealiz = progSet.returnItemSetting(ItemSetting.NUM_REALIZ);
             self.numRealizations = nrealiz.value;
+            
+            self.problem = Problem(progSet);
 
         end
         
@@ -77,9 +80,11 @@ classdef GameEvaluation < handle
             p = ProgressBar(n);
             
             progSet = self.programSettings;
+            prob = self.problem;
+            
             tic
             parfor i=1:n
-                r{i} = Realization(progSet);
+                r{i} = Realization(progSet, prob);
                 r{i}.run()
                 %parfor_progress;
                 p.progress();

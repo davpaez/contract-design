@@ -38,7 +38,7 @@ classdef Realization < matlab.mixin.Copyable
         %% Constructor
         
         
-        function self = Realization(progSet)
+        function self = Realization(progSet, prob)
         %{
         * Constructor method of Realization class and builder of
         interactions
@@ -66,7 +66,7 @@ classdef Realization < matlab.mixin.Copyable
             self.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             
             % Problem object
-            self.problem = Problem(progSet);
+            self.problem = prob;
             
 
             % Intial payoffs
@@ -85,14 +85,6 @@ classdef Realization < matlab.mixin.Copyable
             self.principal.receiveContract(con);
             self.agent.receiveContract(con);
             
-            % Creating function handles
-            %{
-            self.fh.contEnvForce = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            self.fh.demandRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            self.fh.revenueRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            self.fh.contResponse = progSet.returnItemSetting(ItemSetting.CONT_RESP_FNC);
-            %}
-            
             % Contruction of nature
             self.nature = Nature(progSet);
             
@@ -110,47 +102,6 @@ classdef Realization < matlab.mixin.Copyable
             self.principal.registerEvent(initEventPrincipal);
             self.agent.registerEvent(initEventAgent);
             
-        end
-        
-        
-        function run(self)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            import entities.*
-            import dataComponents.*
-            
-            contractDuration = self.contract.contractDuration;
-            
-            % Build interaction
-            
-            while self.time < contractDuration
-                
-                % Returns earliest submitted operation
-                operation = self.requestOperations();
-                nextTransaction = self.paymentSchedule.getNextTransaction();
-                
-                if operation.time >= contractDuration && nextTransaction.time >= contractDuration
-                    break
-                end
-                
-                if operation.time < nextTransaction.time
-                    
-                    assert(operation.time >= self.time)
-                    
-                    % Executes the earliest submitted operation
-                    self.executeOperation(operation);                    
-                else
-                    
-                    self.executePayment(nextTransaction);
-                end
-            end
-            
-            self.finishRealization();
         end
         
         
@@ -218,6 +169,49 @@ classdef Realization < matlab.mixin.Copyable
             self.agent.setTime(newTime);
             self.principal.setTime(newTime);
             self.nature.setTime(newTime);
+        end
+        
+        
+        function run(self)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            import entities.*
+            import dataComponents.*
+            
+            contractDuration = self.contract.contractDuration;
+            
+            % Build interaction
+            
+            while self.time < contractDuration
+                
+                % Returns earliest submitted operation
+                operation = self.requestOperations();
+                nextTransaction = self.paymentSchedule.getNextTransaction();
+                
+                earliestTime = getEarliestTime(operation, nextTransaction);
+                
+                if earliestTime >= contractDuration
+                    break
+                end
+                
+                if isempty(nextTransaction)
+                    self.executeOperation(operation);
+                else
+                    if operation.time < nextTransaction.time
+                        assert(operation.time >= self.time)
+                        self.executeOperation(operation);
+                    else
+                        self.executePayment(nextTransaction);
+                    end
+                end
+            end
+            
+            self.finishRealization();
         end
         
         
@@ -548,7 +542,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function timeExecution = executePayment(self, transaction)
+        function executePayment(self, transaction)
         %{
         * 
 
@@ -613,14 +607,14 @@ classdef Realization < matlab.mixin.Copyable
         %}
             %import utils.ContinuousSolver
             
-            fare = 72/10e7;
+            fare = self.contract.fare;
             
             %  ------ Differential equations for stocks -------
             
-            contEnvForce = @CommonFnc.continuousEnvForce;
-            contRespFun = @CommonFnc.continuousRespFunction;
-            demand = @CommonFnc.demandFunction;
-            revenue = @CommonFnc.revenueRate;
+            contEnvForce = self.nature.contEnvForceFnc;
+            contRespFun = self.nature.infrastructure.contResponseFnc;
+            demand = self.problem.demandFnc;
+            revenue = self.contract.revRateFnc;
             
             % Performance rate function
             v_f = @(t,v) contRespFun(contEnvForce(t), ...
@@ -861,3 +855,14 @@ function [earliestOp, index] = returnEarliestOperation(opPrincipal, opAgent, opN
     earliestOp = opArray{index};
 end
 
+function time = getEarliestTime(operation, transaction)
+if isempty(transaction)
+    time = operation.time;
+else
+    if transaction.time <= operation.time
+        time = transaction.time;
+    else
+        time = operation.time;
+    end
+end
+end

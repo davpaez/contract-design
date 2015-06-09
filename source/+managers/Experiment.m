@@ -202,8 +202,10 @@ classdef Experiment < managers.TypedClass
                 
         %}
             import managers.*
+            import dataComponents.*
             
-            r = Realization(self.programSettings);
+            prob = Problem(self.programSettings);
+            r = Realization(self.programSettings, prob);
             r.run()
             
             self.gameEvals = r;

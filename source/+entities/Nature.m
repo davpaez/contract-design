@@ -8,7 +8,7 @@ classdef Nature < handle
         time = 0
         hazard          % [Boolean] Turns on and off the natural hazards
         
-        contEnvForce    % Function handle
+        contEnvForceFnc    % Function handle
         
         % ----------- %
         % Objects
@@ -42,6 +42,10 @@ classdef Nature < handle
             % Shock strategy
             faculty = progSet.returnItemSetting(ItemSetting.STRATS_SHOCK);
             self.shockStrategy = faculty.getSelectedStrategy();
+            
+            % Continuous environmental force
+            item = progSet.returnItemSetting(ItemSetting.CONT_ENV_FORCE);
+            self.contEnvForceFnc = item.equation;
             
             % Creates infrastructure object
             self.infrastructure = Infrastructure(progSet);
@@ -105,15 +109,12 @@ classdef Nature < handle
             import dataComponents.Message
             import managers.Strategy
             import managers.Information
+            import managers.Faculty
             
             if self.hazard == true
                 if isempty(self.submittedOperation)
                     
-                    msg = Message(self);
-                    
-                    msg.setTypeRequestedInfo(Information.TIME_SHOCK, ...
-                                             Information.FORCE_SHOCK);
-                                         
+                    msg = Faculty.createEmptyMessage(self, Faculty.SHOCK);
                     self.shockStrategy.decide(msg);
                     
                     isSens = self.shockStrategy.isSensitive();

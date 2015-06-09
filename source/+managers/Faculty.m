@@ -52,10 +52,11 @@ classdef Faculty < managers.ItemSetting
             
             switch typeFaculty
                 case Faculty.CONTRACT_OFFER
-                    decVars = {Information.CONTRACT_DURATION ; ...
-                Information.PERFORMANCE_THRESHOLD ;
+                    decVars = {Information.CONTRACT_DURATION; ...
                 Information.PAYMENT_SCHEDULE; ...
-                Information.REVENUE_RATE_FUNC};
+                Information.REVENUE_RATE_FUNC; ...
+                Information.PERFORMANCE_THRESHOLD; ...
+                Information.FARE};
                     
                 case Faculty.INSPECTION
                     decVars = {Information.TIME_INSPECTION};
@@ -77,6 +78,18 @@ classdef Faculty < managers.ItemSetting
                 otherwise
                     error('Type is not valid')
             end
+            
+        end
+        
+        function msg = createEmptyMessage(theExecutor, typeFaculty)
+            %TODONEXT
+            
+            import dataComponents.Message
+            import managers.Faculty
+            
+            msg = Message(theExecutor);
+            decVars = Faculty.getInfoDecVars(typeFaculty);
+            msg.setTypeRequestedInfo(decVars);
             
         end
         

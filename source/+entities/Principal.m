@@ -73,22 +73,19 @@ classdef Principal <  entities.Player
             import dataComponents.Message
             import dataComponents.Contract
             import managers.Information
+            import managers.Faculty
             
-            msg = Message(self);
-            msg.setTypeRequestedInfo(Information.CONTRACT_DURATION, ...
-                Information.PERFORMANCE_THRESHOLD, ...
-                Information.PAYMENT_SCHEDULE, ...
-                Information.REVENUE_RATE_FUNC);
-            
+            msg = Faculty.createEmptyMessage(self, Faculty.CONTRACT_OFFER);
             self.contractStrategy.decide(msg);
             
             conDur = msg.getOutput(Information.CONTRACT_DURATION);
             perfThreshold = msg.getOutput(Information.PERFORMANCE_THRESHOLD);
             paymentSchedule = msg.getOutput(Information.PAYMENT_SCHEDULE);
             revRateFnc = msg.getOutput(Information.REVENUE_RATE_FUNC);
+            fare = msg.getOutput(Information.FARE);
             
-            contract = Contract(progSet, conDur, perfThreshold, ...
-                paymentSchedule, revRateFnc);
+            contract = Contract(progSet, conDur, paymentSchedule, ...
+                revRateFnc, perfThreshold, fare);
         end
         
         
@@ -105,12 +102,11 @@ classdef Principal <  entities.Player
             import dataComponents.Transaction
             import managers.Strategy
             import managers.Information
+            import managers.Faculty
             
             if isempty(self.submittedOperation)
                 
-                msg = Message(self);
-                msg.setTypeRequestedInfo(Information.TIME_INSPECTION);
-                
+                msg = Faculty.createEmptyMessage(self, Faculty.INSPECTION);
                 self.inspectionStrategy.decide(msg);
                 
                 timeNextInspection = msg.getOutput(Information.TIME_INSPECTION);

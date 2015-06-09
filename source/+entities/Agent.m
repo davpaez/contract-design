@@ -101,18 +101,14 @@ classdef Agent < entities.Player
             
             import dataComponents.Operation
             import dataComponents.Message
-            import managers.Strategy
             import managers.Information
+            import managers.Faculty
             
             self.solvePerformanceForTime = solvePerformanceForTime;
             self.solveTimeForPerformance = solveTimeForPerformance;
-            
-            msg = Message(self);
-            msg.setTypeRequestedInfo(Information.TIME_VOL_MAINT, ...
-                                     Information.PERF_VOL_MAINT);
-            
-            msg.setExtraInfo(Message.MAX_PERF, infra.maxPerf)
-            
+                                 
+            msg = Faculty.createEmptyMessage(self, Faculty.VOL_MAINT);
+            msg.setExtraInfo(Message.MAX_PERF, infra.maxPerf);
             self.volMaintStrategy.decide(msg);
             
             isSens = self.volMaintStrategy.isSensitive();

@@ -136,7 +136,7 @@ classdef Message < handle
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function setTypeRequestedInfo(self, varargin)
+        function setTypeRequestedInfo(self, typeInfoArray)
         %{
         
             Input
@@ -146,18 +146,17 @@ classdef Message < handle
         %}
             import managers.Information
             
-            cellIdentifiers = varargin;
             % Check valitidy of types of outputs
-            n = length(cellIdentifiers);
+            n = length(typeInfoArray);
             for i=1:n
-                assert(Information.isValid_TypeInfo(cellIdentifiers{i}), ...
+                assert(Information.isValid_TypeInfo(typeInfoArray{i}), ...
                     'The type of output response specified is not valid.')
             end
             
-            assert(length(cellIdentifiers) == length(unique(cellIdentifiers)), ...
+            assert(length(typeInfoArray) == length(unique(typeInfoArray)), ...
                 'The types entered must be unique')
             
-            self.typeRequestedInfo = cellIdentifiers;
+            self.typeRequestedInfo = typeInfoArray;
             
         end
         
