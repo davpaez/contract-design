@@ -1,3 +1,16 @@
+%{
+# PURPOSE
+
+An operation object represents an operation or intention of operation 
+performed by either Nature or Player on the infrastructure system. It can 
+be exchanged between clases so that they understand what other classes are 
+doing, or are intending to do on Infrastructure.
+
+Operation objects are not stored as attribute of any player. They are only 
+stransactional objects that do not need to persist beyond its execution.
+
+%}
+
 classdef Operation < managers.TypedClass
     % 
     properties (Constant, Hidden = true)

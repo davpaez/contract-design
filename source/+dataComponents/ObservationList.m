@@ -1,3 +1,10 @@
+%{
+# PURPOSE
+
+TODO
+
+%}
+
 classdef ObservationList < matlab.mixin.Copyable
     
     properties (Constant, GetAccess = protected)

@@ -1,3 +1,10 @@
+%{
+# PURPOSE
+
+TODO
+
+%}
+
 classdef Event < matlab.mixin.Copyable
     
     properties (Constant, Hidden = true)

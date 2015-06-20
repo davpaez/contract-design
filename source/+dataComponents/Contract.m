@@ -1,3 +1,11 @@
+%{
+# PURPOSE
+
+The contract class contains information that define a contract. It is meant
+to the accessible to all players.
+
+%}
+
 classdef Contract < matlab.mixin.Copyable
     
     properties (GetAccess = public, SetAccess = protected)
