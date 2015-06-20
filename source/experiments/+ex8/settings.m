@@ -69,7 +69,7 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.DEMAND_FNC);
-fnc.equation = @commonFnc.demandFunction;
+fnc.equation = @CommonFnc.demandFunction;
 
 progSet.add(fnc);
 
