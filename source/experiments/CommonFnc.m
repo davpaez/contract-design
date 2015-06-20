@@ -54,12 +54,15 @@ classdef CommonFnc
             b = 40000;
             k = 50;
             
-            % TODO Make this truncation works when arguments are vectors
+            n = length(v);
+            d = zeros(n,1);
             
-            if v <= k
-                d = a*v;
-            else
-                d = a*k + b*(v-k);
+            for i=1:n
+                if v(i) <= k
+                    d(i) = a*v(i);
+                else
+                    d(i) = a*k + b*(v(i)-k);
+                end
             end
         end
         
