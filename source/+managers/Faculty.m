@@ -82,7 +82,6 @@ classdef Faculty < managers.ItemSetting
         end
         
         function msg = createEmptyMessage(theExecutor, typeFaculty)
-            %TODONEXT
             
             import dataComponents.Message
             import managers.Faculty

@@ -1,6 +1,5 @@
 classdef Problem < matlab.mixin.Copyable
     % This class saves useful public information
-    % TODO This class may not be necessary
     
     properties
         discountRate
