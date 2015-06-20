@@ -13,10 +13,9 @@ classdef Nature < handle
         % ----------- %
         % Objects
         % ----------- %
-        
-        infrastructure
         shockStrategy
         submittedOperation
+        problem
         
     end
     
@@ -25,7 +24,7 @@ classdef Nature < handle
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function self = Nature(progSet)
+        function self = Nature(progSet, prob)
         %{
         
             Input
@@ -47,8 +46,8 @@ classdef Nature < handle
             item = progSet.returnItemSetting(ItemSetting.CONT_ENV_FORCE);
             self.contEnvForceFnc = item.equation;
             
-            % Creates infrastructure object
-            self.infrastructure = Infrastructure(progSet);
+            % Problem object
+            self.problem = prob;
         end
         
         
@@ -65,18 +64,6 @@ classdef Nature < handle
         %}
             time = self.time;
         end
-        
-        
-        function performance = getCurrentPerformance(self)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            performance = self.infrastructure.getPerformance();
-        end
 
 
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
@@ -92,7 +79,6 @@ classdef Nature < handle
         %}
             if time > self.time
                 self.time = time;
-                self.infrastructure.setTime(time);
             end
         end
         
@@ -141,7 +127,7 @@ classdef Nature < handle
         end
         
         
-        function applyOperation(self, operation)
+        function applyOperation(self, operation, infrastructure)
         %{
         
             Input
@@ -157,14 +143,14 @@ classdef Nature < handle
             assert(condition == true, 'Only maintenance (vol or maint) or shock operation can be applied to nature')
             
             if operation.isType(Operation.VOL_MAINT) || operation.isType(Operation.MAND_MAINT)
-                self.infrastructure.registerObservation(operation.time, operation.perfGoal);
+                infrastructure.registerObservation(operation.time, operation.perfGoal);
                 
             else % For shock operations, the force value must be translated into perfGoal
-                perfBeforeShock = self.solvePerformanceForTime(operation.time);
+                perfBeforeShock = infrastructure.getPerformance();
                 forceValue = operation.forceValue;
-                perfGoal = self.infrastructure.shockResponseFnc(perfBeforeShock, forceValue);
+                perfGoal = infrastructure.shockResponseFnc(perfBeforeShock, forceValue);
                 
-                self.infrastructure.registerObservation(operation.time, perfGoal);
+                infrastructure.registerObservation(operation.time, perfGoal);
                 
             end
             
@@ -179,6 +165,7 @@ classdef Nature < handle
             Output
                 
         %}
+            
             self.infrastructure.setTime(time);
         end
         

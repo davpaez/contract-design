@@ -140,7 +140,7 @@ classdef CommonFnc
             Output
                 up:             Principal's utility
         %}
-            up = thePrincipal.observation.getMeanValue();
+            up = thePrincipal.observationList.getMeanValue();
         end
         
         
@@ -154,9 +154,8 @@ classdef CommonFnc
             Output
                 ua:         Agent's utility
         %}
-            if ~isempty(theAgent.payoff)
-                tm = theAgent.contract.getContractDuration();
-                ua = theAgent.payoff.getNPV(tm);
+            if ~isempty(theAgent.payoffList)
+                ua = theAgent.payoffList.getBalance();
             else
                 ua = 0;
             end

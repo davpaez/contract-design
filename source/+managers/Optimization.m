@@ -122,6 +122,9 @@ classdef Optimization
         %}
         function outerProblem = returnOuterProblem(self)
             
+            nrealiz = progSet.returnItemSetting(ItemSetting.NUM_REALIZ);
+            self.numRealizations = nrealiz.value;
+            
             [indicesOuterVars, numOuterVars] = self.getNumberControlledVars(InputData.PRINCIPAL);
             
             % Row vector for lower and upper bounds

@@ -129,8 +129,6 @@ classdef EventList < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(self.isValidType(type) ,...
-                'The type entered as argument is not valid')
             
             ids = strcmp(self.type, type);
             if any(ids)

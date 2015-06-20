@@ -114,37 +114,6 @@ classdef Infrastructure < matlab.mixin.Copyable
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function setTime(self, newTime)
-        %{
-        * This method must be called BEFORE a jump action is applied!
-        
-            Input
-                
-            Output
-                
-        %}
-            if newTime > self.time
-                currentTime =  self.time;
-                currentPerf = self.performance;
-                
-                deltaTime = newTime - currentTime;
-                f = (deltaTime/self.TIMESTEP);
-                n = max([3,floor(f)]);
-                
-                [t,v] = ode45(self.detRate, linspace(currentTime, newTime, n), currentPerf);
-                
-                % Truncate performance values lower than null perf
-                v(v<self.nullPerf) = self.nullPerf;
-                
-                n = length(t);
-                
-                for i=2:n
-                    self.history.register(t(i), v(i));
-                end
-            end
-        end
-        
-        
         function evolve(self, t, v)
         %{
         * 
@@ -154,11 +123,9 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-            n = length(t);
             
-            for i = 2:n
-                self.history.register(t(i), v(i));
-            end
+            self.history.register(t,v);
+            
         end
         
         
@@ -171,7 +138,7 @@ classdef Infrastructure < matlab.mixin.Copyable
             Output
                 
         %}
-            %self.setTime(time);
+            
             self.history.register(time, perf);
         end
         

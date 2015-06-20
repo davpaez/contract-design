@@ -70,6 +70,9 @@ classdef Experiment < managers.TypedClass
                 case Experiment.OPT
                     self.optimization();
             end
+            
+            disp('    Experiment object created')
+            disp(' ')
         end
         
         
@@ -150,6 +153,11 @@ classdef Experiment < managers.TypedClass
             % Type of experiment
             tp = self.typeExp;
             
+            disp('Experiment execution:')
+            disp(['    Start: ', datestr(datetime)])
+            
+            t1 = clock;
+            
             switch tp
                 case Experiment.SING
                     self.runSingle();
@@ -164,9 +172,14 @@ classdef Experiment < managers.TypedClass
                     self.runOptimization();
             end
             
+            t2 = clock;
+            minElapsed = etime(t2, t1)/60;
+            disp(['    End:   ', datestr(datetime)])
+            disp(['    Minutes elapsed: ', num2str(minElapsed)])
+            disp(' ')
+            
             % Close log file (if necessary)
             fi.closeLogFile();
-            
             fi.showLogFile();
         end
         
@@ -260,6 +273,7 @@ classdef Experiment < managers.TypedClass
                 
         %}
             data = self.gameEvals.report();
+            self.programSettings.reportUnusedItems()
         end
         
         

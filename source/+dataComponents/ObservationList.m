@@ -175,31 +175,40 @@ classdef ObservationList < matlab.mixin.Copyable
             Output
                 
         %}
-            pointer = self.pt;
-            lastEntry = pointer-1;
-            
-            if pointer > 1
-                % Checks validity of entry
-                assert(time >= self.time(lastEntry), ...
-                    'The time of observations must be non-decreasing.')
+            for i=1:length(time)
                 
-                % Registers if current entry creates a jump
-                if time == self.time(lastEntry)
-                    self.registerJump();
+                pointer = self.pt;
+                lastEntry = pointer-1;
+
+                if pointer > 1
+                    % Checks validity of entry
+                    assert(time(i) >= self.time(lastEntry), ...
+                        'The time of observations must be non-decreasing.')
+                    
+                    % Check if first entry exists already
+                    if self.time(lastEntry) == time(i) && self.value(lastEntry) == value(i)
+                        continue
+                    end
+                    
+                    % Registers if current entry creates a jump
+                    if time(i) == self.time(lastEntry)
+                        self.registerJump();
+                    end
                 end
+
+                % Registers time and value
+                self.time(pointer) = time(i);
+                self.value(pointer) = value(i);
+
+                % Makes arrays bigger if necessary
+                if (pointer + self.SLACK) > self.listSize
+                    self.extendArrays();
+                end
+
+                % Updates pointer
+                self.pt = pointer + 1;
+
             end
-            
-            % Registers time and value
-            self.time(pointer) = time;
-            self.value(pointer) = value;
-            
-            % Makes arrays bigger if necessary
-            if (pointer + self.SLACK) > self.listSize
-                self.extendArrays();
-            end
-            
-            % Updates pointer
-            self.pt = pointer + 1;
         end
         
         
@@ -562,26 +571,7 @@ classdef ObservationList < matlab.mixin.Copyable
             end
             
         end
-        
-        
-        function value = interpolate(self, time)
-        %{
-        * 
-        
-            Input
-            
-            Output
-                
-        %}
-            lastEntry = self.pt - 1;
-            
-            t = self.time(1:lastEntry);
-            v = self.value(1:lastEntry);
-            %TODO Do not use interp1. It does not work because the time
-            %vector is not strict monotonically increasing
-            value = interp1(t, v, time);
-        end
-        
+ 
         
     end
 end

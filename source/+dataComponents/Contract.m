@@ -12,11 +12,9 @@ classdef Contract < matlab.mixin.Copyable
         contractDuration 	% Mission time (years)
         initialPerf         % Initial perf of infrastructure: Assummed to be equal to MAX_PERF
         perfThreshold       % Minimum perf required by principal
-        revRateFnc         % Function handle of revenue rate
-        fare
-        %investment         % Land purchase and construction cost
+        revRateFnc          % Function handle of revenue rate
+        fare                % Unitary cost of infrastructure usage
         paymentSchedule     % Government contributions Array[nx2] --> [time value]
-        maxSumPenalties     % Maximum possible penalty
         penaltyStrategy     % Penalty policy (Strategy object)
     end
     
@@ -104,22 +102,13 @@ classdef Contract < matlab.mixin.Copyable
             import dataComponents.PaymentSchedule
             import dataComponents.Transaction
             
-            self.paymentSchedule = PaymentSchedule();
+            ps = contributions;
             
-            % Investment
-            self.paymentSchedule.addTransaction(...
-                0, ...
-                investment, ...
-                Transaction.INVESTMENT);
+            % Add agent's investment transaction
+            ps.addTransaction(0, investment, Transaction.INVESTMENT);
             
-            % ContributionS
-            numberPayments = size(contributions, 1);
-            for i=1:numberPayments
-                self.paymentSchedule.addTransaction(...
-                    contributions(i,1), ...
-                    contributions(i,2), ...
-                    Transaction.CONTRIBUTION);
-            end
+            % Update contract's payment schedule
+            self.paymentSchedule = ps;
         end
         
         

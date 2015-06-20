@@ -39,7 +39,7 @@ classdef GameEvaluation < handle
             nrealiz = progSet.returnItemSetting(ItemSetting.NUM_REALIZ);
             self.numRealizations = nrealiz.value;
             
-            self.problem = Problem(progSet);
+            self.problem = Problem(self.programSettings);
 
         end
         
@@ -77,24 +77,23 @@ classdef GameEvaluation < handle
             n = self.numRealizations;
             
             %parfor_progress(N);
-            p = ProgressBar(n);
+            %p = ProgressBar(n);
             
             progSet = self.programSettings;
             prob = self.problem;
             
-            tic
             parfor i=1:n
-                r{i} = Realization(progSet, prob);
-                r{i}.run()
+                currentRealz = Realization(progSet, prob);
+                currentRealz.run();
+                r{i} = currentRealz;
                 %parfor_progress;
-                p.progress();
+                %p.progress();
                  
             end
             %parfor_progress(0);
-            p.stop();
+            %p.stop();
             
             self.realizations = r;
-            toc
         end
         
         
@@ -127,7 +126,7 @@ classdef GameEvaluation < handle
             Output
                 
         %}
-            data = self.realizations.report();
+            data = self.realizations{1}.report();
         end
         
         
@@ -140,15 +139,12 @@ classdef GameEvaluation < handle
                 
         %}
             n = self.numRealizations;
-            ua = zeros(n, 1);
-            up = zeros(n, 1);
+            
+            data = cell(n,1);
             
             for i = 1:n
-                [ua(i) up(i)] = self.realizations{i}.utilityPlayers();
+                data{i} = self.realizations{i}.report();
             end
-            
-            data = struct('ua', ua, ...
-                'up', up );
                 
         end
         

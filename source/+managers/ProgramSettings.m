@@ -7,6 +7,7 @@ classdef ProgramSettings < matlab.mixin.Copyable
         % ----------- %
         writable = false
         settingItems_Number = 0
+        usedItems
         
         % ----------- %
         % Objects
@@ -32,6 +33,14 @@ classdef ProgramSettings < matlab.mixin.Copyable
     methods (Access = protected)
         
         function cpObj = copyElement(obj)
+        %{
+        * 
+            Input
+                setArr: [array of ItemSetting]
+            Output
+                
+        %}
+            
             cpObj = copyElement@matlab.mixin.Copyable(obj);
             if ~isempty(obj.settingArray)
                 n = length(obj.settingArray);
@@ -46,19 +55,22 @@ classdef ProgramSettings < matlab.mixin.Copyable
     
     methods
         %% Constructor
+        
+        function self = ProgramSettings()
         %{
         * 
             Input
-                setArr: [array of ItemSetting]
+                
             Output
                 
         %}
-        function self = ProgramSettings(setArr)
+            
             
         end
         
         
         %% Getter functions
+        
         function answer = get.determined(thisProgramSetting)
             n = length(thisProgramSetting.settingArray);
             
@@ -75,13 +87,11 @@ classdef ProgramSettings < matlab.mixin.Copyable
         end
         
         
-        
         %% Regular methods
         
         % ----------------------------------------------------------------
         % ---------- Accessor methods ------------------------------------
         % ----------------------------------------------------------------
-        
         
         function itemSettingObject = returnItemSetting(self, id)
         %{
@@ -105,6 +115,7 @@ classdef ProgramSettings < matlab.mixin.Copyable
                     if strcmp(self.settingArray{i}.identifier, id)
                         found = true;
                         itemSettingObject = self.settingArray{i};
+                        self.usedItems(i) = true;
                         break
                     end
                 end
@@ -115,6 +126,7 @@ classdef ProgramSettings < matlab.mixin.Copyable
             end
         end
         
+        
         % ----------------------------------------------------------------
         % ---------- Mutator methods -------------------------------------        
         % ----------------------------------------------------------------
@@ -122,12 +134,16 @@ classdef ProgramSettings < matlab.mixin.Copyable
         function lockSettings(self)
             self.writable = false;
             disp('    Problem Settings Write Access: Locked')
+            
+            self.usedItems = false(self.getNumberItems(), 1);
         end
+        
         
         function unlockSettings(self)
             self.writable = true;
             disp('    Problem Settings Write Access: Unlocked')
         end
+        
         
         function add(self, item)
             
@@ -157,6 +173,7 @@ classdef ProgramSettings < matlab.mixin.Copyable
             
         end
         
+        
         function init_UserInput(self)
             n = self.settingItems_Number;
             
@@ -167,6 +184,7 @@ classdef ProgramSettings < matlab.mixin.Copyable
                 end
             end
         end
+        
         
         function init_Random(self)
             n = thisProgSet.settingItems_Number;
@@ -179,14 +197,17 @@ classdef ProgramSettings < matlab.mixin.Copyable
             end
         end
         
+        
         function promptUserSelectRules(self)
             %TODO
         end
+        
         
         % ----------------------------------------------------------------
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
         
+        function n = getNumberItems(self)
         %{
         
             Input
@@ -194,11 +215,31 @@ classdef ProgramSettings < matlab.mixin.Copyable
             Output
                 
         %}
-        function n = getNumberItems(self)
+            
             n = self.settingItems_Number;
         end
         
-
+        
+        function reportUnusedItems(self)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            
+            n = self.getNumberItems();
+            disp(' ')
+            disp('Settings items not queried within experiment:')
+            for i=1:n
+                if self.usedItems(i) == false
+                    disp(['     ', self.settingArray{i}.identifier])
+                end
+            end
+        end
+        
+        
     end
     
 end

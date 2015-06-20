@@ -4,6 +4,7 @@ classdef Problem < matlab.mixin.Copyable
     properties
         discountRate
         demandFnc
+        timeRes
     end
     
     methods
@@ -28,7 +29,8 @@ classdef Problem < matlab.mixin.Copyable
             item = progSettings.returnItemSetting(ItemSetting.DEMAND_FNC);
             self.demandFnc = item.equation;
             
-            
+            item = progSettings.returnItemSetting(ItemSetting.TIME_RES);
+            self.timeRes = item.value;
         end
         
         

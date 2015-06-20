@@ -62,7 +62,7 @@ classdef Principal <  entities.Player
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function contract = generateContract(self, progSet)
+        function contract = generateContract(self, progSet, infra)
         %{
         
             Input
@@ -80,11 +80,14 @@ classdef Principal <  entities.Player
             
             conDur = msg.getOutput(Information.CONTRACT_DURATION);
             perfThreshold = msg.getOutput(Information.PERFORMANCE_THRESHOLD);
-            paymentSchedule = msg.getOutput(Information.PAYMENT_SCHEDULE);
+            principalContributions = msg.getOutput(Information.PAYMENT_SCHEDULE);
             revRateFnc = msg.getOutput(Information.REVENUE_RATE_FUNC);
             fare = msg.getOutput(Information.FARE);
             
-            contract = Contract(progSet, conDur, paymentSchedule, ...
+            assert(infra.nullPerf <= perfThreshold && perfThreshold <= infra.maxPerf, ...
+                'Performance threshold must be withinn [nullPerf, maxPerf] interval.')
+            
+            contract = Contract(progSet, conDur, principalContributions, ...
                 revRateFnc, perfThreshold, fare);
         end
         

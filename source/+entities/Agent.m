@@ -16,8 +16,6 @@ classdef Agent < entities.Player
         % ----------- %
         % Attributes
         % ----------- %
-        solvePerformanceForTime
-        solveTimeForPerformance
         maintCostFunction
         
         % ----------- %
@@ -83,9 +81,7 @@ classdef Agent < entities.Player
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function operation = submitOperation(self, currentPerf, ...
-                solvePerformanceForTime, solveTimeForPerformance, ...
-                perfRange, infra)
+        function operation = submitOperation(self, contSolver, infra)
         %{
         * Implements agent's decision rule, determines action to submit.
         The action is saved in the submittedAction attribute. Returns the
@@ -104,8 +100,6 @@ classdef Agent < entities.Player
             import managers.Information
             import managers.Faculty
             
-            self.solvePerformanceForTime = solvePerformanceForTime;
-            self.solveTimeForPerformance = solveTimeForPerformance;
                                  
             msg = Faculty.createEmptyMessage(self, Faculty.VOL_MAINT);
             msg.setExtraInfo(Message.MAX_PERF, infra.maxPerf);
@@ -121,6 +115,10 @@ classdef Agent < entities.Player
             % Stores Operation object
             self.setSubmittedOperation(operation);
             
+        end
+        
+        function evolve(self, t, bal)
+            self.payoffList.registerBalance(t, bal);
         end
         
         

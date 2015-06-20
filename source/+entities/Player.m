@@ -45,7 +45,7 @@ classdef Player < handle
             self.problem = problem;
             self.eventList = EventList();
             self.observationList = ObservationList();
-            self.payoffList = PayoffList(problem.discountRate);
+            self.payoffList = PayoffList();
         end
         
         
@@ -111,7 +111,7 @@ classdef Player < handle
         
         %}
             
-            idPff = self.payoffList.register(time, value, type);
+            idPff = self.payoffList.registerFlow(time, value, type);
         end
         
         

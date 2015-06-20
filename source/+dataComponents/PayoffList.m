@@ -14,7 +14,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         listSize
         listJumpsSize
         
-        discRate
         % ----------- %
         % Objects
         % ----------- %
@@ -22,14 +21,14 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
     end
     
     properties (GetAccess = protected, SetAccess = protected)
-        % Registered properties
+        % Registered property arrays
         time
-        value
-        duration
+        balance
+        valueFlow
         type
         
-        % Calculated properties
-        balance
+        % Calculated
+        
         
         % Auxiliary properties
         
@@ -45,7 +44,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function self = PayoffList(discountRate)
+        function self = PayoffList()
         %{
         * 
         
@@ -69,12 +68,10 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             self.pt = 1;
             self.listSize = self.BLOCKSIZE;
             self.listJumpsSize = self.BLOCKSIZE/5;
-            self.discRate = discountRate;
             
             % Registered lists
             self.time = zeros(self.BLOCKSIZE,1);
-            self.value = zeros(self.BLOCKSIZE,1);
-            self.duration = zeros(self.BLOCKSIZE,1);
+            self.valueFlow = zeros(self.BLOCKSIZE,1);
             self.type = cell(self.BLOCKSIZE,1);
             
             % Calculated lists                                      Number
@@ -88,6 +85,9 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             
             % Auxiliary lists
             self.jumpsIndex = zeros(self.JUMPBLOCKSIZE, 1);
+            
+            % Initialize payoff list
+            self.registerBalance(0, 0);
         end
         
         
@@ -107,7 +107,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
-        function currentValue = getCurrentValue(self)
+        function currentValue = getBalance(self)
         %{
         * 
         
@@ -116,7 +116,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-            currentValue = self.value(self.pt-1);
+            currentValue = self.balance(self.pt-1);
         end
         
 
@@ -137,10 +137,9 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             st = struct();
             
             st.time = self.time(ids);
-            st.value = self.value(ids);
-            st.duration = self.duration(ids);
-            st.type = self.type(ids);
             st.balance = self.balance(ids);
+            st.valueFlow = self.valueFlow(ids);
+            st.type = self.type(ids);
             
             st.state = self.state(ids);
             
@@ -150,48 +149,93 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
+        function st = getBalanceHistory(self)
+            
+             st = struct();
+             
+             st.time = self.time(1:self.pt-1);
+             st.balance = self.balance(1:self.pt-1);
+        end
+        
+        
+        
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function id = register(self, time, value, type)
+        function id = registerFlow(self, time, value, type)
         %{
-        * 
+        * Registers instantaneous (jump) flow
         
             Input
                 
             Output
                 
         %}
-            % Check validity of arguments
             
-            if self.pt > 1
-                assert(time >= self.time(self.pt-1), ...
-                    'The time of observations must be non-decreasing.')
-                if time == self.time(self.pt-1)
-                    self.registerJump();
-                end
-            end
-            
+            assert(time >= self.time(self.pt-1), ...
+                'The jump must accur just after last payoff, but at the same numeric time.')
             
             % Validate type
             assert(self.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
-            % Registers time, value, type, duration
-            id = self.pt;
-            self.time(id) = time;
-            self.value(id) = value;
-            self.type{id} = type;
-            %self.duration(id) = dur; % Duration will possibly be
-            %deprecated
+            % Registers jump
+            self.registerJump();
             
-            % Makes arrays bigger if necessary
-            if self.pt + (self.BLOCKSIZE/10) > self.listSize
-                self.extendArrays();
+            % Registers time, value, type
+            if self.time(self.pt-1) < time
+                id = self.pt;
+                self.time(id) = time;
+                self.valueFlow(id) = value;
+                self.balance(id) = self.balance(self.pt-1);
+                self.type{id} = type;
+            else
+                id = self.pt-1;
+                self.valueFlow(id) = value;
+                self.type{id} = type;
             end
             
-            % Updates pointer
-            self.pt = self.pt + 1;
+            self.registerBalance(time, self.balance(self.pt-1) + value);
+        end
+        
+        
+        function id = registerBalance(self, time, value)
+        %{
+        * Registers balance values to the balance history
+        
+            Input
+                
+            Output
+                
+        %}
+            
+            % Registers balance
+            n = length(time);
+            
+            for i=1:n
+                
+                id = self.pt;
+                
+                if self.pt > 1
+                    if time(i) == self.time(id-1) && value(i) == self.balance(id-1)
+                        continue
+                    end
+                end
+                
+                self.time(id) = time(i);
+                self.balance(id) = value(i);
+                
+                % Makes arrays bigger if necessary
+                if self.pt + (self.BLOCKSIZE/10) > self.listSize
+                    self.extendArrays();
+                end
+
+                % Updates pointer
+                self.pt = self.pt + 1;
+                
+            end
+            
+            
         end
         
         
@@ -209,12 +253,9 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             
             % Extends registers lists
             self.time(self.pt+1:self.listSize, :) = 0;
-            self.value(self.pt+1:self.listSize, :) = 0;
-            self.type{self.listSize,1} = [];
-            self.duration(self.pt+1:self.listSize, :) = 0;
-            
-            % Extends calculated lists
             self.balance(self.pt+1:self.listSize, :) = 0;
+            self.valueFlow(self.pt+1:self.listSize, :) = 0;
+            self.type{self.listSize,:} = []; % This is ok!
             
             % Extends state matrix for all lists (columns)
             self.state(self.pt+1:self.listSize, :) = false;
@@ -247,7 +288,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             self.jumpsCounter = self.jumpsCounter + 1;
             
             % Register the pre-jump index!
-            self.jumpsIndex(self.jumpsCounter) = self.pt - 1;
+            self.jumpsIndex(self.jumpsCounter) = self.pt;
             
             if self.jumpsCounter + (self.JUMPBLOCKSIZE/10) > self.listJumpsSize
                 self.extendJumpsArray();
@@ -271,17 +312,14 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
                 id = thisPayoff.pt - 1;
             end
             
-            if thisPayoff.duration(id) == 0
-                val = thisPayoff.getBalancePreFlow('index',id) + thisPayoff.value(id);
-            else
-                val = thisPayoff.getBalancePreFlow('index',id);
-            end
+            val = thisPayoff.getBalancePreFlow('index', id) + thisPayoff.valueFlow(id);
+
         end
         
         
         function balValue = getBalancePreFlow(thisPayoff, varargin)
         %{
-        * 
+        * %TODO Fix this method
         
             Input
                 
@@ -326,64 +364,6 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             
         end
         
-        
-        function balValue = calculateBalance(thisPayoff, positionStruct)
-        %{
-        * Calculate balance NOT including the value of the position
-        specified (whether index or time)
-        
-            Input
-                
-            Output
-                
-        %}
-            logicalTest = isfield(positionStruct, 'index') || isfield(positionStruct, 'time');
-            assert( logicalTest, 'Either "index" or "time" must be specified')
-            
-            % If index is specified but time is not
-            if isfield(positionStruct, 'index') && ~isfield(positionStruct, 'time')
-                index = positionStruct.index;
-                time = thisPayoff.time(index);
-            
-            % If index is specified and time is too
-            elseif isfield(positionStruct, 'index') && isfield(positionStruct, 'time')
-                time = positionStruct.time;
-                index = positionStruct.index;
-            else
-                error('This should not happen')
-            end
-
-            valInst = 0;  % Sum of instantaneous flows
-            valDist = 0;  % Sum of distributed flows
-            
-            for i=1:index-1
-                % If instantaneous flow
-                if thisPayoff.duration(i) == 0
-                    
-                    deltaTime = time - thisPayoff.time(i);
-                    fv = futureValueFlow(thisPayoff.value(i), deltaTime, thisPayoff.discRate);
-                    valInst = valInst + fv;
-                    
-                else % If distributed flow
-                    
-                    ti = thisPayoff.time(i);        % Initial time of flow
-                    dur = thisPayoff.duration(i);   % Duration of flow
-                    tf = min(time, ti+dur);         % Upper bound for integral
-                    effDur = tf-ti;                 % Effective duration of flow
-                    
-                    cmltFv = futureValueContFlow(thisPayoff.value(i), 0, effDur, thisPayoff.discRate);
-                    
-                    if tf < time
-                        extraTime = time - tf;
-                        cmltFv = futureValueFlow(cmltFv, extraTime, thisPayoff.discRate);
-                    end
-                    
-                    valDist = valDist + cmltFv;
-                end
-            end
-            balValue = valInst + valDist;
-        end
-        
 
         function answer = isType(thisPayoff, type, id)
         %{
@@ -422,35 +402,7 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         end
         
         
-        function presentValue = getNPV(self, tm)
-        %{
-        *Calculates and returns the NPV of the linked-list of payoffs up
-        until (and including) thisPayoff
-        
-            Input
-                None
-            Output
-                PresentValue: [class double] Present value caltulated in
-                time t = 0
-        %}
-            
-            t = max(self.time + self.duration);
-            deltaTime = tm - t;
-            
-            if deltaTime > 0
-                postFlowBalance = self.getBalancePostFlow();
-                currentBalance = futureValueFlow(postFlowBalance, deltaTime, self.discRate);
-            elseif deltaTime == 0
-                currentBalance = self.getBalancePostFlow();
-            else
-                error('This should not happen')
-            end
-            
-            presentValue = presentValueFlow(currentBalance, tm, self.discRate);
-        end
-        
-        
-        function st = getBalanceHistory(self, finalTime)
+        function presentValue = getNPV(self)
         %{
         * 
         
@@ -459,90 +411,13 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             Output
                 
         %}
-            lastValidIndex = self.pt - 1;
-            st = struct();
-            cont = 0;
-            
-            for i=1:lastValidIndex
-                
-                balBefore = self.getBalancePreFlow('index',i);
-                
-                if i==1 || ~ismember(i-1, self.jumpsIndex)
-                    % Point before flow (jump)
-                    cont = cont + 1;
-                    st.time(cont) = self.time(i);
-                    st.balance(cont) = balBefore;
-                end
-                
-                if self.duration(i) == 0
-                    % Point after flow (jump)
-                    cont = cont + 1;
-                    st.time(cont) = self.time(i);
-                    st.balance(cont) = balBefore + self.value(i);
-                end
-            end
-            
-            %{
-            remainingTime = finalTime - st.time(cont);
-            
-            if remainingTime > 0
-                prevBal = st.balance(cont);
-                
-                cont = cont + 1;
-                
-                st.time(cont) = finalTime;
-                st.balance(cont) = futureValueFlow(prevBal, remainingTime, thisPayoff.discRate);
-            end
-            %}
+            %TODO
         end
         
         
+        function data = getDataJumps(self)
+            data = self.getData(self.jumpsIndex(1:self.jumpsCounter));
+        end
+        
     end
-end
-
-%% ::::::::::::::::::    Auxiliary functions    :::::::::::::::::::
-% *****************************************************************
-
-function value = futureValueContFlow(flow, ti, tf, discRate)
-%{
-* 
-
-    Input
-
-    Output
-
-%}
-
-value = flow/discRate * (exp(discRate*tf)-exp(discRate*ti));
-
-end
-
-
-function value = presentValueFlow(futureValue, futureTime, discRate)
-%{
-* 
-
-    Input
-
-    Output
-
-%}
-
-value = futureValue*exp(-discRate*futureTime);
-
-end
-
-
-function value = futureValueFlow(presentValue, futureTime, discRate)
-%{
-* 
-
-    Input
-
-    Output
-
-%}
-
-value = presentValue*exp(discRate*futureTime);
-
 end

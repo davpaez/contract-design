@@ -195,6 +195,8 @@ classdef Message < handle
             Output
                 
         %}
+            import managers.Information
+            
             cellIdentifiers = varargin(1:2:length(varargin));
             values = varargin(2:2:length(varargin));
             
@@ -204,6 +206,31 @@ classdef Message < handle
                 idx = find(strcmp(self.typeRequestedInfo, varName));
                 assert(~isempty(idx), ...
                     'The submitted response type must coincide with the types of the requested info')
+                
+                % Makes sure that if time of action is greater than current
+                % realization time, it must be at least greater than the
+                % current time by at least timeRes
+                % This is done to prevent realization from keep looping
+                % trying to evolve between two timestamps that are
+                % essentially the same.
+                typesWithExecutionTime = {  Information.TIME_INSPECTION, ...
+                    Information.TIME_VOL_MAINT, ...
+                    Information.TIME_SHOCK};
+                
+                answer = any(strcmp(typesWithExecutionTime, varName));
+                
+                if answer == true
+                    timeRes = self.executor.problem.timeRes;
+                    currentTime = self.executor.time;
+                    
+                    values{i} = round(values{i}, 4);
+                    
+                    if values{i} > currentTime
+                        if values{i} < currentTime + timeRes
+                            values{i} = currentTime + timeRes;
+                        end
+                    end
+                end
                 
                 % Assign value
                 self.valuesResponse{idx} = values{i};

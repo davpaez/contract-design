@@ -4,6 +4,7 @@ classdef PaymentSchedule < handle
     properties
         listTransactions
         allExecuted = false
+        isSorted = false
     end
     
     methods
@@ -27,7 +28,7 @@ classdef PaymentSchedule < handle
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function addTransaction(thisPaySch, time, value, type)
+        function addTransaction(self, time, value, type)
         %{
         * Adds a payment schedule between a pair (emitter, receiver)
             
@@ -44,7 +45,26 @@ classdef PaymentSchedule < handle
         %}
             import dataComponents.Transaction
             
-            thisPaySch.listTransactions{end+1} = Transaction(time, value, type);
+            self.isSorted = false;
+            self.listTransactions{end+1} = Transaction(time, value, type);
+        end
+        
+        
+        function buildFromVectors(self, timeVector, valueVector, type)
+        %{
+        *   
+            Input
+                
+            Output
+                
+        %}
+            assert(length(timeVector) == length(valueVector))
+            
+            n = length(timeVector);
+            
+            for i=1:n
+                self.addTransaction(timeVector(i), valueVector(i), type);
+            end
         end
         
         
@@ -57,6 +77,10 @@ classdef PaymentSchedule < handle
             Output
                 
         %}
+            
+            if ~self.isSorted
+                self.sortTransactions()
+            end
             
             if self.allExecuted == true
                 nextTransaction = [];
@@ -88,6 +112,26 @@ classdef PaymentSchedule < handle
             self.allExecuted = true;
         end
         
+        
+        function sortTransactions(self)
+            
+            assert(~isempty(self.listTransactions))
+            
+            n = length(self.listTransactions);
+            t = zeros(1,n);
+            for i=1:n
+                t(i) = self.listTransactions{i}.time;
+            end
+            
+            unsorted = self.listTransactions;
+            self.listTransactions = cell(n,1);
+            
+            [~, k] = sort(t);
+            
+            self.listTransactions = unsorted(k);
+            
+            self.isSorted = true;
+        end
         
     end
 end
