@@ -120,30 +120,33 @@ classdef Rule_1 < managers.DecisionRule
         function mainAlgorithm(thisRule, theMsg)
             import dataComponents.Event
             import managers.Information
+            import dataComponents.PaymentSchedule
+            import dataComponents.Transaction
             
             thePrincipal = theMsg.getExecutor();
             
             % Submit response
             %{
-              - contract duration
-              - payment schedule
-              - revenue rate function
-              - performance threshold
+              - tm: contract duration
+              - pc: principal's contribution
+              - rf: revenue rate function
+              - k: performance threshold
             %}
             
             tm = 20;
-            h = [0 100;
-                5 150;
-                10 150;
-                15 200];
             
-            fare = 72/10e7;
+            pc_time = [0, 5, 10, 15];
+            pc_value = [100, 150, 150, 200];
+            pc = PaymentSchedule();
+            pc.buildFromVectors(pc_time, pc_value, Transaction.CONTRIBUTION);
+            
+            fare = 720/10e7;
             
             rf = @(d)revenueRate(d, fare);
-            k = 60;
+            k = 80;
             
             theMsg.submitResponse(Information.CONTRACT_DURATION, tm, ...
-                Information.PAYMENT_SCHEDULE, h, ...
+                Information.PAYMENT_SCHEDULE, pc, ...
                 Information.REVENUE_RATE_FUNC, rf, ...
                 Information.PERFORMANCE_THRESHOLD, k, ...
                 Information.FARE, fare);

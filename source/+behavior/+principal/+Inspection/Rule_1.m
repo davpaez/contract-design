@@ -86,7 +86,7 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setParams_UpperBounds([ 5 ]);
             
 			% Set default parameters value
-			thisRule.setParams_Value( [2] );
+			thisRule.setParams_Value( [0.5] );
             
             % Set as Non-adaptive
             thisRule.setTypeRule_Sensitivity(DecisionRule.SENSITIVE);
@@ -128,7 +128,7 @@ classdef Rule_1 < managers.DecisionRule
             Output
                 
         %}
-        function timeNextInspection = mainAlgorithm(thisRule, theMsg)
+        function mainAlgorithm(thisRule, theMsg)
             import dataComponents.Event
             import managers.Information
             
