@@ -208,10 +208,10 @@ function table1_callback(hObject, callbackdata)
         % Information
         typeExp = selectedExp.returnItemSetting(ItemSetting.TYPE_EXP).value;
         numRlz = selectedExp.returnItemSetting(ItemSetting.NUM_REALIZ).value;
-        inspectionStrategy = selectedExp.returnItemSetting(ItemSetting.STRATS_INSP);
-        penaltyStrategy = selectedExp.returnItemSetting(ItemSetting.PEN_POLICY);
-        volMaintStrategy = selectedExp.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
-        mandMaintStrategy = selectedExp.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
+        inspectionFaculty = selectedExp.returnItemSetting(ItemSetting.STRATS_INSP);
+        penaltyFaculty = selectedExp.returnItemSetting(ItemSetting.PEN_POLICY);
+        volMaintFaculty = selectedExp.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
+        mandMaintFaculty = selectedExp.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
         
         description = cell(1,0);
         
@@ -219,10 +219,10 @@ function table1_callback(hObject, callbackdata)
         description{end+1} = [''];
         description{end+1} = ['Realizations per game:  ', num2str(numRlz)];
         description{end+1} = [''];
-        description{end+1} = ['Inspection strategy: ', num2str(inspectionStrategy.getIndexSelectedStrategy())];
-        description{end+1} = ['Penalty strategy: ', num2str(penaltyStrategy.getIndexSelectedStrategy())];
-        description{end+1} = ['Vol maint strategy: ', num2str(volMaintStrategy.getIndexSelectedStrategy())];
-        description{end+1} = ['Mand maint strategy: ', num2str(mandMaintStrategy.getIndexSelectedStrategy())];
+        description{end+1} = ['Inspection strategy: ', inspectionFaculty.selectedStrategy.id];
+        description{end+1} = ['Penalty strategy: ', penaltyFaculty.selectedStrategy.id];
+        description{end+1} = ['Vol maint strategy: ', volMaintFaculty.selectedStrategy.id];
+        description{end+1} = ['Mand maint strategy: ', mandMaintFaculty.selectedStrategy.id];
         
         htext2.String = description;
     else
