@@ -115,10 +115,10 @@ classdef Rule_1 < managers.DecisionRule
             
             thePrincipal = theMsg.getExecutor();
             
-            penaltyPayoffs = thePrincipal.payoff.returnPayoffsOfType(Transaction.PENALTY);
-            pmax = thePrincipal.contract.getMaxSumPenalties();
+            penaltyPayoffs = thePrincipal.payoffList.returnPayoffsOfType(Transaction.PENALTY);
+            pmax = 500; % Arbitrary value
 
-            sumPastPenalties = sum(penaltyPayoffs.value);
+            sumPastPenalties = sum(penaltyPayoffs.valueFlow);
 			
 			n = 10;
 			valueSinglePenalty = pmax / n;
@@ -127,10 +127,10 @@ classdef Rule_1 < managers.DecisionRule
 			
 			assert(slack >= 0)
             
-			if slack > valueSinglePenalty
-				valuePenaltyFee = valueSinglePenalty;
-			else
-				valuePenaltyFee = slack;
+            if slack > valueSinglePenalty
+                valuePenaltyFee = valueSinglePenalty;
+            else
+                valuePenaltyFee = slack;
             end
             
             theMsg.submitResponse(Information.VALUE_PENALTY_FEE, valuePenaltyFee);
