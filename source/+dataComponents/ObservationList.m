@@ -3,6 +3,8 @@
 
 TODO
 
+List properties are stored as column arrays.
+
 %}
 
 classdef ObservationList < matlab.mixin.Copyable
@@ -30,18 +32,18 @@ classdef ObservationList < matlab.mixin.Copyable
         value
         
         % Calculated properties
-        cumSum
+        cumsum
         area
         average
-        meanValue
+        meanvalue
         deviation
         
         % Auxiliary properties
         
         state           % Updated status of each table field
         
-        jumpsIndex      % Indices corresponding to all pre-jump indices
-        jumpsCounter = 0
+        jumpsindex      % Indices corresponding to all pre-jump indices
+        jumpscounter = 0
     end
     
     methods
@@ -67,11 +69,11 @@ classdef ObservationList < matlab.mixin.Copyable
             self.time = zeros(self.BLOCKSIZE,1);
             self.value = zeros(self.BLOCKSIZE,1);
             
-            % Calculated lists                                     Number
-            self.cumSum = zeros(self.BLOCKSIZE,1);            %(1)
+            % Calculated lists                                Number
+            self.cumsum = zeros(self.BLOCKSIZE,1);            %(1)
             self.area = zeros(self.BLOCKSIZE,1);              %(2)
             self.average = zeros(self.BLOCKSIZE,1);           %(3)
-            self.meanValue = zeros(self.BLOCKSIZE,1);         %(4)
+            self.meanvalue = zeros(self.BLOCKSIZE,1);         %(4)
             self.deviation = zeros(self.BLOCKSIZE,1);         %(5)
             
             % Update if more calculated lists are added!
@@ -81,7 +83,7 @@ classdef ObservationList < matlab.mixin.Copyable
             self.state = false(self.BLOCKSIZE, numberCalculatedLists);
             
             % Auxiliary lists
-            self.jumpsIndex = zeros(self.JUMPBLOCKSIZE, 1);
+            self.jumpsindex = zeros(self.JUMPBLOCKSIZE, 1);
         end
         
         
@@ -139,6 +141,7 @@ classdef ObservationList < matlab.mixin.Copyable
             Output
                 
         %}
+            self.computeLists();
             
             if nargin < 2
                 lastValidIndex = self.pt - 1;
@@ -147,18 +150,23 @@ classdef ObservationList < matlab.mixin.Copyable
             
             st = struct();
             
+            % Registered lists
             st.time = self.time(ids);
             st.value = self.value(ids);
-            st.cumSum = self.cumSum(ids);
+            
+            % Calculated lists
+            st.cumsum = self.cumsum(ids);
             st.area = self.area(ids);
             st.average = self.average(ids);
-            st.meanValue = self.meanValue(ids);
+            st.meanvalue = self.meanvalue(ids);
             st.deviation = self.deviation(ids);
             
+            % State list
             st.state = self.state(ids);
             
+            % Auxiliary list
             if nargin == 1
-                st.jumpsIndex = self.jumpsIndex(1:self.jumpsCounter);
+                st.jumpsindex = self.jumpsindex(1:self.jumpscounter);
             end
         end
         
@@ -230,10 +238,10 @@ classdef ObservationList < matlab.mixin.Copyable
             self.value(self.pt+1:self.listSize, :) = 0;
             
             % Extends calculated lists
-            self.cumSum(self.pt+1:self.listSize, :) = 0;
+            self.cumsum(self.pt+1:self.listSize, :) = 0;
             self.area(self.pt+1:self.listSize, :) = 0;
             self.average(self.pt+1:self.listSize, :) = 0;
-            self.meanValue(self.pt+1:self.listSize, :) = 0;
+            self.meanvalue(self.pt+1:self.listSize, :) = 0;
             self.deviation(self.pt+1:self.listSize, :) = 0;
             
             % Extends state matrix for all lists (columns)
@@ -243,7 +251,7 @@ classdef ObservationList < matlab.mixin.Copyable
         
         function extendJumpsArray(self)
         %{
-        * Extends array of jumpsIndex
+        * Extends array of jumpsindex
         
             Input
             
@@ -252,7 +260,7 @@ classdef ObservationList < matlab.mixin.Copyable
         %}
             
             self.listJumpsSize = self.listJumpsSize + self.JUMPBLOCKSIZE;
-            self.jumpsIndex(self.jumpsCounter+1:self.listJumpsSize, :) = 0;
+            self.jumpsindex(self.jumpscounter+1:self.listJumpsSize, :) = 0;
         end
         
         
@@ -268,12 +276,12 @@ classdef ObservationList < matlab.mixin.Copyable
                 
         %}
             
-            self.jumpsCounter = self.jumpsCounter + 1;
+            self.jumpscounter = self.jumpscounter + 1;
             
             % Registers the pre-jump index!
-            self.jumpsIndex(self.jumpsCounter) = self.pt-1;
+            self.jumpsindex(self.jumpscounter) = self.pt-1;
             
-            if self.jumpsCounter + (self.JUMPBLOCKSIZE/10) > self.listJumpsSize
+            if self.jumpscounter + (self.JUMPBLOCKSIZE/10) > self.listJumpsSize
                 self.extendJumpsArray();
             end
         end
@@ -302,10 +310,10 @@ classdef ObservationList < matlab.mixin.Copyable
             end
             
             if self.state(index,stateColNumber) == true
-                cumSumValue = self.cumSum(index);
+                cumSumValue = self.cumsum(index);
             else
                 cumSumValue = sum(self.value(1:index));
-                self.cumSum(index) = cumSumValue;
+                self.cumsum(index) = cumSumValue;
                 self.state(index,stateColNumber) = true;
             end
         end
@@ -402,14 +410,14 @@ classdef ObservationList < matlab.mixin.Copyable
             end
             
             if self.state(index,stateColNumber) == true
-                m = self.meanValue(index);
+                m = self.meanvalue(index);
             else
                 if index == 1
                     m = self.getValue(index);
                 else
                     m = self.getArea(index)/(self.time(index)-self.time(1));
                 end
-                self.meanValue(index) = m;
+                self.meanvalue(index) = m;
                 self.state(index,stateColNumber) = true;
             end
         end
@@ -443,6 +451,19 @@ classdef ObservationList < matlab.mixin.Copyable
                 dev = std(self.value(1:index));
                 self.deviation(index) = dev;
                 self.state(index,stateColNumber) = true;
+            end
+        end
+        
+        
+        function computeLists(self)
+            lastValidIndex = self.pt-1;
+            
+            for i=1:lastValidIndex
+                self.getCumSum(i);
+                self.getArea(i);
+                self.getAverage(i);
+                self.getMeanValue(i);
+                self.getDeviation(i);
             end
         end
         
@@ -521,7 +542,7 @@ classdef ObservationList < matlab.mixin.Copyable
             
             for i=1:lastValidIndex
                 st.time(i) = self.time(i);
-                st.meanValue(i) = self.getMeanValue(i);
+                st.meanvalue(i) = self.getMeanValue(i);
             end
         end
         
@@ -551,11 +572,11 @@ classdef ObservationList < matlab.mixin.Copyable
             jumpPair = [];
             
             % Maximum index of jumpsIndex list
-            i = self.jumpsCounter;
+            i = self.jumpscounter;
             
             while i >= 1
                 
-                origIndex = self.jumpsIndex(i);
+                origIndex = self.jumpsindex(i);
                 timeJump = self.time(origIndex);
                 
                 if timeJump <= time
