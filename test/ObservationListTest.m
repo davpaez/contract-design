@@ -208,7 +208,7 @@ function [o1, indexLastPreJump, timeLastJump, valueLastPreJump, valueLastPostJum
 % * A jump is defined as pair of consecutive observations which share the
 %   same time of occurrence
 
-    numAleat = round(rand()*10000);
+    numAleat = round(rand()*1000);
     values = rand(numAleat,1);
     
     o1 = dataComponents.ObservationList();
