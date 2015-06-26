@@ -1,13 +1,19 @@
+%{
+
+Variable names for UI elements must be enumerated incrementally according
+their position in its parent panel in the direction left to right and top
+to bottom.
+
+Initialization tasks
+http://www.mathworks.com/help/matlab/creating_guis/initializing-a-programmatic-gui.html
+
+Construct the components
+http://www.mathworks.com/help/matlab/creating_guis/creating-figures-for-programmatic-guis.html
+http://www.mathworks.com/help/matlab/creating_guis/adding-components-to-a-programmatic-gui.html
+
+%}
+
 function gui()
-% MYGUI Brief description of GUI.
-%       Comments displayed at the command line in response 
-%       to the help command. 
-
-% (Leave a blank line following the help.)
-
-
-%%  Initialization tasks
-% http://www.mathworks.com/help/matlab/creating_guis/initializing-a-programmatic-gui.html
 
 close all
 
@@ -18,9 +24,6 @@ layoutMainWindow(gui_State);
 
 end
 
-%%  Construct the components
-% http://www.mathworks.com/help/matlab/creating_guis/creating-figures-for-programmatic-guis.html
-% http://www.mathworks.com/help/matlab/creating_guis/adding-components-to-a-programmatic-gui.html
 
 
 function layoutMainWindow(gui_State)
