@@ -53,7 +53,7 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TIME_RES);
-data.value = 1/365;
+data.value = round(1*(1/365)*(1/10), 4);
 
 progSet.add(data);
 
@@ -79,7 +79,7 @@ progSet.add(fnc);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
-data.value = 500;
+data.value = 100;
 
 progSet.add(data);
 

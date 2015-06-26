@@ -14,5 +14,6 @@ import managers.*
 addpath('experiments');
 progSettings = ex8.settings();
 experim = Experiment(progSettings);
-experim.run()
-%experim.report()
+
+experim.run();
+data = experim.report();
