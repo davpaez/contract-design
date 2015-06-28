@@ -141,11 +141,13 @@ classdef GameEvaluation < handle
             n = self.numRealizations;
             
             data = cell(n,1);
+            realz = self.realizations;
             
-            for i = 1:n
-                data{i} = self.realizations{i}.report();
+            parfor i = 1:n
+                r = realz{i};
+                d = r.report();
+                data{i} = d;
             end
-                
         end
         
     end
