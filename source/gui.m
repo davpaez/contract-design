@@ -86,35 +86,54 @@ function layoutMainWindow(gui_State)
         'Tag', 'panel4');
     
     %% Buttons
-    
+    % Browse button
     button1 = uicontrol(panel1, ...
         'Style', 'pushbutton', ...
         'String', 'Browse...',...
         'Position', [20 15 80 30],...
         'Callback', @button1_callback, ...
-        'Tag', 'browseFolder');
-
-    button2 = uicontrol(panel2, ...
+        'Tag', 'button1');
+    
+    % Load experiment button
+    button2 = uicontrol(panel1, ...
         'Style', 'pushbutton', ...
-        'String', 'Set custom parameters',...
-        'Position', [20 15 150 30],...
-        'Callback', [], ...
+        'String', 'Load', ...
+        'Position', [110 15 80 30],...
+        'Callback', @button2_callback, ...
         'Tag', 'button2');
     
-    button3 = uicontrol(panel3, ...
+    % Custom parameters button
+    button3 = uicontrol(panel2, ...
         'Style', 'pushbutton', ...
-        'String', 'Run', ...
+        'String', 'Set custom parameters',...
         'Position', [20 15 150 30],...
         'Callback', @button3_callback, ...
         'Tag', 'button3');
     
-    button5 = uicontrol(panel1, ...
+    % Run button
+    button4 = uicontrol(panel3, ...
         'Style', 'pushbutton', ...
-        'String', 'Load', ...
-        'Position', [110 15 80 30],...
+        'String', 'Run', ...
+        'Position', [20 15 150 30],...
+        'Callback', @button4_callback, ...
+        'Tag', 'button4');
+    
+    % Report experiment button    button4 = uicontrol(panel3, ...
+    button5 = uicontrol(panel4, ...
+        'Style', 'pushbutton', ...
+        'String', 'Show report...', ...
+        'Position', [20 15 150 30],...
         'Callback', @button5_callback, ...
         'Tag', 'button5');
-
+    
+    % Save experiment button
+    button6 = uicontrol(panel4, ...
+        'Style', 'pushbutton', ...
+        'String', 'Save experiment...', ...
+        'Position', [190 15 150 30],...
+        'Callback', @button6_callback, ...
+        'Tag', 'button6');
+    
     %% Static text
     
     text1 = uicontrol(  panel1,...
@@ -179,7 +198,7 @@ end
 
 
 function button1_callback(hObject, callbackdata)
-% Button for browsing folder with experiments
+% Opens file exporer to select folder with experiments
     
     folderExperiments = uigetdir();
     
@@ -188,6 +207,98 @@ function button1_callback(hObject, callbackdata)
         htext1 = findobj('Tag','text1');
         htext1.String = folderExperiments;
     end
+end
+
+
+function button2_callback(hObject, callbackdata)
+% Loads experiment
+
+    htext1 = findobj('Tag','text1');
+    folderExperiments = htext1.String;
+
+    if ischar(folderExperiments)
+
+        [tableData exp_array] = searchExperiments(folderExperiments);
+
+        htext2 = findobj('Tag', 'text2');
+        htext2.String = [':::  ', num2str(length(exp_array)), ' experiments successfully loaded.','  :::'];
+
+        htable1 = findobj('Tag','table1');
+        htable1.Data = tableData;
+
+        hpanel2 = findobj('Tag', 'panel2');
+
+        if length(exp_array) > 0
+            setappdata(hpanel2, 'array_progsettings', exp_array);
+        else
+            rmappdata(hpanel2, 'array_progsettings');
+        end
+    end
+end
+
+
+function button3_callback(hObject, callbackdata)
+% Set custom parameters for decision rules
+    
+end
+
+
+function button4_callback(hObject, callbackdata)
+% Runs selected experiment
+    
+    import managers.Experiment
+    
+    hpanel2 = findobj('Tag', 'panel2');
+    progSettings = getappdata(hpanel2, 'current_progsettings');
+    
+    experiment = Experiment(progSettings);
+    experiment.run()
+    
+    hpanel3 = findobj('Tag', 'panel3');
+    setappdata(hpanel3, 'experiment', experiment);
+    
+end
+
+
+function button5_callback(hObject, callbackdata)
+% Reports experiment
+    
+    import managers.Experiment
+    
+    hpanel3 = findobj('Tag', 'panel3');
+    experiment = getappdata(hpanel3, 'experiment');
+    typeExperiment = experiment.typeExp;
+    
+    hpanel4 = findobj('Tag', 'panel4');
+    
+    switch typeExperiment
+        
+        case Experiment.SING
+            data = experiment.report();
+            setappdata(hpanel4, 'reportSingle', data);
+            
+            % Launches report window
+            %TODO
+            
+        case Experiment.DISP
+            data = experiment.report();
+            setappdata(hpanel4, 'reportDispersion', data);
+            
+            % Launches report window
+            %TODO
+            
+        case Experiment.SENS
+            
+        case Experiment.OPT
+            
+    end
+end
+
+
+function button6_callback(hObject, callbackdata)
+% Saves experiment
+
+
 end
 
 
@@ -231,71 +342,6 @@ function table1_callback(hObject, callbackdata)
     else
         rmappdata(hpanel2, 'current_progsettings');
         htext2.String = 'No experiment has been selected.';
-    end
-end
-
-
-function button3_callback(hObject, callbackdata)
-% Runs selected experiment
-    
-    import managers.Experiment
-    
-    hpanel2 = findobj('Tag', 'panel2');
-    progSettings = getappdata(hpanel2, 'current_progsettings');
-    
-    experiment = Experiment(progSettings);
-    experiment.run()
-    
-    hpanel3 = findobj('Tag', 'panel3');
-    setappdata(hpanel3, 'experiment', experiment);
-    
-    hpanel4 = findobj('Tag', 'panel4');
-    
-    deleteChildHandles(hpanel4);
-    
-    typeExperiment = experiment.typeExp;
-    
-    switch typeExperiment
-        case Experiment.SING
-            data = experiment.report();
-            setappdata(hpanel4, 'reportSingle', data);
-            layout_SING()
-            
-        case Experiment.DISP
-            data = experiment.report();
-            setappdata(hpanel4, 'reportDispersion', data);
-            layout_DISP()
-            
-        case Experiment.SENS
-            
-        case Experiment.OPT
-            
-    end
-end
-
-
-function button5_callback(hObject, callbackdata)
-
-    htext1 = findobj('Tag','text1');
-    folderExperiments = htext1.String;
-
-    if ischar(folderExperiments)
-
-        [tableData exp_array] = searchExperiments(folderExperiments);
-
-        htext2 = findobj('Tag', 'text2');
-        htext2.String = [':::  ', num2str(length(exp_array)), ' experiments successfully loaded.','  :::'];
-
-        htable1 = findobj('Tag','table1');
-        htable1.Data = tableData;
-
-        hpanel2 = findobj('Tag', 'panel2');
-
-        if length(exp_array) > 0
-            setappdata(hpanel2, 'array_progsettings', exp_array);
-        else
-            rmappdata(hpanel2, 'array_progsettings');
-        end
     end
 end
 
