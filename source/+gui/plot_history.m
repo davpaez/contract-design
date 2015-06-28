@@ -1,20 +1,11 @@
-function plotRealization(hObject, callbackdata)
+function plot_history(panel, data)
 % Show the history of a SING experiment
 
 import dataComponents.Event
 
-hFigure = figure( 'Name', 'Realization report', ...
-    'NumberTitle', 'off', ...
-    'MenuBar','none',...
-    'Toolbar','figure',...
-    'Units', 'pixels', ...
-    'Position', [100 100 600 600],...
-    'Visible','off', ...
-    'Tag', 'realiz');
+%hpanel4 = findobj('Tag', 'panel4');
 
-hpanel4 = findobj('Tag', 'panel4');
-
-data = getappdata(hpanel4, 'reportSingle');
+%data = getappdata(hpanel4, 'reportSingle');
 
 horiz_margin = 0.05;
 vert_margin = 0.05;
@@ -29,11 +20,11 @@ posVec2 = [0.1    0.375      width   height];
 posVec3 = [0.1    0.07                 width   height];
 
 ax1 = subplot('Position', posVec1, ...
-    'Parent', hFigure);
+    'Parent', panel);
 ax2 = subplot('Position', posVec2, ...
-    'Parent', hFigure);
+    'Parent', panel);
 ax3 = subplot('Position', posVec3, ...
-    'Parent', hFigure);
+    'Parent', panel);
 
 % Figure 1. Interaction sequence
 
@@ -156,8 +147,5 @@ ylabel(ax3, 'Mean performance')
 
 % Synchronize axes limits
 linkaxes([ax1,ax2,ax3],'x')
-
-
-hFigure.Visible = 'on';
 
 end

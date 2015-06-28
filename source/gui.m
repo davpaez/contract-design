@@ -227,11 +227,14 @@ function button2_callback(hObject, callbackdata)
         htable1.Data = tableData;
 
         hpanel2 = findobj('Tag', 'panel2');
-
+        
+        % Remove all appdata
+        remove_programsettings();
+        remove_experiment();
+        remove_reports();
+        
         if length(exp_array) > 0
             setappdata(hpanel2, 'array_progsettings', exp_array);
-        else
-            rmappdata(hpanel2, 'array_progsettings');
         end
     end
 end
@@ -248,6 +251,9 @@ function button4_callback(hObject, callbackdata)
     
     import managers.Experiment
     
+    remove_experiment();
+    remove_reports();
+    
     hpanel2 = findobj('Tag', 'panel2');
     progSettings = getappdata(hpanel2, 'current_progsettings');
     
@@ -255,8 +261,8 @@ function button4_callback(hObject, callbackdata)
     experiment.run()
     
     hpanel3 = findobj('Tag', 'panel3');
-    setappdata(hpanel3, 'experiment', experiment);
     
+    setappdata(hpanel3, 'experiment', experiment);
 end
 
 
@@ -274,15 +280,21 @@ function button5_callback(hObject, callbackdata)
     switch typeExperiment
         
         case Experiment.SING
-            data = experiment.report();
-            setappdata(hpanel4, 'reportSingle', data);
+            data = getappdata(hpanel4, 'reportSingle');
+            if isempty(data)
+                data = experiment.report();
+                setappdata(hpanel4, 'reportSingle', data);
+            end
             
             % Launches report window
             gui.report_single()
             
         case Experiment.DISP
-            data = experiment.report();
-            setappdata(hpanel4, 'reportDispersion', data);
+            data = getappdata(hpanel4, 'reportDispersion');
+            if isempty(data)
+                data = experiment.report();
+                setappdata(hpanel4, 'reportDispersion', data);
+            end
             
             % Launches report window
             %TODO
@@ -557,5 +569,44 @@ function deleteChildHandles(h)
     for i=1:length(child_handles)
         h = child_handles(i);
         delete(h);
+    end
+end
+
+
+function remove_programsettings()
+% Removes program settings app data
+
+    hpanel2 = findobj('Tag', 'panel2');
+    
+    % Program settings
+    if isappdata(hpanel2, 'array_progsettings')
+        rmappdata(hpanel2, 'array_progsettings');
+    end
+end
+
+function remove_experiment()
+% Removes experiment app data
+
+    hpanel3 = findobj('Tag', 'panel3');
+    
+    % Experiment
+    if isappdata(hpanel3, 'experiment')
+        rmappdata(hpanel3, 'experiment');
+    end
+end
+
+function remove_reports()
+% Removes reports app data
+
+    hpanel4 = findobj('Tag', 'panel4');
+    
+    % Report single
+    if isappdata(hpanel4, 'reportSingle')
+        rmappdata(hpanel4, 'reportSingle');
+    end
+    
+    % Report dispersion
+    if isappdata(hpanel4, 'reportDispersion')
+        rmappdata(hpanel4, 'reportDispersion');
     end
 end
