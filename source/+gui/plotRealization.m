@@ -154,6 +154,10 @@ xlabel(ax3, 'Time')
 ylabel(ax3, 'Mean performance')
 
 
+% Synchronize axes limits
+linkaxes([ax1,ax2,ax3],'x')
+
+
 hFigure.Visible = 'on';
 
 end
