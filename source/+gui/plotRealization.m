@@ -142,8 +142,8 @@ hold(ax3, 'on')
 grid(ax3, 'on');
 
 plot(ax3, ...
-    data.perceivedPerfMeanValue.time, data.perceivedPerfMeanValue.meanValue, '-o', ...
-    data.realPerfMeanValue.time, data.realPerfMeanValue.meanValue,'-.');
+    data.perceivedPerfMeanValue.time, data.perceivedPerfMeanValue.meanvalue, '-o', ...
+    data.realPerfMeanValue.time, data.realPerfMeanValue.meanvalue,'-.');
 
 
 %plot(perfHistory.time,perfHistory.value, 'Color', [0.9 0.9 0.9])

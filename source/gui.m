@@ -278,7 +278,7 @@ function button5_callback(hObject, callbackdata)
             setappdata(hpanel4, 'reportSingle', data);
             
             % Launches report window
-            %TODO
+            gui.report_single()
             
         case Experiment.DISP
             data = experiment.report();
