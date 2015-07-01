@@ -743,31 +743,59 @@ classdef Realization < matlab.mixin.Copyable
         %}
             import dataComponents.Event
             import dataComponents.Transaction
+            import managers.DataRealization
             
             [utilityAgent, utilityPrincipal] = self.utilityPlayers();
             contractDuration = self.contract.contractDuration;
+            perfThreshold = self.contract.perfThreshold;
+            inspection_markers = self.principal.eventList.getMarkersInfo(Event.INSPECTION, self.principal.observationList);
+            detection_markers = self.principal.eventList.getMarkersInfo(Event.DETECTION, self.principal.observationList);
             
-            dataPayoffPrincipal = self.principal.payoffList.getData();
-            dataPayoffAgent = self.agent.payoffList.getData();
+            data = DataRealization();
             
-            data = struct(...
-                'ua',                       utilityAgent, ...
-                'up',                       utilityPrincipal, ...
-                'contractDuration',         contractDuration, ...
-                'threshold',                self.contract.perfThreshold, ...
-                'maxPerf',                  self.infrastructure.maxPerf, ...
-                'nullPerf',                 self.infrastructure.nullPerf, ...
-                'perfHistory' ,             self.infrastructure.history.getData(), ...
-                'inspectionMarker',         self.principal.eventList.getMarkersInfo(Event.INSPECTION, self.principal.observationList), ...
-                'detectionMarker',          self.principal.eventList.getMarkersInfo(Event.DETECTION, self.principal.observationList), ...
-                'volMaintMarker',           self.agent.eventList.getMarkersInfo(Event.VOL_MAINT, self.agent.observationList), ...
-                'shockMarker',              self.agent.eventList.getMarkersInfo(Event.SHOCK, self.agent.observationList), ...
-                'realPerfMeanValue',        self.infrastructure.history.getMeanValueHistory(), ...
-                'perceivedPerfMeanValue',   self.principal.observationList.getMeanValueHistory(), ...
-                'balP',                     self.principal.payoffList.getBalanceHistory(), ...
-                'balA',                     self.agent.payoffList.getBalanceHistory(), ...
-                'jumpsMaint',               self.agent.payoffList.returnPayoffsOfType(Transaction.MAINTENANCE), ...
-                'jumpsContrib',             self.agent.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
+            if ~isempty(inspection_markers)
+                num_insp_noviol = length(inspection_markers.time);
+            else
+                num_insp_noviol = 0;
+            end
+            
+            if ~isempty(detection_markers)
+                num_detections = length(detection_markers.time);
+            else
+                num_detections = 0;
+            end
+            
+            total_inspections = num_insp_noviol + num_detections;
+            
+            violationRatio = num_detections / total_inspections;
+            
+            data = DataRealization();
+            
+            % Double values
+            data.addEntry('ua', 'Agent''s utility', utilityAgent);
+            data.addEntry('up', 'Principal''s utility', utilityPrincipal);
+            data.addEntry('contractDuration', 'Contract duration', contractDuration);
+            data.addEntry('threshold', 'Contract duration', perfThreshold);
+            data.addEntry('maxPerf', 'Maximum performance', self.infrastructure.maxPerf);
+            data.addEntry('nullPerf', 'Null performance', self.infrastructure.nullPerf);
+            data.addEntry('numInspNoViol', 'Insp. without violation', num_insp_noviol);
+            data.addEntry('numDetections', 'Insp. with violation', num_detections);
+            data.addEntry('numInspections', 'Total inspections', total_inspections);
+            data.addEntry('violationRatio', 'Observed violation ratio', violationRatio);
+            
+            % Struct values
+            data.addEntry('perfHistory', 'Performance history', self.infrastructure.history.getData());
+            data.addEntry('inspectionMarker', 'Time and perf when inspections occurred', inspection_markers);
+            data.addEntry('detectionMarker', 'Time and perf when detections occurred', detection_markers);
+            data.addEntry('volMaintMarker', 'Time and perf when vol maints occurred', self.agent.eventList.getMarkersInfo(Event.VOL_MAINT, self.agent.observationList));
+            data.addEntry('shockMarker', 'Time and perf when shocks occurred', self.agent.eventList.getMarkersInfo(Event.SHOCK, self.agent.observationList));
+            data.addEntry('realPerfMeanValue', 'History of actual perf mean value', self.infrastructure.history.getMeanValueHistory());
+            data.addEntry('perceivedPerfMeanValue', 'History of perceived perf mean value', self.principal.observationList.getMeanValueHistory());
+            data.addEntry('balA', 'Agent''s balance', self.agent.payoffList.getBalanceHistory());
+            data.addEntry('balP', 'Principal''s balance', self.principal.payoffList.getBalanceHistory());
+            data.addEntry('jumpsMaint', 'Time and balance just before a jump due to maint', self.agent.payoffList.returnPayoffsOfType(Transaction.MAINTENANCE));
+            data.addEntry('jumpsContrib', 'Time and balance just before a jump due to flow', self.agent.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
+            data.addEntry('jumpsPenalties', 'Time and balance just before a jump due to a penalty', self.agent.payoffList.returnPayoffsOfType(Transaction.PENALTY));
         end
         
     end

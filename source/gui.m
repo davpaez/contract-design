@@ -1,13 +1,19 @@
+%{
+
+Variable names for UI elements must be enumerated incrementally according
+their position in its parent panel in the direction left to right and top
+to bottom.
+
+Initialization tasks
+http://www.mathworks.com/help/matlab/creating_guis/initializing-a-programmatic-gui.html
+
+Construct the components
+http://www.mathworks.com/help/matlab/creating_guis/creating-figures-for-programmatic-guis.html
+http://www.mathworks.com/help/matlab/creating_guis/adding-components-to-a-programmatic-gui.html
+
+%}
+
 function gui()
-% MYGUI Brief description of GUI.
-%       Comments displayed at the command line in response 
-%       to the help command. 
-
-% (Leave a blank line following the help.)
-
-
-%%  Initialization tasks
-% http://www.mathworks.com/help/matlab/creating_guis/initializing-a-programmatic-gui.html
 
 close all
 
@@ -18,9 +24,6 @@ layoutMainWindow(gui_State);
 
 end
 
-%%  Construct the components
-% http://www.mathworks.com/help/matlab/creating_guis/creating-figures-for-programmatic-guis.html
-% http://www.mathworks.com/help/matlab/creating_guis/adding-components-to-a-programmatic-gui.html
 
 
 function layoutMainWindow(gui_State)
@@ -30,7 +33,7 @@ function layoutMainWindow(gui_State)
     heightScreen = ss(4);
 
     widthWindow = 900;
-    heightWindow = 600;
+    heightWindow = 500;
     
     gui_State.window_props.wh = [widthWindow, heightWindow];
     
@@ -64,54 +67,73 @@ function layoutMainWindow(gui_State)
     
     panel1 = uipanel(hMain, 'Title', 'Select experiments folder', ...
         'Units', 'pixels', ...
-        'Position', [20 520 width_panels 70], ...
+        'Position', [20 420 width_panels 70], ...
         'Tag', 'panel1');
     
     panel2 = uipanel(hMain, 'Title', 'Choose experiment', ...
         'Units', 'pixels', ...
-        'Position', [20 280 width_panels 230], ...
+        'Position', [20 190 width_panels 230], ...
         'Tag', 'panel2');
     
     panel3 = uipanel(hMain, 'Title', 'Run experiment', ...
         'Units', 'pixels', ...
-        'Position', [20 190 width_panels 80], ...
+        'Position', [20 100 width_panels 80], ...
         'Tag', 'panel3');
     
     panel4 = uipanel(hMain, 'Title', 'Results', ...
         'Units', 'pixels', ...
-        'Position', [20 20 width_panels 160], ...
+        'Position', [20 10 width_panels 80], ...
         'Tag', 'panel4');
     
     %% Buttons
-    
-    btn_browseFolder = uicontrol(panel1, ...
+    % Browse button
+    button1 = uicontrol(panel1, ...
         'Style', 'pushbutton', ...
         'String', 'Browse...',...
         'Position', [20 15 80 30],...
-        'Callback', @btn_browseFolder_callback, ...
-        'Tag', 'browseFolder');
-
-    button2 = uicontrol(panel2, ...
+        'Callback', @button1_callback, ...
+        'Tag', 'button1');
+    
+    % Load experiment button
+    button2 = uicontrol(panel1, ...
         'Style', 'pushbutton', ...
-        'String', 'Set custom parameters',...
-        'Position', [20 15 150 30],...
-        'Callback', [], ...
+        'String', 'Load', ...
+        'Position', [110 15 80 30],...
+        'Callback', @button2_callback, ...
         'Tag', 'button2');
     
-    button3 = uicontrol(panel3, ...
+    % Custom parameters button
+    button3 = uicontrol(panel2, ...
         'Style', 'pushbutton', ...
-        'String', 'Run', ...
+        'String', 'Set custom parameters',...
         'Position', [20 15 150 30],...
         'Callback', @button3_callback, ...
         'Tag', 'button3');
     
-    button5 = uicontrol(panel1, ...
+    % Run button
+    button4 = uicontrol(panel3, ...
         'Style', 'pushbutton', ...
-        'String', 'Load', ...
-        'Position', [110 15 80 30],...
+        'String', 'Run', ...
+        'Position', [20 15 150 30],...
+        'Callback', @button4_callback, ...
+        'Tag', 'button4');
+    
+    % Report experiment button    button4 = uicontrol(panel3, ...
+    button5 = uicontrol(panel4, ...
+        'Style', 'pushbutton', ...
+        'String', 'Show report...', ...
+        'Position', [20 15 150 30],...
         'Callback', @button5_callback, ...
         'Tag', 'button5');
-
+    
+    % Save experiment button
+    button6 = uicontrol(panel4, ...
+        'Style', 'pushbutton', ...
+        'String', 'Save experiment...', ...
+        'Position', [190 15 150 30],...
+        'Callback', @button6_callback, ...
+        'Tag', 'button6');
+    
     %% Static text
     
     text1 = uicontrol(  panel1,...
@@ -175,8 +197,8 @@ end
 % http://www.mathworks.com/help/matlab/creating_guis/adding-components-to-a-programmatic-gui.html
 
 
-function btn_browseFolder_callback(hObject, callbackdata)
-% Button for browsing folder with experiments
+function button1_callback(hObject, callbackdata)
+% Opens file exporer to select folder with experiments
     
     folderExperiments = uigetdir();
     
@@ -185,6 +207,110 @@ function btn_browseFolder_callback(hObject, callbackdata)
         htext1 = findobj('Tag','text1');
         htext1.String = folderExperiments;
     end
+end
+
+
+function button2_callback(hObject, callbackdata)
+% Loads experiment
+
+    htext1 = findobj('Tag','text1');
+    folderExperiments = htext1.String;
+
+    if ischar(folderExperiments)
+
+        [tableData exp_array] = searchExperiments(folderExperiments);
+
+        htext2 = findobj('Tag', 'text2');
+        htext2.String = [':::  ', num2str(length(exp_array)), ' experiments successfully loaded.','  :::'];
+
+        htable1 = findobj('Tag','table1');
+        htable1.Data = tableData;
+
+        hpanel2 = findobj('Tag', 'panel2');
+        
+        % Remove all appdata
+        remove_programsettings();
+        remove_experiment();
+        remove_reports();
+        
+        if length(exp_array) > 0
+            setappdata(hpanel2, 'array_progsettings', exp_array);
+        end
+    end
+end
+
+
+function button3_callback(hObject, callbackdata)
+% Set custom parameters for decision rules
+    
+end
+
+
+function button4_callback(hObject, callbackdata)
+% Runs selected experiment
+    
+    import managers.Experiment
+    
+    remove_experiment();
+    remove_reports();
+    
+    hpanel2 = findobj('Tag', 'panel2');
+    progSettings = getappdata(hpanel2, 'current_progsettings');
+    
+    experiment = Experiment(progSettings);
+    experiment.run()
+    
+    hpanel3 = findobj('Tag', 'panel3');
+    
+    setappdata(hpanel3, 'experiment', experiment);
+end
+
+
+function button5_callback(hObject, callbackdata)
+% Reports experiment
+    
+    import managers.Experiment
+    
+    hpanel3 = findobj('Tag', 'panel3');
+    experiment = getappdata(hpanel3, 'experiment');
+    typeExperiment = experiment.typeExp;
+    
+    hpanel4 = findobj('Tag', 'panel4');
+    
+    switch typeExperiment
+        
+        case Experiment.SING
+            data = getappdata(hpanel4, 'reportSingle');
+            if isempty(data)
+                data = experiment.report();
+                setappdata(hpanel4, 'reportSingle', data);
+            end
+            
+            % Launches report window
+            gui.report_single()
+            
+        case Experiment.DISP
+            data = getappdata(hpanel4, 'reportDispersion');
+            if isempty(data)
+                data = experiment.report();
+                setappdata(hpanel4, 'reportDispersion', data);
+            end
+            
+            % Launches report window
+            %TODO
+            
+        case Experiment.SENS
+            
+        case Experiment.OPT
+            
+    end
+end
+
+
+function button6_callback(hObject, callbackdata)
+% Saves experiment
+
+
 end
 
 
@@ -228,71 +354,6 @@ function table1_callback(hObject, callbackdata)
     else
         rmappdata(hpanel2, 'current_progsettings');
         htext2.String = 'No experiment has been selected.';
-    end
-end
-
-
-function button3_callback(hObject, callbackdata)
-% Runs selected experiment
-    
-    import managers.Experiment
-    
-    hpanel2 = findobj('Tag', 'panel2');
-    progSettings = getappdata(hpanel2, 'current_progsettings');
-    
-    experiment = Experiment(progSettings);
-    experiment.run()
-    
-    hpanel3 = findobj('Tag', 'panel3');
-    setappdata(hpanel3, 'experiment', experiment);
-    
-    hpanel4 = findobj('Tag', 'panel4');
-    
-    deleteChildHandles(hpanel4);
-    
-    typeExperiment = experiment.typeExp;
-    
-    switch typeExperiment
-        case Experiment.SING
-            data = experiment.report();
-            setappdata(hpanel4, 'reportSingle', data);
-            layout_SING()
-            
-        case Experiment.DISP
-            data = experiment.report();
-            setappdata(hpanel4, 'reportDispersion', data);
-            layout_DISP()
-            
-        case Experiment.SENS
-            
-        case Experiment.OPT
-            
-    end
-end
-
-
-function button5_callback(hObject, callbackdata)
-
-    htext1 = findobj('Tag','text1');
-    folderExperiments = htext1.String;
-
-    if ischar(folderExperiments)
-
-        [tableData exp_array] = searchExperiments(folderExperiments);
-
-        htext2 = findobj('Tag', 'text2');
-        htext2.String = [':::  ', num2str(length(exp_array)), ' experiments successfully loaded.','  :::'];
-
-        htable1 = findobj('Tag','table1');
-        htable1.Data = tableData;
-
-        hpanel2 = findobj('Tag', 'panel2');
-
-        if length(exp_array) > 0
-            setappdata(hpanel2, 'array_progsettings', exp_array);
-        else
-            rmappdata(hpanel2, 'array_progsettings');
-        end
     end
 end
 
@@ -508,5 +569,44 @@ function deleteChildHandles(h)
     for i=1:length(child_handles)
         h = child_handles(i);
         delete(h);
+    end
+end
+
+
+function remove_programsettings()
+% Removes program settings app data
+
+    hpanel2 = findobj('Tag', 'panel2');
+    
+    % Program settings
+    if isappdata(hpanel2, 'array_progsettings')
+        rmappdata(hpanel2, 'array_progsettings');
+    end
+end
+
+function remove_experiment()
+% Removes experiment app data
+
+    hpanel3 = findobj('Tag', 'panel3');
+    
+    % Experiment
+    if isappdata(hpanel3, 'experiment')
+        rmappdata(hpanel3, 'experiment');
+    end
+end
+
+function remove_reports()
+% Removes reports app data
+
+    hpanel4 = findobj('Tag', 'panel4');
+    
+    % Report single
+    if isappdata(hpanel4, 'reportSingle')
+        rmappdata(hpanel4, 'reportSingle');
+    end
+    
+    % Report dispersion
+    if isappdata(hpanel4, 'reportDispersion')
+        rmappdata(hpanel4, 'reportDispersion');
     end
 end
