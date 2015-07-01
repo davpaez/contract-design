@@ -793,8 +793,9 @@ classdef Realization < matlab.mixin.Copyable
             data.addEntry('perceivedPerfMeanValue', 'History of perceived perf mean value', self.principal.observationList.getMeanValueHistory());
             data.addEntry('balA', 'Agent''s balance', self.agent.payoffList.getBalanceHistory());
             data.addEntry('balP', 'Principal''s balance', self.principal.payoffList.getBalanceHistory());
-            data.addEntry('jumpsMaint', 'Time and perf just before a jump due to maint', self.agent.payoffList.returnPayoffsOfType(Transaction.MAINTENANCE));
+            data.addEntry('jumpsMaint', 'Time and balance just before a jump due to maint', self.agent.payoffList.returnPayoffsOfType(Transaction.MAINTENANCE));
             data.addEntry('jumpsContrib', 'Time and balance just before a jump due to flow', self.agent.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
+            data.addEntry('jumpsPenalties', 'Time and balance just before a jump due to a penalty', self.agent.payoffList.returnPayoffsOfType(Transaction.PENALTY));
         end
         
     end

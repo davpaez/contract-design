@@ -111,8 +111,8 @@ grid(ax2, 'on');
 
 plot(ax2, data.getValue('balA').time, data.getValue('balA').balance, '-')
 plot(ax2, data.getValue('jumpsContrib').time, data.getValue('jumpsContrib').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','g', 'MarkerFaceColor', 'g');
-plot(ax2, data.getValue('jumpsMaint').time, data.getValue('jumpsMaint').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','r',  'MarkerFaceColor', 'r');
-
+plot(ax2, data.getValue('jumpsMaint').time, data.getValue('jumpsMaint').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','b',  'MarkerFaceColor', 'b');
+plot(ax2, data.getValue('jumpsPenalties').time, data.getValue('jumpsPenalties').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','r',  'MarkerFaceColor', 'r');
 
 %legend(ax2,'Discrete flow', 'Location', 'bestoutside')
 ylabel(ax2, 'Agent''s balance ($)')
