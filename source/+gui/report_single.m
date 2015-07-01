@@ -65,7 +65,22 @@ List of indicators:
 - std of actual performance
 %}
 numfields = 15;
-data_table = cell(15, 2);
-fields = fieldnames(data_exp);
+data_table = cell(0, 2);
+
+fields = {
+    'ua', ...
+    'up', ...
+    'numInspNoViol', ...
+    'numDetections', ...
+    'numInspections', ...
+    'violationRatio', ...
+    };
+
+for i=1:numel(fields)
+    data_table{i,1} = data_exp.getDescription(fields{i});
+    data_table{i,2} = data_exp.getValue(fields{i});
+end
+
+htable.Data = data_table;
 
 end
