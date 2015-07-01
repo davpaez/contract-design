@@ -85,12 +85,12 @@ classdef Rule_1 < managers.DecisionRule
             % Maximum mu so that before t=tm a shock must have
             % occurred with 95% probability
             minLambda = -(log(1-0.95)) / assumedMaxContractDuration;
-			maxLambda = 1;
+			maxLambda = 2;
             thisRule.setParams_LowerBounds([ minLambda ]);
             thisRule.setParams_UpperBounds([ maxLambda ]);
             
 			% Set default parameters value
-			thisRule.setParams_Value( [0.8] );
+			thisRule.setParams_Value( [1.5] );
 			
             % Set as Non-adaptive
             thisRule.setTypeRule_Sensitivity(DecisionRule.INSENSITIVE);
