@@ -25,7 +25,45 @@ function [ output_args ] = report_single( input_args )
     
     gui.plot_history(panel5, data)
     
+    table2 = uitable(panel6, ...
+        'Data', [],... 
+        'ColumnName', {'Field', 'Value'},...
+        'ColumnEditable', [false false], ...
+        'Position', [20 20 250 520], ...
+        'CellSelectionCallback', [], ...
+        'Tag', 'table2');
+    
+    populateFields(table2, data);
+    
     hFigure.Visible = 'on';
     
 end
 
+function populateFields(htable, data_exp)
+%{
+List of indicators:
+- Utility agent
+- Utility principal
+- Balance agent
+- Balance principal
+- Time below threshold
+- Sum penalties
+- Agent's B/C
+- # inspections
+- # detections
+- # actual violations
+- # cost of inspections
+- Observed mean value perf
+- Real mean value perf
+- Error inspection index (area between the two curves / tm)
+- cost of inspections
+- cost vol maints
+- cost mand maints
+- std of observed performance
+- std of actual performance
+%}
+numfields = 15;
+data_table = cell(15, 2);
+fields = fieldnames(data_exp);
+
+end
