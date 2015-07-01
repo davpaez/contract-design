@@ -20,6 +20,16 @@ classdef DataRealization < handle
             self.values{end+1} = val;
         end
         
+        function desc = getDescription(self, kw)
+            desc = [];
+            for i=1:numel(self.keywords)
+                if strcmp(self.keywords{i}, kw)
+                    desc = self.descriptions{i};
+                    break
+                end
+            end
+        end
+        
         function val = getValue(self, kw)
             val = [];
             for i=1:numel(self.keywords)
@@ -28,8 +38,7 @@ classdef DataRealization < handle
                     break
                 end
             end
-        end
-        
+        end        
         
     end
     
