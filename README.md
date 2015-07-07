@@ -1,24 +1,10 @@
 # README #
 
-### What is this repository for? ###
+### Publications ###
 
-This is the repository for an Agent-Based Model developed in MATLAB to simulate the performance on an infrastructure system whose operation has been delegated to a private party (e.g., a public-private partnership). 
+#### European Journal of operational Research (EJOR)
 
-### How do I use it? ###
+The model presented in the paper *A dynamic principal-agent framework for modeling the performance of infrastructure* submitted to the EJOR is freely available. Please follow these instructions:
 
-You need to have installed MATLAB 2014b or later.
-
-From the MATLAB environment, the model can be run in two ways:
-
-* By executing the `main.m` file. This runs the selected experiment without showing a GUI.
-* By executing the `gui.m` file. This lauches the GUI from which you can select an experiment to run.
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
+1. Go to the EJOR2015 branch [[Link here]](https://github.com/davpaez/contract-design/tree/EJOR2015)
+2. Clone or download
