@@ -1,29 +1,10 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+### Publications ###
 
-### What is this repository for? ###
+#### European Journal of operational Research (EJOR)
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+The model presented in the paper *A dynamic principal-agent framework for modeling the performance of infrastructure* submitted to the EJOR is freely available. Please follow these instructions:
 
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+1. Go to the EJOR2015 branch [[Link here]](https://github.com/davpaez/contract-design/tree/EJOR2015)
+2. Clone or download
