@@ -2,7 +2,7 @@
 
 ### Publications ###
 
-#### European Journal of operational Research (EJOR)
+#### European Journal of Operational Research (EJOR)
 
 The model presented in the paper *A dynamic principal-agent framework for modeling the performance of infrastructure* submitted to the EJOR is freely available. Please follow these instructions:
 
