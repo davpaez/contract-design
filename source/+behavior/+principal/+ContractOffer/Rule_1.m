@@ -133,17 +133,17 @@ classdef Rule_1 < managers.DecisionRule
               - k: performance threshold
             %}
             
-            tm = 20;
+            tm = 25;
             
             pc_time = [0, 5, 10, 15];
-            pc_value = [100, 150, 150, 200];
+            pc_value = [150, 150, 50, 50];
             pc = PaymentSchedule();
             pc.buildFromVectors(pc_time, pc_value, Transaction.CONTRIBUTION);
             
             fare = 720/10e7;
             
             rf = @(d)revenueRate(d, fare);
-            k = 80;
+            k = 70;
             
             theMsg.submitResponse(Information.CONTRACT_DURATION, tm, ...
                 Information.PAYMENT_SCHEDULE, pc, ...
@@ -168,5 +168,6 @@ function rate = revenueRate(d, fare)
     Output
         rate:   Rate of revenue
 %}
-    rate = d*fare;
+    %rate = d*fare;
+    rate = 72;
 end
