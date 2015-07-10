@@ -64,14 +64,13 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setName('Standard contract');
 
             % One decision variable: Time of voluntary maintenance
-            thisRule.setDecisionVars_Number(5);
+            thisRule.setDecisionVars_Number(4);
             
             % Nature of decision vars
             thisRule.setDecisionVars_TypeInfo({ Information.CONTRACT_DURATION; ...
                 Information.PAYMENT_SCHEDULE; ...
                 Information.REVENUE_RATE_FUNC; ...
-                Information.PERFORMANCE_THRESHOLD; ...
-                Information.FARE});
+                Information.PERFORMANCE_THRESHOLD});
             
             % Set as Sensitive
             thisRule.setTypeRule_Sensitivity(DecisionRule.INSENSITIVE);
@@ -81,7 +80,6 @@ classdef Rule_1 < managers.DecisionRule
             
             % Type of output produced by this rule
             thisRule.setTypeRule_Output({ DecisionRule.ABSOLUTE_VALUE; ...
-                DecisionRule.ABSOLUTE_VALUE; ...
                 DecisionRule.ABSOLUTE_VALUE; ...
                 DecisionRule.ABSOLUTE_VALUE; ...
                 DecisionRule.ABSOLUTE_VALUE});
@@ -140,16 +138,13 @@ classdef Rule_1 < managers.DecisionRule
             pc = PaymentSchedule();
             pc.buildFromVectors(pc_time, pc_value, Transaction.CONTRIBUTION);
             
-            fare = 720/10e7;
-            
-            rf = @(d)revenueRate(d, fare);
+            rf = @revenueRate;
             k = 70;
             
             theMsg.submitResponse(Information.CONTRACT_DURATION, tm, ...
                 Information.PAYMENT_SCHEDULE, pc, ...
                 Information.REVENUE_RATE_FUNC, rf, ...
-                Information.PERFORMANCE_THRESHOLD, k, ...
-                Information.FARE, fare);
+                Information.PERFORMANCE_THRESHOLD, k);
         end
         
         
@@ -157,17 +152,16 @@ classdef Rule_1 < managers.DecisionRule
     
 end
 
-function rate = revenueRate(d, fare)
+function rate = revenueRate(d)
 %{
 * 
 
     Input
         d:      Rate of demand
-        fare:	Price received per unit of demand
 
     Output
         rate:   Rate of revenue
 %}
+    fare = 720/10e7;    
     rate = d*fare;
-    %rate = 72;
 end

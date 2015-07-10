@@ -13,7 +13,6 @@ classdef Contract < matlab.mixin.Copyable
         initialPerf         % Initial perf of infrastructure: Assummed to be equal to MAX_PERF
         perfThreshold       % Minimum perf required by principal
         revRateFnc          % Function handle of revenue rate
-        fare                % Unitary cost of infrastructure usage
         paymentSchedule     % Government contributions Array[nx2] --> [time value]
         penaltyStrategy     % Penalty policy (Strategy object)
     end
@@ -24,7 +23,7 @@ classdef Contract < matlab.mixin.Copyable
         % *****************************************************************
         
         function self = Contract(progSet, conDur, contributions, ...
-                revRateFnc, perfThreshold, fare)
+                revRateFnc, perfThreshold)
         %{
         * 
         
@@ -48,9 +47,6 @@ classdef Contract < matlab.mixin.Copyable
             
             % Performance threshold
             self.perfThreshold = perfThreshold;
-            
-            % Fare
-            self.fare = fare;
             
             % Initial performance
             self.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;

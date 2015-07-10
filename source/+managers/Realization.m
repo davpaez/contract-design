@@ -591,7 +591,7 @@ classdef Realization < matlab.mixin.Copyable
             perf = y(:,1);
             agentBalance = y(:,2);
             
-            demHist = self.contSolver.demandFnc(perf, self.contract.fare);
+            demHist = self.contSolver.demandFnc(perf);
             
             self.demandHistory.register(t, demHist);
             self.agent.evolve(t, agentBalance);

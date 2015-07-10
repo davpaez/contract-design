@@ -24,7 +24,7 @@ classdef ItemSetting < matlab.mixin.Copyable
         TYPE_EXP        = 'TYPE_EXP'    % Type of experiment
         TIME_RES        = 'TIME_RES'    % Time resolution
         DISC_RATE       = 'DISC_RATE'   % Annual discount rate
-        DEMAND_FNC      = 'DEMAND_FNC'  % How users demand respond to Perf, Fare and time
+        DEMAND_FNC      = 'DEMAND_FNC'  % How users demand respond to Perf and time
         
         % Optimization
         NUM_REALIZ      = 'NUM_REALIZ'  % Number of realizations

@@ -45,8 +45,6 @@ classdef ContinuousSolver
             assert(length(tf) == 1, 'The time parameter must be a scalar')
             assert(tf > t0, 'Time tf must be greater than t0')
             
-            fare = self.realization.contract.fare;
-            
             %  ------ Differential equations for stocks -------
             
             cef = self.contEnvForce;
@@ -56,12 +54,12 @@ classdef ContinuousSolver
             
             % Performance rate function
             v_f = @(t,v) crf(cef(t), ...
-                dem(v, fare), ...
+                dem(v), ...
                 v, ...
                 t);
             
             % Agent's balance rate function
-            ba_f = @(v) rev(dem(v, fare));
+            ba_f = @(v) rev(dem(v));
             
             fun = @(t,x) [v_f(t,x(1));  ba_f(x(1))];
             

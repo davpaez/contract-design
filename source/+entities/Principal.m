@@ -82,13 +82,12 @@ classdef Principal <  entities.Player
             perfThreshold = msg.getOutput(Information.PERFORMANCE_THRESHOLD);
             principalContributions = msg.getOutput(Information.PAYMENT_SCHEDULE);
             revRateFnc = msg.getOutput(Information.REVENUE_RATE_FUNC);
-            fare = msg.getOutput(Information.FARE);
             
             assert(infra.nullPerf <= perfThreshold && perfThreshold <= infra.maxPerf, ...
                 'Performance threshold must be withinn [nullPerf, maxPerf] interval.')
             
             contract = Contract(progSet, conDur, principalContributions, ...
-                revRateFnc, perfThreshold, fare);
+                revRateFnc, perfThreshold);
         end
         
         

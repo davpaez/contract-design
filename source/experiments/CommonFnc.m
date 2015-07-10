@@ -17,13 +17,14 @@ classdef CommonFnc
         end
         
         
-        function d = demandFunction(v, fare, nullPerf, maxPerf)
+        function d = demandFunction(v, nullPerf, maxPerf)
         %{
         * Bilinear demand function
         
             Input
-                v:      Performance
-                fare:	Unitary price for infrastructure usage
+                v:      Current performance
+                nullPerf:   Minimum performance
+                maxPerf:    Maximum performance
             
             Output
                 d:      Rate of demand

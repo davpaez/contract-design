@@ -133,7 +133,7 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.DEMAND_FNC);
-fnc.equation = @(v, fare)CommonFnc.demandFunction(v, fare, nullPerf, maxPerf);
+fnc.equation = @(v)CommonFnc.demandFunction(v, nullPerf, maxPerf);
 
 progSet.add(fnc);
 
