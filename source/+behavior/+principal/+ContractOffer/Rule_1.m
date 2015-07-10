@@ -168,6 +168,6 @@ function rate = revenueRate(d, fare)
     Output
         rate:   Rate of revenue
 %}
-    %rate = d*fare;
-    rate = 72;
+    rate = d*fare;
+    %rate = 72;
 end
