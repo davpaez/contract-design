@@ -65,14 +65,6 @@ data.value = 0.04;
 
 progSet.add(data);
 
-% 4. Demand function
-fnc = Function();
-
-fnc.setIdentifier(ItemSetting.DEMAND_FNC);
-fnc.equation = @CommonFnc.demandFunction;
-
-progSet.add(fnc);
-
 %% Optimization (16 - 30)
 
 % 16. Number of realizations per simulation of game
@@ -122,15 +114,28 @@ maxp.value = 100;
 
 progSet.add(maxp);
 
+
+nullPerf = progSet.returnItemSetting(ItemSetting.NULL_PERF).value;
+maxPerf = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
+
+
 % 108. Initial performance
 % Warning!!!!: The initial performance cannot be less than the null
 % performance
 data = InputData();
 
 data.setIdentifier(ItemSetting.INITIAL_PERF);
-data.value = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
+data.value = maxPerf;
 
 progSet.add(data);
+
+% 4. Demand function
+fnc = Function();
+
+fnc.setIdentifier(ItemSetting.DEMAND_FNC);
+fnc.equation = @(v, fare)CommonFnc.demandFunction(v, fare, nullPerf, maxPerf);
+
+progSet.add(fnc);
 
 % 109. Continuous response function
 fnc = Function();

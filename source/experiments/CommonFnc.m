@@ -17,28 +17,7 @@ classdef CommonFnc
         end
         
         
-        function r = continuousRespFunction(f, d, v, t)
-        %{
-        * 
-        
-            Input
-                f:  Continuous environmental force
-                d:  Demand
-                v:  Performance
-                t:  Time (years)
-                
-            Output
-                r:  Response
-        %}
-            r = -(f./1000).*20.*(0.5./((v+10)./100));
-            if v <= 0 % TODO Make this truncation works when arguments are vectors
-                r = 0;
-            end
-            
-        end
-        
-        
-        function d = demandFunction(v, fare)
+        function d = demandFunction(v, fare, nullPerf, maxPerf)
         %{
         * Bilinear demand function
         
@@ -50,19 +29,14 @@ classdef CommonFnc
                 d:      Rate of demand
         %}
             
-            a = 160000;
-            b = 40000;
-            k = 50;
+            c = 4;     % Parameter to control concavity
+            a = 28e6;   % Demand at maximum performance
             
             n = length(v);
             d = zeros(n,1);
             
             for i=1:n
-                if v(i) <= k
-                    d(i) = a*v(i);
-                else
-                    d(i) = a*k + b*(v(i)-k);
-                end
+                d(i) = ((v(i)-nullPerf)/(maxPerf-nullPerf))^(c)*a;
             end
         end
         
