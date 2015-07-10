@@ -218,6 +218,9 @@ faculty = Faculty(Faculty.INSPECTION);
 
 faculty.setIdentifier(ItemSetting.STRATS_INSP);
 faculty.selectStrategy('Fixed');
+rule = 'Fixed inspection interval by parameter';
+params = [4];
+faculty.setParams(rule, params);
 
 progSet.add(faculty);
 

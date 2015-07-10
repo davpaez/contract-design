@@ -61,7 +61,7 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setIndex(1);
             
             % Set name
-            thisRule.setName('Fixed Maintenance Interval by Parameter');
+            thisRule.setName('Fixed maintenance interval by parameter');
 
             % One decision variable: Time of voluntary maintenance
             thisRule.setDecisionVars_Number(1);
