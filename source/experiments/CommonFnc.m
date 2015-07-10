@@ -42,21 +42,6 @@ classdef CommonFnc
         end
         
         
-        function rate = revenueRate(d, fare)
-        %{
-        * 
-        
-            Input
-                d:      Rate of demand
-                fare:	Price received per unit of demand
-            
-            Output
-                rate:   Rate of revenue
-        %}
-            rate = d*fare;
-        end
-        
-        
         function finalPerf = shockResponseFunction(nullP, maxP, currentPerf, forceValue)
         %{
         * 
