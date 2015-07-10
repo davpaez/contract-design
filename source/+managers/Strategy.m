@@ -100,6 +100,31 @@ classdef Strategy < matlab.mixin.Copyable
         end
         
         
+        function setParams(self, nameRule, params)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            
+            n = length(self.decisionRuleList);
+            found = false;
+            for i=1:n
+                if strcmpi(nameRule, self.decisionRuleList{i}.name)
+                    self.decisionRuleList{i}.setParams_Value(params);
+                    found = true;
+                    break
+                end
+            end
+            
+            if found == false
+                error('Decision rule not found: parameters could not be changed.')
+            end
+        end
+        
+        
         function answer = isSensitive(self)
         %{
         *

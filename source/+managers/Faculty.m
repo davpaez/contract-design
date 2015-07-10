@@ -245,6 +245,18 @@ classdef Faculty < managers.ItemSetting
         end
         
         
+        function setParams(self, nameRule, params)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            self.selectedStrategy.setParams(nameRule, params);
+        end
+        
+        
         function setFacultyContractOffer(self)
         %{
         
