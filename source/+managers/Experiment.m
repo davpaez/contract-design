@@ -173,9 +173,13 @@ classdef Experiment < managers.TypedClass
             end
             
             t2 = clock;
-            minElapsed = etime(t2, t1)/60;
+            secsElapsed = etime(t2, t1);
+            timeElapsed = utils.sec2struct(secsElapsed);
             disp(['    End:   ', datestr(datetime)])
-            disp(['    Minutes elapsed: ', num2str(minElapsed)])
+            disp(['    Time elapsed: ', ...
+                num2str(timeElapsed.hour), ' h : ', ...
+                num2str(timeElapsed.minutes), ' m : ', ...
+                num2str(timeElapsed.seconds), ' s'])
             disp(' ')
             
             % Close log file (if necessary)
