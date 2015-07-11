@@ -133,7 +133,7 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.DEMAND_FNC);
-fnc.equation = @(v)CommonFnc.demandFunction(v, nullPerf, maxPerf);
+fnc.equation = @(v)demandFunction(v, nullPerf, maxPerf);
 
 progSet.add(fnc);
 
@@ -174,7 +174,7 @@ progSet.add(inv);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NAT_HAZARD);
-data.value = true;
+data.value = false;
 
 progSet.add(data);
 
@@ -201,7 +201,10 @@ progSet.add(fnc);
 faculty = Faculty(Faculty.CONTRACT_OFFER);
 
 faculty.setIdentifier(ItemSetting.STRATS_CONTRACT);
-faculty.selectStrategy('Standard');
+faculty.selectStrategy('Simple');
+rule = 'Simple parametrized';
+params = [25, 6e-6, 70]; % [tm, fare, k*]
+faculty.setParams(rule, params);
 
 progSet.add(faculty);
 
@@ -209,7 +212,7 @@ progSet.add(faculty);
 faculty = Faculty(Faculty.PENALTY);
 
 faculty.setIdentifier(ItemSetting.PEN_POLICY);
-faculty.selectStrategy('Incremental');
+faculty.selectStrategy('Fixed');
 
 progSet.add(faculty);
 
@@ -254,7 +257,10 @@ progSet.add(data);
 faculty = Faculty(Faculty.VOL_MAINT);
 
 faculty.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
-faculty.selectStrategy('Test_2');
+faculty.selectStrategy('Test_1');
+rule = 'Fixed maintenance interval by parameter';
+params = [0.85];
+faculty.setParams(rule, params);
 
 progSet.add(faculty);
 
@@ -311,8 +317,7 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
     epsilon = 0.2;
     fixedCost = 4;
 
-    cost = (  sqrt((goalP-nullP) / (maxP-nullP)) - ...
-              sqrt((currentP-nullP) / (maxP-nullP)))*epsilon*inv + fixedCost;
+    cost = ((goalP-currentP) / (maxP-nullP))*epsilon*inv + fixedCost;
 
     assert(isreal(cost), 'Cost must be a real number.')
 end
@@ -340,4 +345,25 @@ if v <= 0
     r = 0;
 end
 
+end
+
+function d = demandFunction(v, nullPerf, maxPerf)
+%{
+* Bilinear demand function
+
+    Input
+        v:      Current performance
+        nullPerf:   Minimum performance
+        maxPerf:    Maximum performance
+
+    Output
+        d:      Rate of demand
+%}
+    
+    n = length(v);
+    d = zeros(n,1);
+
+    for i=1:n
+        d(i) = 12e6;
+    end
 end

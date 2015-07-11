@@ -33,7 +33,9 @@ classdef Rule_1 < managers.DecisionRule
     
     properties (Constant, Hidden = true)
         % Names or parameters in order
-        MAINTENANCE_TIME_INTERVAL = 'maintenanceTimeInterval'
+        CONTRACT_DURATION = 'CONTRACT_DURATION'
+        FARE = 'FARE'
+        PERFORMANCE_THRESHOLD = 'PERFORMANCE_THRESHOLD'
     end
     
     properties (GetAccess = public, SetAccess = protected)
@@ -61,7 +63,7 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setIndex(1);
             
             % Set name
-            thisRule.setName('Standard contract');
+            thisRule.setName('Simple parametrized');
 
             % One decision variable: Time of voluntary maintenance
             thisRule.setDecisionVars_Number(4);
@@ -71,6 +73,31 @@ classdef Rule_1 < managers.DecisionRule
                 Information.PAYMENT_SCHEDULE; ...
                 Information.REVENUE_RATE_FUNC; ...
                 Information.PERFORMANCE_THRESHOLD});
+            
+            % Set as a parametrized rule
+            thisRule.setAsParametrized();
+            
+            % Set number or parameters
+            thisRule.setParams_Number(3);
+            
+            % Set name of parameters
+            thisRule.setParams_Name({ ...
+                thisRule.CONTRACT_DURATION, ...
+                thisRule.FARE, ...
+                thisRule.PERFORMANCE_THRESHOLD});
+            
+            % Set number set of parameters
+            thisRule.setParams_NumberSet({ ...
+                InputData.REAL, ...
+                InputData.REAL, ...
+                InputData.REAL})
+            
+            % Set upper and lower bounds for parameters
+            thisRule.setParams_LowerBounds([ 1, 5e-7 10]);
+            thisRule.setParams_UpperBounds([ 50 5e-5 95]);
+            
+			% Set default parameters value
+			thisRule.setParams_Value( [10, 2.5E-6, 60] );
             
             % Set as Sensitive
             thisRule.setTypeRule_Sensitivity(DecisionRule.INSENSITIVE);
@@ -131,15 +158,16 @@ classdef Rule_1 < managers.DecisionRule
               - k: performance threshold
             %}
             
-            tm = 25;
+            tm = thisRule.params_Value(1);
+            fare = thisRule.params_Value(2);
+            k = thisRule.params_Value(3);
             
             pc_time = [0, 5, 10, 15];
             pc_value = [150, 150, 50, 50];
             pc = PaymentSchedule();
             pc.buildFromVectors(pc_time, pc_value, Transaction.CONTRIBUTION);
             
-            rf = @revenueRate;
-            k = 70;
+            rf = @(d)revenueRate(d, fare);
             
             theMsg.submitResponse(Information.CONTRACT_DURATION, tm, ...
                 Information.PAYMENT_SCHEDULE, pc, ...
@@ -152,7 +180,7 @@ classdef Rule_1 < managers.DecisionRule
     
 end
 
-function rate = revenueRate(d)
+function rate = revenueRate(d, fare)
 %{
 * 
 
@@ -161,7 +189,6 @@ function rate = revenueRate(d)
 
     Output
         rate:   Rate of revenue
-%}
-    fare = 720/10e7;    
+%}   
     rate = d*fare;
 end

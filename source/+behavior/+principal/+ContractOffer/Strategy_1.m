@@ -8,7 +8,7 @@ classdef Strategy_1 < managers.Strategy
             import managers.*
             import behavior.principal.*
 			
-            id = 'Standard';
+            id = 'Simple';
             thisStrategy@managers.Strategy(id, theFaculty.decisionVars);
             
             % Create decision rule objects
