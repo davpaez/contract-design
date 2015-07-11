@@ -134,7 +134,7 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.DEMAND_FNC);
-fnc.equation = @(v)CommonFnc.demandFunction(v, nullPerf, maxPerf);
+fnc.equation = @(v)demandFunction(v, nullPerf, maxPerf);
 
 progSet.add(fnc);
 
@@ -202,7 +202,10 @@ progSet.add(fnc);
 faculty = Faculty(Faculty.CONTRACT_OFFER);
 
 faculty.setIdentifier(ItemSetting.STRATS_CONTRACT);
-faculty.selectStrategy('Standard');
+faculty.selectStrategy('Simple');
+rule = 'Simple parametrized';
+params = [25, 6e-6, 70]; % [tm, fare, k*]
+faculty.setParams(rule, params);
 
 progSet.add(faculty);
 
@@ -338,4 +341,28 @@ if v <= 0
     r = 0;
 end
 
+end
+
+function d = demandFunction(v, nullPerf, maxPerf)
+%{
+* Bilinear demand function
+
+    Input
+        v:      Current performance
+        nullPerf:   Minimum performance
+        maxPerf:    Maximum performance
+
+    Output
+        d:      Rate of demand
+%}
+
+    c = 4;     % Parameter to control concavity
+    a = 28e6;   % Demand at maximum performance
+
+    n = length(v);
+    d = zeros(n,1);
+
+    for i=1:n
+        d(i) = ((v(i)-nullPerf)/(maxPerf-nullPerf))^(c)*a;
+    end
 end
