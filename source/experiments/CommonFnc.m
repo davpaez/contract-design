@@ -17,31 +17,6 @@ classdef CommonFnc
         end
         
         
-        function d = demandFunction(v, nullPerf, maxPerf)
-        %{
-        * Bilinear demand function
-        
-            Input
-                v:      Current performance
-                nullPerf:   Minimum performance
-                maxPerf:    Maximum performance
-            
-            Output
-                d:      Rate of demand
-        %}
-            
-            c = 4;     % Parameter to control concavity
-            a = 28e6;   % Demand at maximum performance
-            
-            n = length(v);
-            d = zeros(n,1);
-            
-            for i=1:n
-                d(i) = ((v(i)-nullPerf)/(maxPerf-nullPerf))^(c)*a;
-            end
-        end
-        
-        
         function finalPerf = shockResponseFunction(nullP, maxP, currentPerf, forceValue)
         %{
         * 
