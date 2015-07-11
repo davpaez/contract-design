@@ -144,7 +144,7 @@ classdef Rule_4 < managers.DecisionRule
                 timeNextVolMaint = theAgent.time + 0.1;
             end
             
-            timeTermination = theAgent.contract.getContractDuration();
+            timeTermination = theAgent.contract.contractDuration;
             if timeNextVolMaint > timeTermination
                 if thisRule.finalMaint == false
                     timeNextVolMaint = max(timeTermination - 0.1, ...
