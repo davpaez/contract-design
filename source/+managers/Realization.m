@@ -113,20 +113,6 @@ classdef Realization < matlab.mixin.Copyable
 		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
         
-        function time = getTime(self)
-        %{
-        * Returns the current time attribute of self
-        
-            Input
-                None
-                
-            Output
-                time: [class double] Value of time attribute of
-                self
-        %}
-        
-            time = self.time;
-        end
         
         
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::

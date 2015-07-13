@@ -54,16 +54,6 @@ classdef Nature < handle
         %% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
         % *****************************************************************
         
-        function time = getTime(self)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            time = self.time;
-        end
 
 
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
