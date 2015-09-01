@@ -6,6 +6,10 @@ classdef Message < handle
         
         TIME_DETECTION      = 'TIME_DETECTION'
         PERF_DETECTION      = 'PERF_DETECTION'
+        
+        CURRENT_PERF        = 'CURRENT_PERF'
+        
+        CONT_SOLVER         = 'CONT_SOLVER'
     end
     
     properties
@@ -42,7 +46,9 @@ classdef Message < handle
             
             validTypes = {  Message.MAX_PERF, ...
                 Message.TIME_DETECTION, ...
-                Message.PERF_DETECTION};
+                Message.PERF_DETECTION, ...
+                Message.CURRENT_PERF, ...
+                Message.CONT_SOLVER};
             
             answer = any(strcmp(validTypes, str));
         end
