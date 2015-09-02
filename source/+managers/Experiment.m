@@ -6,7 +6,7 @@ classdef Experiment < managers.TypedClass
         SING = 'SING'   % Single realization of a game
         DISP = 'DISP'   % Many realizations of the same game (same parameters)
         SENS = 'SENS'   % Many realizations of a games where parameters are varied
-        OPT = 'OPT'     % Optimization of objective function by changing game parameters
+        OPTI = 'OPTI'   % Optimization of objective function by changing game parameters
     end
     
     properties (GetAccess = public, SetAccess = protected)
@@ -41,7 +41,7 @@ classdef Experiment < managers.TypedClass
             listTypes = {  Experiment.SING, ...
                 Experiment.DISP, ...
                 Experiment.SENS, ...
-                Experiment.OPT};
+                Experiment.OPTI};
             
             self@managers.TypedClass(listTypes);
             
@@ -67,7 +67,7 @@ classdef Experiment < managers.TypedClass
                 case Experiment.SENS
                     self.sensitivity();
                     
-                case Experiment.OPT
+                case Experiment.OPTI
                     self.optimization();
             end
             
@@ -168,7 +168,7 @@ classdef Experiment < managers.TypedClass
                 case Experiment.SENS
                     self.runSensitivity();
                     
-                case Experiment.OPT
+                case Experiment.OPTI
                     self.runOptimization();
             end
             
@@ -204,7 +204,7 @@ classdef Experiment < managers.TypedClass
                 case Experiment.SENS
                     self.reportSensitivity();
                     
-                case Experiment.OPT
+                case Experiment.OPTI
                     self.reportOptimization();
             end
         end
