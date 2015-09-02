@@ -4,18 +4,18 @@ classdef Rule_2 < managers.DecisionRule
     Related action: Inspection
     Class name: Rule_2
     Index: 2
-    Name: Fixed inspection interval with random component
+    Name: Stochastic exponentially distributed intervals
     ID: behavior.principal.inspection.Rule_2
     Type of rule:
         * Sensitive
-        * Deterministic
+        * Stochastic
         * Absolute
     
     Parameters:
-        * inspectionTimeInterval
+        * lambda
     
     Input:
-        * timeLastInspection
+        * timeLastVolMaint
         * currentTime
     
     Output:
@@ -33,13 +33,14 @@ classdef Rule_2 < managers.DecisionRule
     
     properties (Constant, Hidden = true)
         % Names or parameters in order
-        INSPECTION_TIME_INTERVAL = 'inspectionTimeInterval'
+        LAMBDA = 'lambda'       % Scale parameter of exp distribution; lambda = 1/mu
     end
     
     properties (GetAccess = public, SetAccess = protected)
         % ----------- %
         % Attributes
         % ----------- %
+        lastInspectionTime
         
         % ----------- %
         % Objects
@@ -60,7 +61,7 @@ classdef Rule_2 < managers.DecisionRule
             thisRule.setIndex(2);
             
             % Set name
-            thisRule.setName('Fixed inspection interval with random component');
+            thisRule.setName('Exponentially distributed intervals');
             
             % One decision variable: Time of inspection
             thisRule.setDecisionVars_Number(1);
@@ -75,26 +76,32 @@ classdef Rule_2 < managers.DecisionRule
             thisRule.setParams_Number(1);
             
             % Set name of parameters
-            thisRule.setParams_Name({ thisRule.INSPECTION_TIME_INTERVAL });
+            thisRule.setParams_Name({ thisRule.LAMBDA });
             
             % Set number set of parameters
             thisRule.setParams_NumberSet({ InputData.REAL })
             
             % Set upper and lower bounds for parameters
-            thisRule.setParams_LowerBounds([ 0.05 ]);
-            thisRule.setParams_UpperBounds([ 5 ]);
-            
-			% Set default parameters value
-			thisRule.setParams_Value( [2] );
+            maxInterval = 10;
+            % Maximum mu so that an inspection must have
+            % occurred with 95% probability before an inteval of maxInterval
+            minLambda = -(log(1-0.95)) / maxInterval;
+			maxLambda = 10;
 			
+            thisRule.setParams_LowerBounds([ minLambda ]);
+            thisRule.setParams_UpperBounds([ maxLambda ]);
+            
             % Set as Non-adaptive
             thisRule.setTypeRule_Sensitivity(DecisionRule.SENSITIVE);
             
-            % Set as Deterministic
-            thisRule.setTypeRule_Determinacy(DecisionRule.DETERMINISTIC);
+            % Set as Stochastic
+            thisRule.setTypeRule_Determinacy(DecisionRule.STOCHASTIC);
 			
             % Type of output produced by this rule
             thisRule.setTypeRule_Output({ DecisionRule.ABSOLUTE_VALUE });
+			
+			% Set default parameters value
+			thisRule.setParams_Value( [0.5] );
         end
         
         %% Getter functions
@@ -126,31 +133,38 @@ classdef Rule_2 < managers.DecisionRule
             Output
                 
         %}
-        function timeNextInspection = mainAlgorithm(thisRule, theMsg)
-            import dataComponents.Event
+        function mainAlgorithm(thisRule, theMsg)
             import managers.Information
             
             thePrincipal = theMsg.getExecutor();
             
-            timeInterval = thisRule.params_Value + rand*1.5 ;
+            lambda = thisRule.params_Value;
             
-            inspEvent = thePrincipal.eventList.getLastEventOfType(Event.INSPECTION);
-			if ~isempty(inspEvent)
-				lastInspectionTime = inspEvent.time;
-			else
-				lastInspectionTime = 0;
-			end
+            timeInterval = - (1/lambda)*log(1-rand);
             
-            timeNextInspection = lastInspectionTime + timeInterval;
-            
-            if timeNextInspection <= thePrincipal.time
-                timeNextInspection = thePrincipal.time + 0.05;
+            if isempty(thisRule.lastInspectionTime)
+                lastInspTime = thePrincipal.observationList.getCurrentTime();
+                if ~isempty(lastInspTime)
+                    thisRule.lastInspectionTime = lastInspTime;
+                else
+                    thisRule.lastInspectionTime = 0;
+                end
             end
+			
+            timeNextInspection = thisRule.lastInspectionTime + timeInterval;
+            
+            if timeNextInspection < thePrincipal.time
+                timeNextInspection = thePrincipal.time;
+            end
+            
+            thisRule.lastInspectionTime = timeNextInspection;
+            
+            timeNextInspection = thePrincipal.time + rand*2;
+            thisRule.lastInspectionTime = timeNextInspection;
             
             theMsg.submitResponse(Information.TIME_INSPECTION, timeNextInspection);
             
         end
         
     end
-    
 end
