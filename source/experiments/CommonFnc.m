@@ -13,7 +13,13 @@ classdef CommonFnc
             Output
                 f:  Precipitation [mm/year]
         %}
-            force = (-(51*sin(t*2*pi./0.5 + pi/4))+86)*12;
+            
+            A = 612;    % Amplitude
+            f = 2;      % Cycles per year
+            phi = pi/4; % Phase shift (radians)
+            m = 1032;   % Mean value
+            
+            force = -A*sin((2*pi*f)*t + phi) + m;
         end
         
         
@@ -30,8 +36,8 @@ classdef CommonFnc
             Output
                 finalPerf:      Performance after shock
         %}
-        minF = 3;
-        maxF = 30;
+        minF = 0;
+        maxF = 70;
 
         assert(forceValue >= 0, 'Force value must be non-negative')
 
