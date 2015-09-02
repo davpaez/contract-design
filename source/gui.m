@@ -124,7 +124,8 @@ function layoutMainWindow(gui_State)
         'String', 'Show report...', ...
         'Position', [20 15 150 30],...
         'Callback', @button5_callback, ...
-        'Tag', 'button5');
+        'Tag', 'button5', ...
+        'Enable', 'off');
     
     % Save experiment button
     button6 = uicontrol(panel4, ...
@@ -132,7 +133,8 @@ function layoutMainWindow(gui_State)
         'String', 'Save experiment...', ...
         'Position', [190 15 150 30],...
         'Callback', @button6_callback, ...
-        'Tag', 'button6');
+        'Tag', 'button6', ...
+        'Enable', 'off');
     
     %% Static text
     
@@ -236,6 +238,12 @@ function button2_callback(hObject, callbackdata)
         if length(exp_array) > 0
             setappdata(hpanel2, 'array_progsettings', exp_array);
         end
+        
+        button5 = findobj('Tag', 'button5');
+        button6 = findobj('Tag', 'button6');
+
+        button5.Enable = 'off';
+        button6.Enable = 'off';
     end
 end
 
@@ -263,6 +271,12 @@ function button4_callback(hObject, callbackdata)
     hpanel3 = findobj('Tag', 'panel3');
     
     setappdata(hpanel3, 'experiment', experiment);
+    
+    button5 = findobj('Tag', 'button5');
+    button6 = findobj('Tag', 'button6');
+    
+    button5.Enable = 'on';
+    button6.Enable = 'on';
 end
 
 
@@ -301,7 +315,7 @@ function button5_callback(hObject, callbackdata)
             
         case Experiment.SENS
             
-        case Experiment.OPT
+        case Experiment.OPTI
             
     end
 end
@@ -537,7 +551,7 @@ function layout_SENS()
 end
 
 
-function layout_OPT()
+function layout_OPTI()
 end
 
 function layout_common()
