@@ -111,7 +111,6 @@ classdef Rule_2 < managers.DecisionRule
                 
         %}
         
-        %TODO Change method signature to receive theMsg object
         function mainAlgorithm(~, theMsg)
             import dataComponents.Transaction
             import managers.Information
@@ -119,7 +118,7 @@ classdef Rule_2 < managers.DecisionRule
             thePrincipal = theMsg.getExecutor();
             penaltyPayoffs = thePrincipal.payoffList.returnPayoffsOfType(Transaction.PENALTY);
             pmax = 500; % Arbitrary value
-            tm = thePrincipal.contract.contractDuration;
+            tm = thePrincipal.contract.duration;
 
             sumPastPenalties = sum(penaltyPayoffs.valueFlow);
             
