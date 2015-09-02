@@ -124,28 +124,5 @@ classdef Principal <  entities.Player
             
         end
         
-        
-        function operation = submitFinalInspection(self)
-        %{
-        * 
-            Input
-                
-            Output
-                
-        %}
-            
-            % TODO DELETE method
-            
-            warning('Deprecated. Final inspection is responsability of theinspection strategy.')
-            
-            import dataComponents.Operation
-            
-            finalTimeContract = self.contract.getContractDuration();
-            
-            operation = Operation(finalTimeContract, Operation.INSPECTION, false, [] );
-            self.setSubmittedOperation(operation);
-        end
-        
-        
     end
 end
