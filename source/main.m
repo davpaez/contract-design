@@ -12,7 +12,7 @@ import managers.*
 
 % Load program settings
 addpath('experiments');
-progSettings = ex8.settings();
+progSettings = ex5.settings();
 experim = Experiment(progSettings);
 
 experim.run();
