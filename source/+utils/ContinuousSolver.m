@@ -68,16 +68,92 @@ classdef ContinuousSolver
             
             [t,y] = ode45(fun, [t0, tf], [currentPerf; currentAgentBalance]);
             
-        end
-        
-        
-        function solvePerformance(self, time)
+            % Quick fix: make it more general
+            indices = y<=0;
+            y(indices) = 0;
             
         end
         
         
-        function solveTime(self, perf)
+        function perf = solvePerformance(self, time)
+        %{
+        * Solve performance for a given time
             
+            Input
+                time: Time at which the performance is queried
+            
+            Output
+                perf: Performance level at time
+        %}
+            currentTime = self.realization.time;
+            queriedTime = time;
+            
+            if queriedTime < currentTime
+                perf = self.realization.infrastructure.history.solveValue(time);
+            elseif queriedTime == currentTime
+                perf = self.realization.infrastructure.performance;
+            else
+                % Extrapolate
+                currentPerf = self.realization.infrastructure.performance;
+                currentAgentBalance = self.realization.agent.payoffList.getBalance();
+                
+                [t, y] = self.solveFutureState(currentTime, time, [currentPerf; currentAgentBalance]);
+                perfHistory = y(:,1);
+                perf = perfHistory(end);
+            end
+        end
+        
+        
+        function time = solveTime(self, perf)
+        %{
+        * 
+            
+            Input
+                
+            
+            Output
+                
+        %}
+            currentTime = self.realization.time;
+            finalTime = self.realization.contract.duration;
+            
+            currentPerf = self.realization.infrastructure.performance;
+            currentAgentBalance = self.realization.agent.payoffList.getBalance();
+            
+            [t, f] = self.solveFutureState(currentTime, finalTime, [currentPerf; currentAgentBalance]);
+            
+            y = f(:,1);
+            
+            % Decrease all y by perf
+            y = y - perf;
+            
+            num = length(t);
+            time = [];
+            
+            tol = 1e-6;
+            
+            for i=2:num
+                if abs(y(i) - 0) < tol
+                    time = t(i);
+                    break
+                else
+                    y0 = y(i-1);
+                    y1 = y(i);
+                    t0 = t(i-1);
+                    t1 = t(i);
+                    
+                    m = y0 * y1;
+                    if m < 0
+                        time = t1 + (t0-t1)*(0 - y1)/(y0 - y1);
+                        break
+                    end
+                end
+            end
+            
+            if isempty(time)
+                ME = MException('solveTime:perfNotFound', 'The performance queried was not found');
+                throw(ME)
+            end
         end
         
         
