@@ -48,7 +48,7 @@ set(ax1, ...
     'XTickLabel', []);
 
 hold(ax1, 'on')
-grid(ax1, 'on');
+grid(ax1, 'off');
 
 hLine1 = plot(ax1, data.getValue('perfHistory').time, data.getValue('perfHistory').value);
 hLine2 = plot(ax1, [0, finalTimePlot], [data.getValue('threshold'), data.getValue('threshold')],':', ...
