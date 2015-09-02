@@ -100,9 +100,14 @@ classdef Agent < entities.Player
             import managers.Information
             import managers.Faculty
             
-                                 
+            
+            
+            % Adding extra info to message
             msg = Faculty.createEmptyMessage(self, Faculty.VOL_MAINT);
-            msg.setExtraInfo(Message.MAX_PERF, infra.maxPerf);
+            msg.setExtraInfo(...
+                Message.MAX_PERF, infra.maxPerf, ...
+                Message.CONT_SOLVER, contSolver);
+            
             self.volMaintStrategy.decide(msg);
             
             isSens = self.volMaintStrategy.isSensitive();
