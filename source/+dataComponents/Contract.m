@@ -9,7 +9,7 @@ to the accessible to all players.
 classdef Contract < matlab.mixin.Copyable
     
     properties (GetAccess = public, SetAccess = protected)
-        contractDuration 	% Mission time (years)
+        duration            % Mission time (years)
         initialPerf         % Initial perf of infrastructure: Assummed to be equal to MAX_PERF
         perfThreshold       % Minimum perf required by principal
         revRateFnc          % Function handle of revenue rate
@@ -40,7 +40,7 @@ classdef Contract < matlab.mixin.Copyable
             import dataComponents.PaymentSchedule
             
             % Contract duration
-            self.contractDuration = conDur;
+            self.duration = conDur;
             
             % Revenue rate function
             self.revRateFnc = revRateFnc;
