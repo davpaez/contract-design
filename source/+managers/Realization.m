@@ -24,6 +24,8 @@ classdef Realization < matlab.mixin.Copyable
         paymentSchedule % Payment schedule object
         demandHistory   % ObservationList object
         
+        lastOperation % Last operation executed in realization
+        
         fileInfo
         
         contSolver % ContinuousSolver object
@@ -167,7 +169,7 @@ classdef Realization < matlab.mixin.Copyable
             import entities.*
             import dataComponents.*
             
-            contractDuration = self.contract.contractDuration;
+            contractDuration = self.contract.duration;
             
             % Build interaction
             
@@ -187,7 +189,6 @@ classdef Realization < matlab.mixin.Copyable
                     self.executeOperation(operation);
                 else
                     if operation.time < nextTransaction.time
-                        assert(operation.time >= self.time)
                         self.executeOperation(operation);
                     else
                         self.executePayment(nextTransaction);
@@ -215,9 +216,14 @@ classdef Realization < matlab.mixin.Copyable
             
             mandMaintFlag = false;
             
+            % Check operation time makes sense
+            assert(operation.time >= self.time)
+            
             % Evolve the system up to the time of the operation to be
             % executed
-            if operation.time > self.time
+            if operation.time == self.time
+                self.validateOperationAdjacency(operation);
+            elseif operation.time > self.time
                 self.evolveContinuously(operation.time);
             end
             
@@ -226,14 +232,21 @@ classdef Realization < matlab.mixin.Copyable
                 case Operation.INSPECTION
                     [timeExecution , mandMaintFlag] = ...
                         self.executeInspection(operation);
+                    self.principal.clearSubmittedOperation();
                     
                 case Operation.VOL_MAINT
                     timeExecution = self.executeVolMaint(operation);
+                    self.agent.clearSubmittedOperation();
                     
                 case Operation.SHOCK
                     timeExecution = self.executeShock(operation);
+                    self.nature.clearSubmittedOperation();
                     
             end
+            
+%             operation.type
+%             operation.time
+%             disp('')
             
             % Update time for ALL entities
             self.updateTimeAll(timeExecution);
@@ -245,6 +258,29 @@ classdef Realization < matlab.mixin.Copyable
                 % Update time for ALL entities having executed the
                 % mandatory maintenance
                 self.updateTimeAll(timeExecutionMandMaint);
+            end
+            
+            self.lastOperation = operation;
+        end
+        
+        
+        function validateOperationAdjacency(self, operation)
+            import dataComponents.Operation
+            
+            if ~isempty(self.lastOperation)
+                if self.lastOperation.isType(Operation.INSPECTION)
+                    test1 = operation.isType(Operation.MAND_MAINT);
+                    test2 = operation.isType(Operation.SHOCK);
+                    assert(test1 || test2)
+                elseif self.lastOperation.isType(Operation.VOL_MAINT)
+                    assert(operation.isType(Operation.SHOCK))
+                elseif self.lastOperation.isType(Operation.MAND_MAINT)
+                    assert(operation.isType(Operation.SHOCK))
+                elseif self.lastOperation.isType(Operation.SHOCK)
+                    error('No operation can follow a shock immediately')
+                else
+                    error('This line should never be reached')
+                end
             end
         end
         
@@ -352,10 +388,6 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Observation
             import dataComponents.Event
             
-            % Inform the Agent that this volMaint operation was executed
-            % %TODO Should not this be called at the end of the method???
-            self.agent.confirmExecutionSubmittedOperation(operation);
-            
             timeVolMaint = operation.time;
             perfGoal = operation.perfGoal;
             
@@ -386,6 +418,9 @@ classdef Realization < matlab.mixin.Copyable
             self.agent.registerEvent(volMaintEvent_Agent);
             
             timeExecution = timeVolMaint;
+            
+            % Inform the Agent that this volMaint operation was executed
+            self.agent.confirmExecutionSubmittedOperation(operation);
         end
         
         
@@ -602,7 +637,7 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Transaction
             import dataComponents.Event
             
-            contractDuration = self.contract.contractDuration;
+            contractDuration = self.contract.duration;
             
             % Evolve until contract duration
             self.evolveContinuously(contractDuration);
@@ -732,7 +767,7 @@ classdef Realization < matlab.mixin.Copyable
             import managers.DataRealization
             
             [utilityAgent, utilityPrincipal] = self.utilityPlayers();
-            contractDuration = self.contract.contractDuration;
+            contractDuration = self.contract.duration;
             perfThreshold = self.contract.perfThreshold;
             inspection_markers = self.principal.eventList.getMarkersInfo(Event.INSPECTION, self.principal.observationList);
             detection_markers = self.principal.eventList.getMarkersInfo(Event.DETECTION, self.principal.observationList);
