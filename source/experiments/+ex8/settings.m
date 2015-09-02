@@ -221,7 +221,10 @@ progSet.add(faculty);
 faculty = Faculty(Faculty.INSPECTION);
 
 faculty.setIdentifier(ItemSetting.STRATS_INSP);
-faculty.selectStrategy('Fixed');
+faculty.selectStrategy('Fixed_plus_random');
+rule = 'Fixed inspection interval with random component';
+params = [4, 0];
+faculty.setParams(rule, params);
 
 progSet.add(faculty);
 
@@ -336,7 +339,7 @@ a = 1.3;
 b = 2.3;
 vi = 100;
 
-r = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t - (d/28e6)*20*((v^2)/500);
+r = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t; %- (d/28e6)*20*((v^2)/500);
 if v <= 0
     r = 0;
 end
