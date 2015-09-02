@@ -160,9 +160,10 @@ classdef Player < handle
             self.eventList.register(timeNewEvent, evt.type, idObs, idPff);
             
 			% Clear submitted operation
-			if ~isempty(self.submittedOperation) && self.submittedOperation.sensitive
-				self.clearSubmittedOperation();
-			end
+            %TODO clear submitted operation outside Player
+% 			if ~isempty(self.submittedOperation) && self.submittedOperation.sensitive
+% 				self.clearSubmittedOperation();
+% 			end
 			
 			% Set time of player to the time of the newEvent
 			self.setTime(timeNewEvent);
