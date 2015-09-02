@@ -71,14 +71,6 @@ classdef Operation < managers.TypedClass
             
             isMaintenance = strcmp(type, Operation.VOL_MAINT) || strcmp(type, Operation.MAND_MAINT);
             
-            %{
-            % TODO How to acces the maxPerf and nullPerf information?
-            if isMaintenance == true
-                assert(param <= Infrastructure.MAXPERF && param >= 0, ...
-                'The performance goal must be within the interval [0, Infrastructure.MAXPERF]')                
-            end
-            %}
-            
             % Object construction
             self.time = time;
             self.setType(type);
