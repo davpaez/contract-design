@@ -501,6 +501,60 @@ classdef ObservationList < matlab.mixin.Copyable
         end
         
         
+        function value = solveValue(self, time)
+        %{
+        * Gives the value associated with a time. 
+        
+            Input
+            
+            Output
+                
+        %}
+            lastTime = self.time(self.pt-1);
+            assert(time >= 0, 'Time queried must be non-negative')
+            
+            if time <= lastTime
+                % Interpolate
+                value = self.interpolate(time);
+            else
+                % Throw error
+                error('Time queried is greater than the time of the last observation')
+            end
+            
+        end
+        
+        function value = interpolate(self, time)
+        %{
+        * Iterpolates for given time. At jumps, it returns the post-jump
+        value
+        
+            Input
+            
+            Output
+                
+        %}
+            for i = 1:(self.pt-2)
+                currentTime = self.time(i);
+                nextTime = self.time(i+1);
+                
+                if currentTime <= time && time <= nextTime
+                    
+                    y0 = self.value(i);
+                    y1 = self.value(i+1);
+                    x0 = currentTime;
+                    x1 = nextTime;
+                    
+                    if x0 == x1
+                        value = y1;
+                    else
+                        value = y0 + (y1-y0)*(time-x0)/(x1-x0);
+                    end
+                    break
+                end
+            end
+        end
+        
+        
         function sumValue = getSumBetween(self, indexFirst, indexLast)
         %{
         * 
