@@ -112,47 +112,76 @@ classdef Rule_4 < managers.DecisionRule
         function mainAlgorithm(thisRule, theMsg)
             import dataComponents.Event
             import managers.Information
+            import dataComponents.Message
             
             %TODO Improve bugs
             %TODO Figure out the conditions that a rule must have to not
             %make the program cycle indefinitely
             
             theAgent = theMsg.getExecutor();
+            contractDuration = theAgent.contract.duration;
+            contSolver = theMsg.getExtraInfo(Message.CONT_SOLVER);
+            perfThreshold = theAgent.contract.perfThreshold;
+            currentPerf = contSolver.realization.infrastructure.getPerformance();
+            
+            isViolating = currentPerf < perfThreshold;
             
             inspEvents = theAgent.eventList.getEventsOfType(Event.INSPECTION);
-            if isempty(inspEvents)
-                timeNextVolMaint = theAgent.time*3;
-                
-            elseif length(inspEvents.time) == 1
-                expInterval = inspEvents.time;
-                timeNextVolMaint = ceil(theAgent.time/expInterval)*expInterval*0.98;
-                
-            else
-                expInterval = mean(diff(inspEvents.time));
-                timeLastInsp = inspEvents.time(end);
-                lastVolMaintEvent = theAgent.eventList.getLastEventOfType(Event.VOL_MAINT);
-                if isempty(lastVolMaintEvent) || lastVolMaintEvent.time > timeLastInsp
-                    timeNextVolMaint = timeLastInsp + 2*expInterval;
+            
+            if isempty(inspEvents) || length(inspEvents.time) < 3
+                if isViolating
+                    timeNextVolMaint = theAgent.time + 0.1;
                 else
-                    timeNextVolMaint = timeLastInsp + 0.95*expInterval;
+                    try
+                        timeNextVolMaint = contSolver.solveTime(perfThreshold);
+                    catch
+                        timeNextVolMaint = theAgent.time + 0.1;
+                    end
                 end
+            else
+                
+                interval = mean(diff(inspEvents.time));
+                
+                guessInspectionTimes = inspEvents.time(1):interval:contractDuration;
+                
+                index = [];
+                for i=1:length(guessInspectionTimes)
+                    perf = contSolver.solvePerformance(guessInspectionTimes(i));
+                    if perf < perfThreshold
+                        index = i;
+                        break
+                    end
+                end
+                
+                if isempty(index)
+                    timeNextVolMaint = contractDuration;
+                else
+                    timeNextVolMaint = guessInspectionTimes(index) - 0.2;
+                end
+                
+                if timeNextVolMaint <= theAgent.time
+                    if isViolating
+                        timeNextVolMaint = theAgent.time + 0.1;
+                    else
+                        try
+                            timeNextVolMaint = contSolver.solveTime(perfThreshold);
+                        catch
+                            timeNextVolMaint = theAgent.time + 0.1;
+                        end
+                    end
+                end
+                
+%                 timeLastInsp = inspEvents.time(end);
+%                 lastVolMaintEvent = theAgent.eventList.getLastEventOfType(Event.VOL_MAINT);
             end
             
-            assert(~isnan(timeNextVolMaint), 'Hola')
-            
+                
             if timeNextVolMaint <= theAgent.time
                 timeNextVolMaint = theAgent.time + 0.1;
             end
             
-            timeTermination = theAgent.contract.duration;
-            if timeNextVolMaint > timeTermination
-                if thisRule.finalMaint == false
-                    timeNextVolMaint = max(timeTermination - 0.1, ...
-                        (theAgent.time+timeTermination)/2);
-                    thisRule.finalMaint = true;
-                else
-                    timeNextVolMaint = inf;
-                end
+            if abs(timeNextVolMaint - theAgent.time) < 1e-3
+                timeNextVolMaint = theAgent.time + 0.1;
             end
             
             theMsg.submitResponse(Information.TIME_VOL_MAINT, timeNextVolMaint);
