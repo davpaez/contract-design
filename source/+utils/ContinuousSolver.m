@@ -68,9 +68,11 @@ classdef ContinuousSolver
             
             [t,y] = ode45(fun, [t0, tf], [currentPerf; currentAgentBalance]);
             
+            perfHistory = y(:,1);
+            balanceHistory = y(:,2);
             % Quick fix: make it more general
-            indices = y<=0;
-            y(indices) = 0;
+            indices = perfHistory<=0;
+            perfHistory(indices) = 0;
             
         end
         
