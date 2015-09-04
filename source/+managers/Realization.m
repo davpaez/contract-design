@@ -28,7 +28,7 @@ classdef Realization < matlab.mixin.Copyable
         
         fileInfo
         
-        contSolver % ContinuousSolver object
+        solver % Solver object
     end
     
     methods
@@ -59,7 +59,7 @@ classdef Realization < matlab.mixin.Copyable
             import entities.*
             import dataComponents.*
             import managers.*
-            import utils.ContinuousSolver
+            import utils.Solver
             
             % Get fileInfo handle
             self.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
@@ -107,7 +107,7 @@ classdef Realization < matlab.mixin.Copyable
             self.agent.registerEvent(initEventAgent);
             
             % Continuous solver object
-            self.contSolver = ContinuousSolver(progSet, self);
+            self.solver = Solver(progSet, self);
             
         end
         
@@ -609,12 +609,12 @@ classdef Realization < matlab.mixin.Copyable
             currentPerf = self.infrastructure.getPerformance();
             currentAgentBalance = self.agent.payoffList.getBalance(); % Current agent's balance
             
-            [t, y] = self.contSolver.solveFutureState(self.time, tf, [currentPerf; currentAgentBalance]);
+            [t, y] = self.solver.solveFutureState(self.time, tf, [currentPerf; currentAgentBalance]);
             
             perf = y(:,1);
             agentBalance = y(:,2);
             
-            demHist = self.contSolver.demandFnc(perf);
+            demHist = self.solver.demandFnc(perf);
             
             self.demandHistory.register(t, demHist);
             self.agent.evolve(t, agentBalance);
@@ -712,7 +712,7 @@ classdef Realization < matlab.mixin.Copyable
             operationPrincipal = self.principal.submitOperation();
             self.validateOperation(operationPrincipal);
             
-            operationAgent = self.agent.submitOperation(self.contSolver, self.infrastructure);
+            operationAgent = self.agent.submitOperation(self.solver, self.infrastructure);
             self.validateOperation(operationAgent);
             
             operationNature = self.nature.submitOperation();

@@ -1,4 +1,4 @@
-classdef ContinuousSolver
+classdef Solver
 
     properties
         realization
@@ -12,7 +12,7 @@ classdef ContinuousSolver
     
     methods
         
-        function self = ContinuousSolver(progSet, realz)
+        function self = Solver(progSet, realz)
             
             import managers.ItemSetting
             

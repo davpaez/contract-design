@@ -9,7 +9,7 @@ classdef Message < handle
         
         CURRENT_PERF        = 'CURRENT_PERF'
         
-        CONT_SOLVER         = 'CONT_SOLVER'
+        SOLVER              = 'SOLVER'
     end
     
     properties
@@ -48,7 +48,7 @@ classdef Message < handle
                 Message.TIME_DETECTION, ...
                 Message.PERF_DETECTION, ...
                 Message.CURRENT_PERF, ...
-                Message.CONT_SOLVER};
+                Message.SOLVER};
             
             answer = any(strcmp(validTypes, str));
         end

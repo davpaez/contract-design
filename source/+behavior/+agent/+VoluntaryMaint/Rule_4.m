@@ -120,9 +120,9 @@ classdef Rule_4 < managers.DecisionRule
             
             theAgent = theMsg.getExecutor();
             contractDuration = theAgent.contract.duration;
-            contSolver = theMsg.getExtraInfo(Message.CONT_SOLVER);
+            solver = theMsg.getExtraInfo(Message.SOLVER);
             perfThreshold = theAgent.contract.perfThreshold;
-            currentPerf = contSolver.realization.infrastructure.getPerformance();
+            currentPerf = solver.realization.infrastructure.getPerformance();
             
             isViolating = currentPerf < perfThreshold;
             
@@ -133,7 +133,7 @@ classdef Rule_4 < managers.DecisionRule
                     timeNextVolMaint = theAgent.time + 0.1;
                 else
                     try
-                        timeNextVolMaint = contSolver.solveTime(perfThreshold);
+                        timeNextVolMaint = solver.solveTime(perfThreshold);
                     catch
                         timeNextVolMaint = theAgent.time + 0.1;
                     end
@@ -151,7 +151,7 @@ classdef Rule_4 < managers.DecisionRule
                 
                 index = [];
                 for i=1:length(guessInspectionTimes) %
-                    perf = contSolver.solvePerformance(guessInspectionTimes(i));
+                    perf = solver.solvePerformance(guessInspectionTimes(i));
                     if perf < perfThreshold
                         index = i;
                         break
@@ -169,7 +169,7 @@ classdef Rule_4 < managers.DecisionRule
                         timeNextVolMaint = theAgent.time + 0.1;
                     else
                         try
-                            timeNextVolMaint = contSolver.solveTime(perfThreshold);
+                            timeNextVolMaint = solver.solveTime(perfThreshold);
                         catch
                             timeNextVolMaint = theAgent.time + 0.1;
                         end

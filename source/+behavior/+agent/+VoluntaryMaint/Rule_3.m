@@ -120,15 +120,15 @@ classdef Rule_3 < managers.DecisionRule
             perfThreshold = theAgent.contract.perfThreshold;
             contractDuration = theAgent.contract.duration;
             
-            contSolver = theMsg.getExtraInfo(Message.CONT_SOLVER);
+            solver = theMsg.getExtraInfo(Message.SOLVER);
             
-            currentPerf = contSolver.realization.infrastructure.getPerformance();
+            currentPerf = solver.realization.infrastructure.getPerformance();
             
             if currentPerf <= perfThreshold
                 timeNextVolMaint = theAgent.time;
             else
                 try
-                    timeNextVolMaint = contSolver.solveTime(perfThreshold);
+                    timeNextVolMaint = solver.solveTime(perfThreshold);
                 catch
                     % If threshold is never reached
                     timeNextVolMaint = contractDuration;

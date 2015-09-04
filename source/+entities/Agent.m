@@ -81,14 +81,14 @@ classdef Agent < entities.Player
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
-        function operation = submitOperation(self, contSolver, infra)
+        function operation = submitOperation(self, solver, infra)
         %{
         * Implements agent's decision rule, determines action to submit.
         The action is saved in the submittedAction attribute. Returns the
         time of the submitted action
         
             Input
-                contSolver: [class ContinuousSolver] 
+                solver: [class Solver] 
                 infra: infrastructure object
             
             Output
@@ -106,7 +106,7 @@ classdef Agent < entities.Player
             msg = Faculty.createEmptyMessage(self, Faculty.VOL_MAINT);
             msg.setExtraInfo(...
                 Message.MAX_PERF, infra.maxPerf, ...
-                Message.CONT_SOLVER, contSolver);
+                Message.SOLVER, solver);
             
             self.volMaintStrategy.decide(msg);
             
