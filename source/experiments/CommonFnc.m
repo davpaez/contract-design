@@ -106,7 +106,14 @@ classdef CommonFnc
             Output
                 up:             Principal's utility
         %}
-            up = thePrincipal.observationList.getMeanValue();
+            perf_mean = thePrincipal.observationList.getMeanValue();
+            balance = thePrincipal.payoffList.getBalance();
+            
+            if balance >=0
+                up = (10*perf_mean - balance)/1000;
+            else
+                up = (balance + 10*perf_mean)/1000;
+            end
         end
         
         
