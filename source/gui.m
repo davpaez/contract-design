@@ -311,7 +311,7 @@ function button5_callback(hObject, callbackdata)
             end
             
             % Launches report window
-            %TODO
+            gui.report_dispersion()
             
         case Experiment.SENS
             

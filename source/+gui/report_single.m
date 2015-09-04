@@ -1,4 +1,4 @@
-function [ output_args ] = report_single( input_args )
+function report_single()
 
     hpanel4 = findobj('Tag', 'panel4');
     data = getappdata(hpanel4, 'reportSingle');
