@@ -1,13 +1,12 @@
 %{
 -------------------------------------------------------------
-Experiment 8
+Experiment 6
 
-This experiment is being used as a test for the new features
-of the model!
+
 -------------------------------------------------------------
 
 Description:
-Single and deterministic analysis of the game
+Dispersion analysis of the game
 
 %}
 

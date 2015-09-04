@@ -1,9 +1,8 @@
 %{
 -------------------------------------------------------------
-Experiment 1
+Experiment 4
 
-This experiment is being used as a test for the new features
-of the model!
+
 -------------------------------------------------------------
 
 Description:
