@@ -523,6 +523,7 @@ classdef ObservationList < matlab.mixin.Copyable
             
         end
         
+        
         function value = interpolate(self, time)
         %{
         * Iterpolates for given time. At jumps, it returns the post-jump
@@ -646,7 +647,15 @@ classdef ObservationList < matlab.mixin.Copyable
             end
             
         end
- 
         
+        
+        function plot(self)
+            x = self.time(1:self.pt-1);
+            y = self.value(1:self.pt-1);
+            
+            figure
+            plot(x, y, '-o')
+            xlabel('Time')
+        end
     end
 end
