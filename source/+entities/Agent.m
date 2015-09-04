@@ -88,8 +88,8 @@ classdef Agent < entities.Player
         time of the submitted action
         
             Input
-                currentPerf: [class double] 
-                solvePerformanceForTime: function handle for solving perf
+                contSolver: [class ContinuousSolver] 
+                infra: infrastructure object
             
             Output
                 time: Time of the commited action
