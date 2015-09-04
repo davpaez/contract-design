@@ -480,6 +480,9 @@ classdef DecisionRule < matlab.mixin.Copyable
                 self.lastOutput = [];
                 
                 % Updates value of parameters
+                if isempty(self.params_DefaultValue)
+                    self.params_DefaultValue = rowVector;
+                end
                 self.params_Value = rowVector;
             end
         end
@@ -583,6 +586,7 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
+            
             assert(self.determinedRule == true, ...
                 'The rule must be determined before it can be executed')
             
