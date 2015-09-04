@@ -338,7 +338,7 @@ a = 1.3;
 b = 2.3;
 vi = 100;
 
-r = -15;
+r = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t; %- (d/28e6)*20*((v^2)/500);
 if v <= 0
     r = 0;
 end
@@ -357,11 +357,14 @@ function d = demandFunction(v, nullPerf, maxPerf)
     Output
         d:      Rate of demand
 %}
-    
+
+    c = 4;     % Parameter to control concavity
+    a = 2.8e7;   % Demand at maximum performance
+
     n = length(v);
     d = zeros(n,1);
 
     for i=1:n
-        d(i) = 12e6;
+        d(i) = ((v(i)-nullPerf)/(maxPerf-nullPerf))^(c)*a;
     end
 end
