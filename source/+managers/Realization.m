@@ -766,7 +766,7 @@ classdef Realization < matlab.mixin.Copyable
         %}
             import dataComponents.Event
             import dataComponents.Transaction
-            import managers.DataRealization
+            import managers.DataStructure
             
             [utilityAgent, utilityPrincipal] = self.utilityPlayers();
             contractDuration = self.contract.duration;
@@ -774,7 +774,6 @@ classdef Realization < matlab.mixin.Copyable
             inspection_markers = self.principal.eventList.getMarkersInfo(Event.INSPECTION, self.principal.observationList);
             detection_markers = self.principal.eventList.getMarkersInfo(Event.DETECTION, self.principal.observationList);
             
-            data = DataRealization();
             
             if ~isempty(inspection_markers)
                 num_insp_noviol = length(inspection_markers.time);
@@ -792,7 +791,7 @@ classdef Realization < matlab.mixin.Copyable
             
             violationRatio = num_detections / total_inspections;
             
-            data = DataRealization();
+            data = DataStructure();
             
             % Double values
             data.addEntry('ua', 'Agent''s utility', utilityAgent);

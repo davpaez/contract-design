@@ -1,4 +1,4 @@
-classdef DataRealization < handle
+classdef DataStructure < handle
     % 
     
     properties
@@ -12,7 +12,7 @@ classdef DataRealization < handle
         %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
         % *****************************************************************
         
-        function self = DataRealization()
+        function self = DataStructure()
         %{
         * 
             Input
