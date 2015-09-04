@@ -221,9 +221,11 @@ classdef Realization < matlab.mixin.Copyable
             
             % Evolve the system up to the time of the operation to be
             % executed
-            if operation.time == self.time
+            if ~isempty(self.lastOperation) && operation.time == self.lastOperation.time
                 self.validateOperationAdjacency(operation);
-            elseif operation.time > self.time
+            end
+            
+            if operation.time > self.time
                 self.evolveContinuously(operation.time);
             end
             
