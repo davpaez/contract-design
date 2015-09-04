@@ -97,9 +97,11 @@ classdef ContinuousSolver
             currentTime = self.realization.time;
             queriedTime = time;
             
+            tol = 1e-5;
+            
             if queriedTime < currentTime
                 perf = self.realization.infrastructure.history.solveValue(time);
-            elseif queriedTime == currentTime
+            elseif abs(queriedTime - currentTime) < tol
                 perf = self.realization.infrastructure.performance;
             else
                 % Extrapolate
