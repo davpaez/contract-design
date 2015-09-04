@@ -141,7 +141,7 @@ progSet.add(fnc);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.CONT_RESP_FNC);
-fnc.equation = @continuousRespFunction;
+fnc.equation = @CommonFnc.continuousRespFunction;
 
 progSet.add(fnc);
 
@@ -320,31 +320,6 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
     cost = ((goalP-currentP) / (maxP-nullP))*epsilon*inv + fixedCost;
 
     assert(isreal(cost), 'Cost must be a real number.')
-end
-
-function r = continuousRespFunction(f, d, v, t)
-%{
-* 
-
-    Input
-        f:  Continuous environmental force
-        d:  Demand
-        v:  Performance
-        t:  Time (years)
-
-    Output
-        r:  Response
-%}
-
-a = 1.3;
-b = 2.3;
-vi = 100;
-
-r = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t; %- (d/28e6)*20*((v^2)/500);
-if v <= 0
-    r = 0;
-end
-
 end
 
 function d = demandFunction(v, nullPerf, maxPerf)
