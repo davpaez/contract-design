@@ -314,8 +314,7 @@ function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
     epsilon = 0.2;
     fixedCost = 4;
 
-    cost = (  sqrt((goalP-nullP) / (maxP-nullP)) - ...
-              sqrt((currentP-nullP) / (maxP-nullP)))*epsilon*inv + fixedCost;
+    cost = ((goalP-currentP) / (maxP-nullP))*epsilon*inv + fixedCost;
 
     assert(isreal(cost), 'Cost must be a real number.')
 end
