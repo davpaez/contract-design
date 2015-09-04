@@ -142,10 +142,15 @@ classdef Rule_4 < managers.DecisionRule
                 
                 interval = mean(diff(inspEvents.time));
                 
-                guessInspectionTimes = inspEvents.time(1):interval:contractDuration;
+                guessNextInspection = inspEvents.time(end) + interval;
+                if guessNextInspection < contractDuration
+                    guessInspectionTimes = guessNextInspection:interval:contractDuration;
+                else
+                    guessInspectionTimes = [];
+                end
                 
                 index = [];
-                for i=1:length(guessInspectionTimes)
+                for i=1:length(guessInspectionTimes) %
                     perf = contSolver.solvePerformance(guessInspectionTimes(i));
                     if perf < perfThreshold
                         index = i;
