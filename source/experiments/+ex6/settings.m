@@ -360,7 +360,7 @@ function d = demandFunction(v, nullPerf, maxPerf)
 %}
 
     c = 4;     % Parameter to control concavity
-    a = 28e6;   % Demand at maximum performance
+    a = 2.8e7;   % Demand at maximum performance
 
     n = length(v);
     d = zeros(n,1);
