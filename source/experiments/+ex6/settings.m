@@ -220,9 +220,9 @@ progSet.add(faculty);
 faculty = Faculty(Faculty.INSPECTION);
 
 faculty.setIdentifier(ItemSetting.STRATS_INSP);
-faculty.selectStrategy('Fixed_plus_random');
-rule = 'Fixed inspection interval with random component';
-params = [4, 0];
+faculty.selectStrategy('ExponentiallyRandom');
+rule = 'Exponentially distributed intervals';
+params = [0.5];
 faculty.setParams(rule, params);
 
 progSet.add(faculty);
@@ -257,7 +257,7 @@ progSet.add(data);
 faculty = Faculty(Faculty.VOL_MAINT);
 
 faculty.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
-faculty.selectStrategy('Test_2');
+faculty.selectStrategy('Test_4');
 
 progSet.add(faculty);
 
