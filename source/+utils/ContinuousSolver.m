@@ -69,11 +69,18 @@ classdef ContinuousSolver
             [t,y] = ode45(fun, [t0, tf], [currentPerf; currentAgentBalance]);
             
             perfHistory = y(:,1);
-            balanceHistory = y(:,2);
-            % Quick fix: make it more general
-            indices = perfHistory<=0;
-            perfHistory(indices) = 0;
             
+            % Make perf values comply with null and max perf
+            nullPerf = self.realization.infrastructure.nullPerf;
+            maxPerf = self.realization.infrastructure.maxPerf;
+            
+            indices = perfHistory < nullPerf;
+            perfHistory(indices) = nullPerf;
+            
+            indices = perfHistory > maxPerf;
+            perfHistory(indices) = maxPerf;
+            
+            y(:,1) = perfHistory;
         end
         
         
