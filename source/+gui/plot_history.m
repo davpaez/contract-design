@@ -3,10 +3,6 @@ function plot_history(panel, data)
 
 import dataComponents.Event
 
-%hpanel4 = findobj('Tag', 'panel4');
-
-%data = getappdata(hpanel4, 'reportSingle');
-
 horiz_margin = 0.05;
 vert_margin = 0.05;
 
