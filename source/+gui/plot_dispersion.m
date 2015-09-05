@@ -1,4 +1,4 @@
-function plotAggregateDisp(hObject, callbackdata)
+function plot_dispersion(panel, data)
 
 hFigure = figure('Visible', 'off');
 
