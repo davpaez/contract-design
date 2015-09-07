@@ -102,7 +102,7 @@ progSet.add(data);
 nullp = InputData();
 
 nullp.setIdentifier(ItemSetting.NULL_PERF);
-nullp.value = 0;
+nullp.value = CommonFnc.null_perf;
 
 progSet.add(nullp);
 
@@ -110,7 +110,7 @@ progSet.add(nullp);
 maxp = InputData();
 
 maxp.setIdentifier(ItemSetting.MAX_PERF);
-maxp.value = 100;
+maxp.value = CommonFnc.max_perf;
 
 progSet.add(maxp);
 
@@ -125,7 +125,7 @@ maxPerf = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
 data = InputData();
 
 data.setIdentifier(ItemSetting.INITIAL_PERF);
-data.value = maxPerf;
+data.value = CommonFnc.initial_perf;
 
 progSet.add(data);
 
@@ -163,7 +163,7 @@ progSet.add(fnc);
 inv = InputData();
 
 inv.setIdentifier(ItemSetting.INV);
-inv.value = 875;
+inv.value = CommonFnc.agent_initial_balance;
 
 progSet.add(inv);
 
@@ -231,7 +231,7 @@ progSet.add(faculty);
 data = InputData();
 
 data.setIdentifier(ItemSetting.COST_INSP);
-data.value = progSet.returnItemSetting(ItemSetting.INV).value / 1000;
+data.value = CommonFnc.cost_single_inspection;
 
 progSet.add(data);
 

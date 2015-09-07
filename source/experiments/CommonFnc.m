@@ -1,5 +1,14 @@
 classdef CommonFnc
     
+    properties (Constant)
+        
+        null_perf = 0
+        max_perf = 100
+        initial_perf = 100
+        agent_initial_balance = 875
+        cost_single_inspection = 875/500
+        
+    end
     methods (Static)
         
         
