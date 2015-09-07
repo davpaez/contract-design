@@ -182,7 +182,7 @@ function layoutMainWindow(gui_State)
     patch(  [0  0  0  0], [0  0  1  1], [0.4392  0.7882  0.3686],...
         'Parent', ax1, ...
         'EdgeColor', 'none', ...
-        'Tag', 'progressPatch');
+        'Tag', 'progresspatch');
     
     %% Finilize window setup
     
@@ -384,7 +384,7 @@ end
 
 function updateProgressBar(value)
 % Updates the progress bar to the value parameter
-    p = findobj('Tag','progressPatch');
+    p = findobj('Tag','progresspatch');
     p.XData(2:3) = value;
 end
 
