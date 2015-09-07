@@ -17,3 +17,7 @@ experim = Experiment(progSettings);
 
 experim.run();
 data = experim.report();
+
+ua = data.getValue('ua_vector');
+up = data.getValue('up_vector');
+scatter(ua, up)

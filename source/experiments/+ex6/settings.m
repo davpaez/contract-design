@@ -71,7 +71,7 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
-data.value = 100;
+data.value = 500;
 
 progSet.add(data);
 
