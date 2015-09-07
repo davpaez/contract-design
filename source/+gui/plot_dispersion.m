@@ -1,31 +1,29 @@
 function plot_dispersion(panel, data)
 
-hFigure = figure('Visible', 'off');
-
-ax1 = subplot('Position', [0.1 0.8 0.7 0.15]);
-ax2 = subplot('Position', [0.1 0.1 0.7 0.65]);
-ax3 = subplot('Position', [0.85 0.1 0.1 0.65]);
-
-hpanel4 = findobj('Tag', 'panel4');
-data = getappdata(hpanel4, 'reportDispersion');
+ax1 = subplot('Position', [0.1 0.8 0.7 0.15], 'Parent', panel);
+ax2 = subplot('Position', [0.1 0.1 0.7 0.65], 'Parent', panel);
+ax3 = subplot('Position', [0.85 0.1 0.1 0.65], 'Parent', panel);
 
 nbins = 25;
 
-histogram(ax1, data.ua, nbins);
-histogram(ax3, data.up, nbins);
+ua_vector = data.getValue('ua_vector');
+up_vector = data.getValue('up_vector');
+
+histogram(ax1, ua_vector, nbins);
+histogram(ax3, up_vector, nbins);
 view(90,-90)
 
-scatter(ax2, data.ua, data.up)
+scatter(ax2, ua_vector, up_vector)
 
 set(ax1, ...
-    'Color', hFigure.Color, ...
+    'Color', panel.BackgroundColor, ...
     'XTick',[], ...
     'Box', 'off', ...
     'XColor', [0.4314  0.4314  0.4314],...
     'YColor', [0.4314  0.4314  0.4314])
 
 set(ax3, ...
-    'Color', hFigure.Color, ...
+    'Color', panel.BackgroundColor, ...
     'XTick',[], ...
     'Box', 'off', ...
     'XColor', [0.4314  0.4314  0.4314],...
@@ -40,8 +38,8 @@ ylabel(ax2, 'Principal''s utility')
 
 hold(ax2, 'on')
 
-mean_ua = mean(data.ua);
-mean_up = mean(data.up);
+mean_ua = mean(ua_vector);
+mean_up = mean(up_vector);
 
 plot(ax2, [min(ax2.XLim), max(ax2.XLim)], [mean_up, mean_up],':', ...
     'Color',[0.7 0 0], ...
@@ -50,8 +48,6 @@ plot(ax2, [min(ax2.XLim), max(ax2.XLim)], [mean_up, mean_up],':', ...
 plot(ax2, [mean_ua, mean_ua], [min(ax2.YLim), max(ax2.YLim)], ':', ...
     'Color',[0.7 0 0], ...
     'LineWidth', 0.1)
-
-hFigure.Visible = 'on';
 
 end
 
