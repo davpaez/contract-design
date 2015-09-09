@@ -24,63 +24,7 @@ function report_single()
         'Tag', 'panel6');
     
     gui.plot_history(panel5, data)
-    
-    table2 = uitable(panel6, ...
-        'Data', [],...
-        'FontSize', 10, ...
-        'ColumnName', {'Field', 'Value'},...
-        'ColumnWidth', {150 80}, ...
-        'ColumnEditable', [false false], ...
-        'Position', [20 20 270 520], ...
-        'CellSelectionCallback', [], ...
-        'Tag', 'table2');
-    
-    populateFields(table2, data);
+    gui.create_table_single(panel6, data);
     
     hFigure.Visible = 'on';
-    
-end
-
-function populateFields(htable, data_exp)
-%{
-List of indicators:
-- Utility agent
-- Utility principal
-- Balance agent
-- Balance principal
-- Time below threshold
-- Sum penalties
-- Agent's B/C
-- # inspections
-- # detections
-- # actual violations
-- # cost of inspections
-- Observed mean value perf
-- Real mean value perf
-- Error inspection index (area between the two curves / tm)
-- cost of inspections
-- cost vol maints
-- cost mand maints
-- std of observed performance
-- std of actual performance
-%}
-numfields = 15;
-data_table = cell(0, 2);
-
-fields = {
-    'ua', ...
-    'up', ...
-    'numInspNoViol', ...
-    'numDetections', ...
-    'numInspections', ...
-    'violationRatio', ...
-    };
-
-for i=1:numel(fields)
-    data_table{i,1} = data_exp.getDescription(fields{i});
-    data_table{i,2} = data_exp.getValue(fields{i});
-end
-
-htable.Data = data_table;
-
 end

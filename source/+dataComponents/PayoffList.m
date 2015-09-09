@@ -179,6 +179,11 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
             assert(self.isValidType(type) ,...
                 'The type entered as argument is not valid')
             
+            id = self.pt-1;
+            if time > self.time(id)
+                self.registerBalance(time, self.balance(id));
+            end
+            
             % Registers jump
             self.registerJump();
             
@@ -417,6 +422,15 @@ classdef PayoffList < matlab.mixin.Copyable & managers.TypedClass
         
         function data = getDataJumps(self)
             data = self.getData(self.jumpsIndex(1:self.jumpsCounter));
+        end
+        
+        function plot(self)
+            x = self.time(1:self.pt-1);
+            y = self.balance(1:self.pt-1);
+            
+            figure
+            plot(x, y, '-o')
+            xlabel('Time')
         end
         
     end

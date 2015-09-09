@@ -5,6 +5,9 @@ classdef DataStructure < handle
         keywords
         descriptions
         values
+        mean
+        cov
+        source
     end
     
     methods
@@ -29,6 +32,31 @@ classdef DataStructure < handle
         %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
         % *****************************************************************
         
+        function addSource(self, s)
+            assert(length(s) > 1 , 'Source must be a cell array (of DataStructure objects)')
+            self.source = s;
+        end
+        
+        function addStatEntry(self, kw)
+            s = self.source;
+            n = length(s);
+            
+            v = zeros(n,1);
+            
+            for i=1:n
+                v(i) = s{i}.getValue(kw);
+            end
+            
+            m = mean(v); %#ok<*CPROP>
+            
+            self.keywords{end+1} = kw;
+            self.descriptions{end+1} = s{i}.getDescription(kw);
+            self.values{end+1} = v;
+            self.mean(end+1) = m;
+            self.cov(end+1) = abs(std(v)/m);
+            
+        end
+        
         function addEntry(self, kw, desc, val)
         %{
         * 
@@ -43,6 +71,8 @@ classdef DataStructure < handle
             self.keywords{end+1} = kw;
             self.descriptions{end+1} = desc;
             self.values{end+1} = val;
+            self.mean(end+1) = nan;
+            self.cov(end+1) = nan;
         end
         
         
@@ -82,7 +112,34 @@ classdef DataStructure < handle
                     break
                 end
             end
-        end        
+        end
+        
+        function st = getEntry(self, kw)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            index = [];
+            for i=1:numel(self.keywords)
+                if strcmp(self.keywords{i}, kw)
+                    index = i;
+                    break
+                end
+            end
+            
+            if isempty(index)
+                st = [];
+            else
+                st = struct('keyword', self.keywords{i}, ...
+                    'description', self.descriptions{i}, ...
+                    'value', self.values{i}, ...
+                    'mean', self.mean(i), ...
+                    'cov', self.cov(i));
+            end
+        end
         
     end
     

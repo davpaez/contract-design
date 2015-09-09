@@ -153,33 +153,14 @@ classdef GameEvaluation < handle
                 dataRealization{i} = d;
             end
             
-            ua_vector = zeros(n,1);
-            ppmv_vector = zeros(n,1);
-            balp_vector = zeros(n,1);
-            up_vector = zeros(n,1);
-            for i=1:n
-                ua_vector(i) = dataRealization{i}.getValue('ua');
-                ppmv_vector(i) = dataRealization{i}.getValue('perceivedPerfMeanValue').meanvalue(end);
-                balp_vector(i) = dataRealization{i}.getValue('balP').balance(end);
-                up_vector(i) = dataRealization{i}.getValue('up');
-            end
+            data.addSource(dataRealization);
+            data.addStatEntry('ua');
+            data.addStatEntry('up');
+            data.addStatEntry('final_ba');
+            data.addStatEntry('final_bp');
+            data.addStatEntry('final_rpmv');
+            data.addStatEntry('final_ppmv');
             
-            ua_mean = mean(ua_vector);
-            ua_cov = abs(std(ua_vector)/ua_mean);
-            ppmv_mean = mean(ppmv_vector);
-            balp_mean = mean(balp_vector);
-            up_mean = mean(up_vector);
-            up_cov = abs(std(up_vector)/up_mean);
-            
-            data.addEntry('ua_vector', 'Vector agent utility', ua_vector);
-            data.addEntry('up_vector', 'Vector principal utility', up_vector);
-            data.addEntry('ua_mean', 'Mean agent utility', ua_mean);
-            data.addEntry('up_mean', 'Mean principal utility', up_mean);
-            data.addEntry('ua_cov', 'COV agent utility', ua_cov);
-            data.addEntry('up_cov', 'COV principal utility', up_cov);
-            data.addEntry('ppmv', 'Perceived performance mean value', ppmv_mean);
-            data.addEntry('balp_mean', 'Mean principal balance', balp_mean);
-            data.addEntry('data_rlz', 'Data realizations', dataRealization);
         end
         
     end

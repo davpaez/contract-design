@@ -324,21 +324,20 @@ classdef Realization < matlab.mixin.Copyable
             
             obs = Observation(timeInspection, perf);
             
-            % Normal inspection or detection
-            if perf >= self.contract.perfThreshold  % It is a regular inspection
+            % Inspection event
+            inspectionEvent = Event(...
+                timeInspection, ...
+                Event.INSPECTION, ...
+                obs, ...
+                tran);
+            
+            % Register event for principal and agent
+            self.principal.registerEvent(inspectionEvent);
+            self.agent.registerEvent(inspectionEvent);
+            
+            % If there is violation
+            if perf < self.contract.perfThreshold
                 
-                % Inspection event
-                inspectionEvent = Event(...
-                    timeInspection, ...
-                    Event.INSPECTION, ...
-                    obs, ...
-                    tran);
-                
-                % Register event for principal and agent
-                self.principal.registerEvent(inspectionEvent);
-                self.agent.registerEvent(inspectionEvent);
-                
-            else  % It is a detection
                 import dataComponents.Message
                 import managers.Information
                 import managers.Faculty
@@ -791,11 +790,21 @@ classdef Realization < matlab.mixin.Copyable
             
             violationRatio = num_detections / total_inspections;
             
+            agent_balanceHistory = self.agent.payoffList.getBalanceHistory();
+            principal_balanceHistory = self.principal.payoffList.getBalanceHistory();
+            
+            history_real_mean_perf = self.infrastructure.history.getMeanValueHistory();
+            history_perc_mean_perf = self.principal.observationList.getMeanValueHistory();
+            
             data = DataStructure();
             
             % Double values
             data.addEntry('ua', 'Agent''s utility', utilityAgent);
             data.addEntry('up', 'Principal''s utility', utilityPrincipal);
+            data.addEntry('final_ba', 'Final agent''s balance', agent_balanceHistory.balance(end));
+            data.addEntry('final_bp', 'Final principal''s balance', principal_balanceHistory.balance(end));
+            data.addEntry('final_rpmv', 'Final real perf. mean value', history_real_mean_perf.meanvalue(end));
+            data.addEntry('final_ppmv', 'Final perc. perf. mean value', history_perc_mean_perf.meanvalue(end));
             data.addEntry('contractDuration', 'Contract duration', contractDuration);
             data.addEntry('threshold', 'Contract duration', perfThreshold);
             data.addEntry('maxPerf', 'Maximum performance', self.infrastructure.maxPerf);
@@ -811,13 +820,16 @@ classdef Realization < matlab.mixin.Copyable
             data.addEntry('detectionMarker', 'Time and perf when detections occurred', detection_markers);
             data.addEntry('volMaintMarker', 'Time and perf when vol maints occurred', self.agent.eventList.getMarkersInfo(Event.VOL_MAINT, self.agent.observationList));
             data.addEntry('shockMarker', 'Time and perf when shocks occurred', self.agent.eventList.getMarkersInfo(Event.SHOCK, self.agent.observationList));
-            data.addEntry('realPerfMeanValue', 'History of actual perf mean value', self.infrastructure.history.getMeanValueHistory());
-            data.addEntry('perceivedPerfMeanValue', 'History of perceived perf mean value', self.principal.observationList.getMeanValueHistory());
-            data.addEntry('balA', 'Agent''s balance', self.agent.payoffList.getBalanceHistory());
-            data.addEntry('balP', 'Principal''s balance', self.principal.payoffList.getBalanceHistory());
-            data.addEntry('jumpsMaint', 'Time and balance just before a jump due to maint', self.agent.payoffList.returnPayoffsOfType(Transaction.MAINTENANCE));
-            data.addEntry('jumpsContrib', 'Time and balance just before a jump due to flow', self.agent.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
-            data.addEntry('jumpsPenalties', 'Time and balance just before a jump due to a penalty', self.agent.payoffList.returnPayoffsOfType(Transaction.PENALTY));
+            data.addEntry('realPerfMeanValue', 'History of actual perf mean value', history_real_mean_perf);
+            data.addEntry('perceivedPerfMeanValue', 'History of perceived perf mean value', history_perc_mean_perf);
+            data.addEntry('balA', 'Agent''s balance', agent_balanceHistory);
+            data.addEntry('balP', 'Principal''s balance', principal_balanceHistory);
+            data.addEntry('jumpsMaint_agent', 'Time and balance just before a jump due to maint', self.agent.payoffList.returnPayoffsOfType(Transaction.MAINTENANCE));
+            data.addEntry('jumpsContrib_agent', 'Time and balance just before a jump due to a contribution', self.agent.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
+            data.addEntry('jumpsPenalties_agent', 'Time and balance just before a jump due to a penalty', self.agent.payoffList.returnPayoffsOfType(Transaction.PENALTY));
+            data.addEntry('jumpsInspections_principal', 'Time and balance just before a jump due to an inspection', self.principal.payoffList.returnPayoffsOfType(Transaction.INSPECTION));
+            data.addEntry('jumpsContrib_principal', 'Time and balance just before a jump due to a contribution', self.principal.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
+            data.addEntry('jumpsPenalties_principal', 'Time and balance just before a jump due to a penalty', self.principal.payoffList.returnPayoffsOfType(Transaction.PENALTY));
         end
         
     end

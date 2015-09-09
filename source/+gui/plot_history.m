@@ -9,25 +9,29 @@ vert_margin = 0.05;
 height = (1-4*vert_margin)/3;
 width = 0.85;
 
+% Colors
 boxColor = [0.35  0.35  0.35];
+default_blue = [0 0.4470 0.7410];
+grey = [0.25 0.25 0.25];
+cyan_low = [0 0.9 0.9];
 
 posVec1 = [0.1    0.685    width   height];
 posVec2 = [0.1    0.375      width   height];
 posVec3 = [0.1    0.07                 width   height];
 
 ax1 = subplot('Position', posVec1, ...
-    'Parent', panel);
+    'Parent', panel, 'Tag', 'deg_history');
 ax2 = subplot('Position', posVec2, ...
-    'Parent', panel);
+    'Parent', panel, 'Tag', 'balance_history');
 ax3 = subplot('Position', posVec3, ...
-    'Parent', panel);
+    'Parent', panel, 'Tag', 'perf_history');
 
 % Figure 1. Interaction sequence
 
 width_fig1 = 700;       % pixels
 height_fig1 = 400;      % pixels
 
-% ---------:::::::::::::::: Subfigure 1 ::::::::::::::::---------------
+%% ---------:::::::::::::::: Subfigure 1 ::::::::::::::::---------------
 
 %   ::::--> Degradation path
 
@@ -41,7 +45,8 @@ set(ax1, ...
     'Box', 'on', ...
     'XColor', boxColor,...
     'YColor', boxColor, ...
-    'XTickLabel', []);
+    'XTickLabel', [], ...
+    'Tag', 'deg_path');
 
 hold(ax1, 'on')
 grid(ax1, 'off');
@@ -90,30 +95,71 @@ end
 
 hold(ax1, 'off')
 
-% ---------:::::::::::::::: Subfigure 2 ::::::::::::::::---------------
+%% ---------:::::::::::::::: Subfigure 2 ::::::::::::::::---------------
 
-set(ax2, ...
+%set(gcf, 'CurrentHandle', ax2);
+
+[ax2_yy, h1, h2] = plotyy(ax2, ...
+    data.getValue('balA').time, data.getValue('balA').balance, ...
+    data.getValue('balP').time, data.getValue('balP').balance);
+
+set(ax2_yy(1), ...
     'XLim', [0 finalTimePlot], ...
     'FontSize', 8, ...
     'Color', 'white', ...
     'Box', 'on', ...
     'XColor', boxColor,...
-    'YColor', boxColor, ...
+    'GridColor', [0.15 0.15 0.15], ...
     'XTickLabel', []);
 
-% Plot Balance vs t : AGENT
-hold(ax2, 'on')
-grid(ax2, 'on');
+set(ax2_yy(2), ...
+    'XLim', [0 finalTimePlot], ...
+    'FontSize', 8, ...
+    'XColor', boxColor,...
+    'GridColor', [0.15 0.15 0.15], ...
+    'XTickLabel', []);
 
-plot(ax2, data.getValue('balA').time, data.getValue('balA').balance, '-')
-plot(ax2, data.getValue('jumpsContrib').time, data.getValue('jumpsContrib').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','g', 'MarkerFaceColor', 'g');
-plot(ax2, data.getValue('jumpsMaint').time, data.getValue('jumpsMaint').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','b',  'MarkerFaceColor', 'b');
-plot(ax2, data.getValue('jumpsPenalties').time, data.getValue('jumpsPenalties').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','r',  'MarkerFaceColor', 'r');
+hold(ax2_yy(1), 'on')
+
+% Contributions - Agent
+if ~isempty(data.getValue('jumpsContrib_agent'))
+    plot(ax2_yy(1), data.getValue('jumpsContrib_agent').time, data.getValue('jumpsContrib_agent').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','blue', 'MarkerFaceColor', 'blue');
+end
+
+% Maintenance - Agent
+if ~isempty(data.getValue('jumpsMaint_agent'))
+    plot(ax2_yy(1), data.getValue('jumpsMaint_agent').time, data.getValue('jumpsMaint_agent').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','green',  'MarkerFaceColor', 'green');
+end
+
+% Penalties - Agent
+if ~isempty(data.getValue('jumpsPenalties_agent'))
+    plot(ax2_yy(1), data.getValue('jumpsPenalties_agent').time, data.getValue('jumpsPenalties_agent').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor','red',  'MarkerFaceColor', 'red');
+end
+
+hold(ax2_yy(2), 'on')
+
+% Inspections - Principal
+if ~isempty(data.getValue('jumpsInspections_principal'))
+    plot(ax2_yy(2), data.getValue('jumpsInspections_principal').time, data.getValue('jumpsInspections_principal').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor', grey,  'MarkerFaceColor', grey);
+end
+
+%{
+% Contributions - Principal
+if ~isempty(data.getValue('jumpsContrib_principal'))
+    plot(ax2_yy(2), data.getValue('jumpsContrib_principal').time, data.getValue('jumpsContrib_principal').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor', cyan_low,  'MarkerFaceColor', cyan_low);
+end
+
+% Penalties - Principal
+if ~isempty(data.getValue('jumpsPenalties_principal'))
+    plot(ax2_yy(2), data.getValue('jumpsPenalties_principal').time, data.getValue('jumpsPenalties_principal').balance, 'o', 'MarkerSize', 3, 'MarkerEdgeColor', 'red',  'MarkerFaceColor', 'red');
+end
+%}
 
 %legend(ax2,'Discrete flow', 'Location', 'bestoutside')
-ylabel(ax2, 'Agent''s balance ($)')
+ylabel(ax2_yy(1), 'Monetary balance ($)', 'Color', boxColor)
+grid(ax2, 'on');
 
-% ---------:::::::::::::::: Subfigure 3 ::::::::::::::::---------------
+%% ---------:::::::::::::::: Subfigure 3 ::::::::::::::::---------------
 
 % Plot PV vs t : PRINCIPAL
 
@@ -129,11 +175,16 @@ hold(ax3, 'on')
 grid(ax3, 'on');
 
 plot(ax3, ...
-    data.getValue('perceivedPerfMeanValue').time, data.getValue('perceivedPerfMeanValue').meanvalue, '-o', ...
-    data.getValue('realPerfMeanValue').time, data.getValue('realPerfMeanValue').meanvalue,'-.');
+    data.getValue('perceivedPerfMeanValue').time, ...
+    data.getValue('perceivedPerfMeanValue').meanvalue, ...
+    '-ok', ...
+    'MarkerSize', 3, ...
+    'MarkerFaceColor', grey);
 
-
-%plot(perfHistory.time,perfHistory.value, 'Color', [0.9 0.9 0.9])
+plot(ax3, ...
+    data.getValue('realPerfMeanValue').time, ...
+    data.getValue('realPerfMeanValue').meanvalue, ...
+    '-.');
 
 %legend(ax3, 'Perceived','Real', 'Location', 'bestoutside')
 
@@ -142,6 +193,6 @@ ylabel(ax3, 'Mean performance')
 
 
 % Synchronize axes limits
-linkaxes([ax1,ax2,ax3],'x')
+linkaxes([ax1,ax2_yy(1),ax2_yy(2),ax3],'x')
 
 end
