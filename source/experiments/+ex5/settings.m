@@ -56,21 +56,13 @@ data.value = round(1*(1/365)*(1/10), 4);
 
 progSet.add(data);
 
-% 3. Annual discount rate
-data = InputData();
-
-data.setIdentifier(ItemSetting.DISC_RATE);
-data.value = 0.04;
-
-progSet.add(data);
-
 %% Optimization (16 - 30)
 
 % 16. Number of realizations per simulation of game
 data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
-data.value = 500;
+data.value = 50;
 
 progSet.add(data);
 

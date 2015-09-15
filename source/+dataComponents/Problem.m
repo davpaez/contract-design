@@ -22,9 +22,6 @@ classdef Problem < matlab.mixin.Copyable
         %}
             % Discount rate
             import managers.ItemSetting
-
-            item = progSettings.returnItemSetting(ItemSetting.DISC_RATE);
-            self.discountRate = item.value;
             
             item = progSettings.returnItemSetting(ItemSetting.DEMAND_FNC);
             self.demandFnc = item.equation;
