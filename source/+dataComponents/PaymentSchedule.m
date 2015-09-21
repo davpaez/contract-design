@@ -133,6 +133,19 @@ classdef PaymentSchedule < handle
             self.isSorted = true;
         end
         
+        function val = getSumTransactions(self, typeTrans)
+            
+            n = length(self.listTransactions);
+            val = 0;
+            
+            for i=1:n
+                currentTran = self.listTransactions{i};
+                if strcmp(currentTran.type, typeTrans)
+                    val = val + currentTran.value;
+                end
+            end
+        end
+        
     end
 end
 

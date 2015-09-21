@@ -22,32 +22,38 @@ classdef ItemSetting < matlab.mixin.Copyable
         
         % Problem
         TYPE_EXP        = 'TYPE_EXP'    % Type of experiment
-        TIME_RES        = 'TIME_RES'    % Time resolution
-        DEMAND_FNC      = 'DEMAND_FNC'  % How users demand respond to Perf and time
         
         % Optimization
         NUM_REALIZ      = 'NUM_REALIZ'  % Number of realizations
         MAX_ITER        = 'MAX_ITER'    % Maximum iterations
         TOL             = 'TOL'         % Tolerance
         
-        % Realization
+        % Infrastructure
+        MAX_PERF        = 'MAX_PERF'        % 
+        NULL_PERF       = 'NULL_PERF'       % 
+        INITIAL_PERF    = 'INITIAL_PERF'    % 
+        DEMAND_FNC      = 'DEMAND_FNC'      % How users demand respond to Perf and time
+        CONT_RESP_FNC   = 'CONT_RESP_FNC'   % 
+        SHOCK_RESP_FNC  = 'SHOCK_RESP_FNC'  % 
         
+        % Realization
+        TIME_RES        = 'TIME_RES'    % Time resolution
         
         % Contract
-        INV             = 'INV'         % Initial investment %TODO May be initial agent's balance?
-        PEN_POLICY      = 'PEN_POLICY'  % 
+        INV             = 'INV'         % Initial investment
         
         % Nature
         NAT_HAZARD      = 'NAT_HAZARD'      % 
         STRATS_SHOCK    = 'STRATS_SHOCK'    % 
         CONT_ENV_FORCE  = 'CONT_ENV_FORCE'  % 
         
-        
         % Principal
-        STRATS_CONTRACT     = 'STRATS_CONTRACT'     % 
+        STRATS_CONTRACT     = 'STRATS_CONTRACT'     %
+        PEN_POLICY      = 'PEN_POLICY'  % 
         STRATS_INSP         = 'STRATS_INSP'         % 
         COST_INSP           = 'COST_INSP'           % 
         PRINCIPAL_UTIL_FNC  = 'PRINCIPAL_UTIL_FNC'  % 
+        
         
         % Agent
         PART_CONSTR         = 'PART_CONSTR'         % 
@@ -56,13 +62,6 @@ classdef ItemSetting < matlab.mixin.Copyable
         MAINT_COST_FNC      = 'MAINT_COST_FNC'      % 
         AGENT_UTIL_FNC      = 'AGENT_UTIL_FNC'      % 
         
-        % Infrastructure
-        MAX_PERF        = 'MAX_PERF'        % 
-        NULL_PERF       = 'NULL_PERF'       % 
-        INITIAL_PERF    = 'INITIAL_PERF'    % 
-        DET_RATE        = 'DET_RATE'        % 
-        CONT_RESP_FNC   = 'CONT_RESP_FNC'   % 
-        SHOCK_RESP_FNC  = 'SHOCK_RESP_FNC'  % 
         
     end
     

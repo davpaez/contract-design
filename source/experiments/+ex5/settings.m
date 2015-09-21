@@ -62,7 +62,7 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
-data.value = 50;
+data.value = 500;
 
 progSet.add(data);
 
@@ -248,7 +248,7 @@ progSet.add(data);
 faculty = Faculty(Faculty.VOL_MAINT);
 
 faculty.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
-faculty.selectStrategy('Test_4');
+faculty.selectStrategy('Perfect maintenance before inspection');
 
 progSet.add(faculty);
 
@@ -264,7 +264,7 @@ progSet.add(faculty);
 fnc = Function();
 
 fnc.setIdentifier(InputData.MAINT_COST_FNC);
-fnc.equation = @(current, goal)maintenanceCostFunction( inv.value, ...
+fnc.equation = @(current, goal)CommonFnc.maintenanceCostFunction( inv.value, ...
                                                         nullp.value, ...
                                                         maxp.value, ...
                                                         current, ...
@@ -292,23 +292,6 @@ end
 
 
 %% Auxiliar functions
-
-function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
-
-    % inv:      Cost of construction: Investment
-    % nullP:    Null performance
-    % maxP:     Max performance
-    % fixedCost:    Fixed (minimum) cost of a maintenance work
-    
-    % Maintenance cost can be at most epsilon times the value
-    % of the construction investment
-    epsilon = 0.2;
-    fixedCost = 4;
-
-    cost = ((goalP-currentP) / (maxP-nullP))*epsilon*inv + fixedCost;
-
-    assert(isreal(cost), 'Cost must be a real number.')
-end
 
 function d = demandFunction(v, nullPerf, maxPerf)
 %{

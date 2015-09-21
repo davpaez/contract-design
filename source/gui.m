@@ -235,8 +235,10 @@ function button2_callback(hObject, callbackdata)
         remove_experiment();
         remove_reports();
         
-        if length(exp_array) > 0
+        if ~isempty(exp_array)
             setappdata(hpanel2, 'array_progsettings', exp_array);
+            experiment_array = cell(length(exp_array),1);
+            setappdata(hpanel2, 'experiment_array', experiment_array);
         end
         
         button5 = findobj('Tag', 'button5');
@@ -336,6 +338,7 @@ function table1_callback(hObject, callbackdata)
     
     if ~isempty(callbackdata.Indices)
         import managers.ItemSetting
+        import managers.Experiment
 
         data = getappdata(hpanel2, 'array_progsettings');
 
@@ -350,16 +353,18 @@ function table1_callback(hObject, callbackdata)
         numRlz = selectedExp.returnItemSetting(ItemSetting.NUM_REALIZ).value;
         inspectionFaculty = selectedExp.returnItemSetting(ItemSetting.STRATS_INSP);
         penaltyFaculty = selectedExp.returnItemSetting(ItemSetting.PEN_POLICY);
+        contractFaculty = selectedExp.returnItemSetting(ItemSetting.STRATS_CONTRACT);
         volMaintFaculty = selectedExp.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
         mandMaintFaculty = selectedExp.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
         
         description = cell(1,0);
         
-        description{end+1} = ['Type of experiment:  ', typeExp];
-        description{end+1} = [''];
-        description{end+1} = ['Realizations per game:  ', num2str(numRlz)];
-        description{end+1} = [''];
+        if ~strcmp(typeExp, Experiment.SING)
+            description{end+1} = ['Realizations per game:  ', num2str(numRlz)];
+            description{end+1} = [''];
+        end
         description{end+1} = ['Inspection strategy: ', inspectionFaculty.selectedStrategy.id];
+        description{end+1} = ['Contract offer: ', contractFaculty.selectedStrategy.id];
         description{end+1} = ['Penalty strategy: ', penaltyFaculty.selectedStrategy.id];
         description{end+1} = ['Vol maint strategy: ', volMaintFaculty.selectedStrategy.id];
         description{end+1} = ['Mand maint strategy: ', mandMaintFaculty.selectedStrategy.id];

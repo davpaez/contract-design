@@ -8,7 +8,7 @@ classdef Strategy_2 < managers.Strategy
             import managers.*
             import behavior.agent.*
 			
-            id = 'Test_2';
+            id = 'Perfect random maintenance';
             thisStrategy@managers.Strategy(id, theFaculty.decisionVars);
             
             % Create decision rule objects

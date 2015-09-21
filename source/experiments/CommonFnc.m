@@ -115,13 +115,17 @@ classdef CommonFnc
             Output
                 up:             Principal's utility
         %}
+            import dataComponents.Transaction
+            
             perf_mean = thePrincipal.observationList.getMeanValue();
             balance = thePrincipal.payoffList.getBalance();
+            sumContrib = abs(thePrincipal.contract.paymentSchedule.getSumTransactions(...
+                Transaction.CONTRIBUTION));
             
-            if balance >=0
-                up = (10*perf_mean - balance)/1000;
+            if balance >= -sumContrib
+                up = (10*perf_mean - balance - sumContrib)/1000;
             else
-                up = (balance + 10*perf_mean)/1000;
+                up = (10*perf_mean + balance + sumContrib)/1000;
             end
         end
         
@@ -141,6 +145,24 @@ classdef CommonFnc
             else
                 ua = 0;
             end
+        end
+        
+        
+        function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
+
+            % inv:      Cost of construction: Investment
+            % nullP:    Null performance
+            % maxP:     Max performance
+            % fixedCost:    Fixed (minimum) cost of a maintenance work
+
+            % Maintenance cost can be at most epsilon times the value
+            % of the construction investment
+            epsilon = 0.2;
+            fixedCost = 4;
+
+            cost = ((goalP-currentP) / (maxP-nullP))*epsilon*inv + fixedCost;
+
+            assert(isreal(cost), 'Cost must be a real number.')
         end
         
     end

@@ -90,7 +90,7 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setParams_UpperBounds([ maxLambda ]);
             
 			% Set default parameters value
-			thisRule.setParams_Value( [1.5] );
+			thisRule.setParams_Value( [0.5] );
 			
             % Set as Non-adaptive
             thisRule.setTypeRule_Sensitivity(DecisionRule.INSENSITIVE);
