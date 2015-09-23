@@ -1,4 +1,4 @@
-classdef ObservationTest < matlab.unittest.TestCase
+classdef ObservationListTest < matlab.unittest.TestCase
     %EVENTTEST Unit test of Event class
     %   Detailed explanation goes here
     
@@ -32,35 +32,75 @@ classdef ObservationTest < matlab.unittest.TestCase
         function testConstructor(testCase)
             
             % Empty arguments - Empty object
-            o1 = dataComponents.Observation();
-            testCase.assertClass( o1, 'dataComponents.Observation');
+            o1 = dataComponents.ObservationList();
+            testCase.assertClass( o1, 'dataComponents.ObservationList');
         end
         
         
-        function testRegisterAndGetData (testCase)
+        function testGetData(testCase)
+            % List observations
+            [o1 , ~, ~] = setupScenario1();
+            
+            st = o1.getData();
+            
+            % Registered lists
+            values_actual = st.value;
+            times_actual = st.time;
+            
+            % Calculated lists
+            cumsum_actual = st.cumsum;
+            area_actual = st.area;
+            average_actual = st.average;
+            meanvalue_actual = st.meanvalue;
+            deviation_actual = st.deviation;
+            
+            % State list
+            state_actual = st.state;
+            
+            % Auxiliary list
+            jumpsindex_actual = st.jumpsindex;
+            
+            % Assumed length
+            lg = length(values_actual);
+            
+            % Check lists' length
+            testCase.verifyLength(times_actual, lg);
+            testCase.verifyLength(cumsum_actual, lg);
+            testCase.verifyLength(area_actual, lg);
+            testCase.verifyLength(average_actual, lg);
+            testCase.verifyLength(meanvalue_actual, lg);
+            testCase.verifyLength(deviation_actual, lg);
+            testCase.verifyLength(state_actual, lg);
+            
+        end
+        
+        
+        function testRegister(testCase)
             
             % List observations
-            [o1 , vector] = setupScenario1();
+            [o1 , times_expected, values_expected] = setupScenario1();
             
 			st = o1.getData();
             
-            values = st.value;
+            values_actual = st.value;
+            times_actual = st.time;
             
-            testCase.verifyEqual(values,vector);
+            testCase.verifyEqual(values_actual, values_expected);
+            testCase.verifyEqual(times_actual, times_expected);
         end
         
         
         function testGetCumSum(testCase)
             
             % List observations
-            [o1 , vector] = setupScenario1();
-            lastPointer = o1.pt;
+            [o1 , ~, values_expected] = setupScenario1();
             
-            cumSum_method = o1.getCumSum(lastPointer);
-            cumSum_correct = sum(vector);
+            st = o1.getData();
             
-            testCase.verifyEqual(cumSum_method, cumSum_correct);
+            cumsum_actual = st.cumsum;
+            cumsum_expected = cumsum(values_expected);
             
+            testCase.verifyEqual(cumsum_actual, cumsum_expected);
         end
         
         
@@ -68,16 +108,14 @@ classdef ObservationTest < matlab.unittest.TestCase
             
             % List observations
             
-            [o1 , vector] = setupScenario1();
+            [o1 , times_expected, values_expected] = setupScenario1();
             
-            lastPointer = o1.pt;
             st = o1.getData();
-            time = st.time;
             
-            area_method = o1.getArea(lastPointer);
-            area_correct = trapz(time,vector);
+            area_actual = st.area;
+            area_expected = cumtrapz(times_expected, values_expected);
             
-            testCase.verifyEqual(area_method, area_correct);
+            testCase.verifyEqual(area_actual, area_expected, 'AbsTol', 0.0001);
         end
         
         
@@ -146,28 +184,34 @@ classdef ObservationTest < matlab.unittest.TestCase
     
 end
 
-% Creates observation list with a random number of elements
-function [o1 , values] = setupScenario1()
+
+function [o1 , times, values] = setupScenario1()
+% Creates observation list with a random number of elements, whose time is
+% strictly incremental
 
     numAleat = round(rand()*10000);
     values = rand(numAleat,1);
+    times = (1:numAleat)';
+    o1 = dataComponents.ObservationList();
     
-    o1 = dataComponents.Observation();
-    
-    for i=1:numAleat
-        o1.register(i,values(i));
+    for i=times
+        t = times(i);
+        v = values(i);
+        
+        o1.register(t, v);
     end
 end
 
+
+function [o1, indexLastPreJump, timeLastJump, valueLastPreJump, valueLastPostJump] = setupScenario2()
 % Creates observation list with jumps created according to some probability
 % * A jump is defined as pair of consecutive observations which share the
 %   same time of occurrence
-function [o1, indexLastPreJump, timeLastJump, valueLastPreJump, valueLastPostJump] = setupScenario2()
-    
-    numAleat = round(rand()*10000);
+
+    numAleat = round(rand()*1000);
     values = rand(numAleat,1);
     
-    o1 = dataComponents.Observation();
+    o1 = dataComponents.ObservationList();
     
     probabilityOfJumps = 0.1;
     

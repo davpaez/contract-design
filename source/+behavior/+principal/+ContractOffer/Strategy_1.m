@@ -1,41 +1,24 @@
-classdef Strategy_1 < managers.ContractStrategy
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (GetAccess = public, SetAccess = protected)
-        % ----------- %
-        % Attributes
-        % ----------- %
-		
-        
-        % ----------- %
-        % Objects
-        % ----------- %
-        
-        
-    end
+classdef Strategy_1 < managers.Strategy
 	
     methods
         %% Constructor
         
-        function thisStrategy = Strategy_1()
-            
-            thisStrategy@managers.ContractStrategy();
+        function thisStrategy = Strategy_1(theFaculty)
             
             import managers.*
             import behavior.principal.*
 			
-            % Set index
-            thisStrategy.setIndex(1);
+            id = 'Simple';
+            thisStrategy@managers.Strategy(id, theFaculty.decisionVars);
             
             % Create decision rule objects
             rule_1 = ContractOffer.Rule_1();
             
+            % Customize parameters properties of rules implemented
+            
+            
             % Initialize cell array of strategy objects
-            thisStrategy.decisionRuleArray{1} = rule_1;
-            
-            % Populate parameters properties of rules implemented
-            
+            thisStrategy.addDecisionRule(rule_1);
         end
         
     end

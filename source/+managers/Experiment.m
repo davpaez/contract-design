@@ -1,14 +1,12 @@
 classdef Experiment < managers.TypedClass
-    %EXPERIMENT Summary of this class goes here
-    %   Detailed explanation goes here
+    % 
     
     properties (Constant, Hidden = true)
-        
         % Types of experiments
         SING = 'SING'   % Single realization of a game
         DISP = 'DISP'   % Many realizations of the same game (same parameters)
         SENS = 'SENS'   % Many realizations of a games where parameters are varied
-        OPT = 'OPT'     % Optimization of objective function by changing game parameters
+        OPTI = 'OPTI'   % Optimization of objective function by changing game parameters
     end
     
     properties (GetAccess = public, SetAccess = protected)
@@ -22,180 +20,302 @@ classdef Experiment < managers.TypedClass
         % ----------- %
         gameEvals
         programSettings
-        
     end
     
-    
     methods
-        %% Constructor
         
-        function thisEx = Experiment(progSet)
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
+        
+        function self = Experiment(progSet)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             import dataComponents.*
             
             listTypes = {  Experiment.SING, ...
                 Experiment.DISP, ...
                 Experiment.SENS, ...
-                Experiment.OPT};
+                Experiment.OPTI};
             
-            thisEx@managers.TypedClass(listTypes);
+            self@managers.TypedClass(listTypes);
             
             disp('Creating Experiment object:')
             
             tp = progSet.returnItemSetting(ItemSetting.TYPE_EXP).value;
-            assert(thisEx.isValidType(tp), ...
+            assert(self.isValidType(tp), ...
                 'The type entered as argument is not valid');
             
-            thisEx.programSettings = progSet;
+            self.programSettings = progSet;
             
             % Type of experiment
-            thisEx.typeExp = tp;
+            self.typeExp = tp;
             
             % Call customized constructors
             switch tp
                 case Experiment.SING
-                    thisEx.single();
+                    self.single();
                 
                 case Experiment.DISP
-                    thisEx.dispersion();
+                    self.dispersion();
                 
                 case Experiment.SENS
-                    thisEx.sensitivity();
+                    self.sensitivity();
                     
-                case Experiment.OPT
-                    thisEx.optimization();
+                case Experiment.OPTI
+                    self.optimization();
             end
+            
+            disp('    Experiment object created')
+            disp(' ')
         end
         
         
-        function single(thisEx)
+        function single(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             
-            thisEx.gameEvals = GameEvaluation(thisEx.programSettings);
+            self.gameEvals = GameEvaluation(self.programSettings);
             disp('    Game evaluation object created')
         end
         
         
-        function dispersion(thisEx)
+        function dispersion(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             
-            thisEx.gameEvals = GameEvaluation(thisEx.programSettings);
+            self.gameEvals = GameEvaluation(self.programSettings);
             disp('    Game evaluation object created')
         end
         
         
-        function sensitivity(thisEx)
+        function sensitivity(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
         end
         
         
-        function optimization(thisEx)
+        function optimization(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
         end
         
-        %% General methods
         
-        function run(thisEx)
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
+        
+        function run(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
             
             % Load experiment's file info
-            fi = thisEx.programSettings.returnItemSetting(ItemSetting.FILE_INFO);
+            fi = self.programSettings.returnItemSetting(ItemSetting.FILE_INFO);
             fi.createOutputFolder();
             
             % Open log file (if necessary)
             fi.openLogFile();
             
             % Type of experiment
-            tp = thisEx.typeExp;
+            tp = self.typeExp;
+            
+            disp('Experiment execution:')
+            disp(['    Start: ', datestr(datetime)])
+            
+            t1 = clock;
             
             switch tp
                 case Experiment.SING
-                    thisEx.runSingle();
+                    self.runSingle();
                 
                 case Experiment.DISP
-                    thisEx.runDispersion();
+                    self.runDispersion();
                 
                 case Experiment.SENS
-                    thisEx.runSensitivity();
+                    self.runSensitivity();
                     
-                case Experiment.OPT
-                    thisEx.runOptimization();
+                case Experiment.OPTI
+                    self.runOptimization();
             end
+            
+            t2 = clock;
+            secsElapsed = etime(t2, t1);
+            timeElapsed = utils.sec2struct(secsElapsed);
+            disp(['    End:   ', datestr(datetime)])
+            disp(['    Time elapsed: ', ...
+                num2str(timeElapsed.hour), ' h : ', ...
+                num2str(timeElapsed.minutes), ' m : ', ...
+                num2str(timeElapsed.seconds), ' s'])
+            disp(' ')
             
             % Close log file (if necessary)
             fi.closeLogFile();
-            
             fi.showLogFile();
         end
         
-        function data = report(thisEx)
+        
+        function data = report(self)
             import managers.*
             
             % Type of experiment
-            tp = thisEx.typeExp;
+            tp = self.typeExp;
             
             switch tp
                 case Experiment.SING
-                    data = thisEx.reportSingle();
+                    data = self.reportSingle();
                 
                 case Experiment.DISP
-                    data = thisEx.reportDispersion();
+                    data = self.reportDispersion();
                 
                 case Experiment.SENS
-                    thisEx.reportSensitivity();
+                    self.reportSensitivity();
                     
-                case Experiment.OPT
-                    thisEx.reportOptimization();
+                case Experiment.OPTI
+                    self.reportOptimization();
             end
         end
         
-        %% Runners
         
-        function runSingle(thisEx)
+        function runSingle(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             import managers.*
+            import dataComponents.*
             
-            r = Realization(thisEx.programSettings);
+            prob = Problem(self.programSettings);
+            r = Realization(self.programSettings, prob);
             r.run()
             
-            thisEx.gameEvals = r;
+            self.gameEvals = r;
         end
         
         
-        function runDispersion(thisEx)
-            
-            thisEx.gameEvals.runGame();
+        function runDispersion(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            self.gameEvals.runGame();
         end
         
         
-        function runSensitivity(thisEx)
-            
-        end
-        
-        
-        function runOptimization(thisEx)
-            
-        end
-        
-        %% Reporters
-        
-        function data = reportSingle(thisEx)
-            data = thisEx.gameEvals.report();
-        end
-        
-        
-        function data = reportDispersion(thisEx)
-            data = thisEx.gameEvals.report();
-        end
-        
-        
-        function reportSensitivity(thisEx)
+        function runSensitivity(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             
         end
         
         
-        function reportOptimization(thisEx)
+        function runOptimization(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
             
         end
+        
+        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
+        
+        function data = reportSingle(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            data = self.gameEvals.report();
+            self.programSettings.reportUnusedItems()
+        end
+        
+        
+        function data = reportDispersion(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            data = self.gameEvals.report();
+        end
+        
+        
+        function reportSensitivity(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
+        end
+        
+        
+        function reportOptimization(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            
+        end
+        
         
     end
-    
 end
-

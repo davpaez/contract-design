@@ -1,6 +1,4 @@
 classdef FileInfo < managers.ItemSetting
-    %FILEINFO Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         nameLogFile = 'log'
@@ -19,49 +17,49 @@ classdef FileInfo < managers.ItemSetting
     end
     
     methods
-        function thisFileInfo = FileInfo()
+        function self = FileInfo()
         
             % Close all open files
             fclose('all');
         end
         
         
-        function createOutputFolder(thisFileInfo)
+        function createOutputFolder(self)
             nameOutputFolder = 'output';
             
-            pathOutputFolder = fullfile(thisFileInfo.expFolder_path, nameOutputFolder);
+            pathOutputFolder = fullfile(self.expFolder_path, nameOutputFolder);
             
             if exist(pathOutputFolder,'dir') == 0
                 mkdir(pathOutputFolder);
             end
-            thisFileInfo.outputFolder_path = pathOutputFolder;
+            self.outputFolder_path = pathOutputFolder;
         end
         
-        function openLogFile(thisFileInfo)
-            if thisFileInfo.logStatus == true
+        function openLogFile(self)
+            if self.logStatus == true
                 dt = strrep(datestr(clock), ':', '');
-                nlf = [thisFileInfo.nameLogFile,' ', dt,'.txt'];
-                fullPathLogfile = fullfile(thisFileInfo.outputFolder_path, nlf);
-                thisFileInfo.fid = fopen(fullPathLogfile, 'w');
-                thisFileInfo.outputFile_path = fullPathLogfile;
+                nlf = [self.nameLogFile,' ', dt,'.txt'];
+                fullPathLogfile = fullfile(self.outputFolder_path, nlf);
+                self.fid = fopen(fullPathLogfile, 'w');
+                self.outputFile_path = fullPathLogfile;
             end
         end
         
-        function closeLogFile(thisFileInfo)
-            if thisFileInfo.logStatus == true
-                fclose(thisFileInfo.fid);
+        function closeLogFile(self)
+            if self.logStatus == true
+                fclose(self.fid);
             end
         end
         
-        function showLogFile(thisFileInfo)
-            if thisFileInfo.logStatus == true
-                winopen(thisFileInfo.outputFile_path);
+        function showLogFile(self)
+            if self.logStatus == true
+                winopen(self.outputFile_path);
             end
         end
         
-        function printLog(thisFileInfo, line)
-            if thisFileInfo.logStatus == true
-                fprintf(thisFileInfo.fid, line);
+        function printLog(self, line)
+            if self.logStatus == true
+                fprintf(self.fid, line);
             end
         end
         

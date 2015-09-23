@@ -1,12 +1,5 @@
 classdef Nature < handle
-    %NATURE Summary of this class goes here
-    %   Detailed explanation goes here
-    properties (Constant, Hidden = true)
-        % Actions available
-        SHOCK = 'SHOCK'
-        UPDATEPERF = 'UPDATEPERF';
-    end
-    
+    % This class represents the natural environment
     
     properties
         % ----------- %
@@ -15,30 +8,23 @@ classdef Nature < handle
         time = 0
         hazard          % [Boolean] Turns on and off the natural hazards
         
+        contEnvForceFnc    % Function handle
+        
         % ----------- %
         % Objects
         % ----------- %
-        
-        shockAction
-        
-        infrastructure
-        
+        shockStrategy
         submittedOperation
+        problem
         
-    end
-    
-    events
-        finishedShock
-    end
-    
-    methods (Access = protected)
-
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function self = Nature(progSet, prob)
         %{
         
             Input
@@ -46,29 +32,34 @@ classdef Nature < handle
             Output
                 
         %}
-        function thisNature = Nature(progSet, contract)
-            import managers.*
+            import managers.ItemSetting
+            import entities.Infrastructure
             
             % Active hazard status
-            thisNature.hazard = progSet.returnItemSetting(ItemSetting.NAT_HAZARD).value;
+            self.hazard = progSet.returnItemSetting(ItemSetting.NAT_HAZARD).value;
             
             % Shock strategy
-            action = progSet.returnItemSetting(ItemSetting.STRATS_SHOCK);
-            thisNature.shockAction = returnCopyAction(action);
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_SHOCK);
+            self.shockStrategy = faculty.getSelectedStrategy();
             
-            % Creates infrastructure object
-            thisNature.infrastructure = entities.Infrastructure(progSet, contract);
+            % Continuous environmental force
+            item = progSet.returnItemSetting(ItemSetting.CONT_ENV_FORCE);
+            self.contEnvForceFnc = item.equation;
+            
+            % Problem object
+            self.problem = prob;
         end
         
-        %% Getter functions
         
-        %% Regular methods
+        %% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
+
+
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        
+        function setTime(self,time)
         %{
         
             Input
@@ -76,41 +67,13 @@ classdef Nature < handle
             Output
                 
         %}
-        function time = getTime(thisNature)
-            time = thisNature.time;
-        end
-        
-        
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-        function performance = getCurrentPerformance(thisNature)
-            performance = thisNature.infrastructure.getPerformance();
-        end
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-        function setTime(thisNature,time)
-            if time > thisNature.time
-                thisNature.time = time;
-                thisNature.infrastructure.setTime(time);
+            if time > self.time
+                self.time = time;
             end
         end
         
+        
+        function operation = submitOperation(self)
         %{
         
             Input
@@ -118,23 +81,19 @@ classdef Nature < handle
             Output
                 
         %}
-        function operation = submitOperation(thisNature)
             import dataComponents.Operation
             import dataComponents.Message
             import managers.Strategy
             import managers.Information
+            import managers.Faculty
             
-            if thisNature.hazard == true
-                if isempty(thisNature.submittedOperation)
+            if self.hazard == true
+                if isempty(self.submittedOperation)
                     
-                    msg = Message(thisNature);
+                    msg = Faculty.createEmptyMessage(self, Faculty.SHOCK);
+                    self.shockStrategy.decide(msg);
                     
-                    msg.setTypeRequestedInfo(Information.TIME_SHOCK, ...
-                                             Information.FORCE_SHOCK);
-                                         
-                    thisNature.shockAction.decide(msg);
-                    
-                    isSens = thisNature.shockAction.isSensitive();
+                    isSens = self.shockStrategy.isSensitive();
                     
                     timeShock = msg.getOutput(Information.TIME_SHOCK);
                     shockForce = msg.getOutput(Information.FORCE_SHOCK);
@@ -142,10 +101,10 @@ classdef Nature < handle
                     operation = Operation( timeShock, Operation.SHOCK, isSens, shockForce);
                     
                     % Stores Operation object
-                    thisNature.setSubmittedOperation( operation );
+                    self.setSubmittedOperation( operation );
                     
                 else
-                    operation = thisNature.submittedOperation;
+                    operation = self.submittedOperation;
                 end
                 
             else
@@ -158,6 +117,7 @@ classdef Nature < handle
         end
         
         
+        function applyOperation(self, operation, infrastructure)
         %{
         
             Input
@@ -165,7 +125,6 @@ classdef Nature < handle
             Output
                 
         %}
-        function applyOperation(thisNature, operation)
             import dataComponents.Operation
             
             condition = operation.isType(Operation.VOL_MAINT) || operation.isType(Operation.MAND_MAINT) || ...
@@ -174,36 +133,53 @@ classdef Nature < handle
             assert(condition == true, 'Only maintenance (vol or maint) or shock operation can be applied to nature')
             
             if operation.isType(Operation.VOL_MAINT) || operation.isType(Operation.MAND_MAINT)
-                thisNature.infrastructure.registerObservation(operation.time, operation.perfGoal);
+                infrastructure.registerObservation(operation.time, operation.perfGoal);
                 
             else % For shock operations, the force value must be translated into perfGoal
-                perfBeforeShock = thisNature.solvePerformanceForTime(operation.time);
+                perfBeforeShock = infrastructure.getPerformance();
                 forceValue = operation.forceValue;
-                perfGoal = thisNature.infrastructure.shockResponseFunction(perfBeforeShock, forceValue);
+                perfGoal = infrastructure.shockResponseFnc(perfBeforeShock, forceValue);
                 
-                thisNature.infrastructure.registerObservation(operation.time, perfGoal);
+                infrastructure.registerObservation(operation.time, perfGoal);
                 
             end
             
         end
         
         
-        function finalizeHistory(thisNature, time)
-            thisNature.infrastructure.setTime(time);
+        function finalizeHistory(self, time)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            
+            self.infrastructure.setTime(time);
         end
         
         
-        function confirmExecutionSubmittedOperation(thisNature, operation)
-            assert(~isempty(thisNature.submittedOperation), ...
+        function confirmExecutionSubmittedOperation(self, operation)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            assert(~isempty(self.submittedOperation), ...
                 'The attribute submitted operation should not be empty.')
             
-            assert(thisNature.submittedOperation.eq(operation), ...
+            assert(self.submittedOperation.eq(operation), ...
                 'The operation executed does not coincide with the operation submitted.')
             
-            thisNature.clearSubmittedOperation();
+            self.clearSubmittedOperation();
             
         end
         
+        
+        function setSubmittedOperation(self, operation)
         %{
         
             Input
@@ -211,10 +187,11 @@ classdef Nature < handle
             Output
                 
         %}
-        function setSubmittedOperation(thisNature, operation)
-            thisNature.submittedOperation = operation;
+            self.submittedOperation = operation;
         end
         
+        
+        function clearSubmittedOperation(self)
         %{
         
             Input
@@ -222,17 +199,14 @@ classdef Nature < handle
             Output
                 
         %}
-        function clearSubmittedOperation(thisNature)
-            thisNature.submittedOperation = [];
+            self.submittedOperation = [];
         end
        
-
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
-        
+        function performance = solvePerformanceForTime(self,time)
         %{
         
             Input
@@ -240,21 +214,9 @@ classdef Nature < handle
             Output
                 
         %}
-        function performance = solvePerformanceForTime(thisNature,time)
-            performance = thisNature.infrastructure.solvePerformanceForTime(time);
+            performance = self.infrastructure.solvePerformanceForTime(time);
         end
+        
         
     end
 end
-
-%% Auxiliary functions
-
-
-    %{
-
-        Input
-
-        Output
-
-    %}
-

@@ -1,7 +1,7 @@
 classdef Agent < entities.Player
-    %AGENT Summary of this class goes here
-    %   Detailed explanation goes here
+    
     properties (Constant, Hidden = true)
+        NAME = 'AGENT'
         
         % Types of cash flow/actions
         ALL = 'ALL';
@@ -16,8 +16,6 @@ classdef Agent < entities.Player
         % ----------- %
         % Attributes
         % ----------- %
-        solvePerformanceForTime
-        solveTimeForPerformance
         maintCostFunction
         
         % ----------- %
@@ -25,26 +23,26 @@ classdef Agent < entities.Player
         % ----------- %
         
         % Active strategies
-        volMaintAction
+        volMaintStrategy
         
         % Reactive strategies
-        mandMaintAction
-    end
-    
-    methods (Access = protected)
-
+        mandMaintStrategy
     end
     
     properties (Dependent)
         inferredInspectionRate
     end
-        
     
+    methods (Static)
+        
+    end
+        
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
-        function thisAgent = Agent(progSet, contract, problem)
+        function self = Agent(progSet, problem)
         %{
         * Constructor method of Agent class
         
@@ -53,87 +51,45 @@ classdef Agent < entities.Player
                 specified properties of the current contract
             
             Output
-                thisAgent: [class Agent] Agent object
+                self: [class Agent] Agent object
         %}
             
             import managers.*
             
             % Creates instance of object of the superclass Player
-            thisAgent@entities.Player(contract, problem);
+            self@entities.Player(problem);
             
             % Assigns voluntary maintenance action
-            action = progSet.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
-            thisAgent.volMaintAction = returnCopyAction(action);
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_VOL_MAINT);
+            self.volMaintStrategy = faculty.getSelectedStrategy();
             
             % Assigns mandatory maintenance action
-            action = progSet.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
-            thisAgent.mandMaintAction = returnCopyAction(action);
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_MAND_MAINT);
+            self.mandMaintStrategy = faculty.getSelectedStrategy();
             
             % Maintenance cost function
             fnc = progSet.returnItemSetting(ItemSetting.MAINT_COST_FNC);
-            thisAgent.maintCostFunction = fnc.equation;
+            self.maintCostFunction = fnc.equation;
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.AGENT_UTIL_FNC);
-            thisAgent.utilityFunction = fnc.equation;
+            self.utilityFunction = fnc.equation;
             
         end
         
         
-        %% Getter functions
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        
-        %{
-        * Calculates inferred inspection rate from the past registered
-        inspection events. This function is called every time the
-        inferredInspectionRate attribute is accessed
-        
-            Input
-                None
-            
-            Output
-                inferredInspectionRate: [class double] Value of the inferred
-                inspection rate
-        %}
-        %{
-        function inferredInspectionRate = get.inferredInspectionRate(thisAgent)
-            
-            if thisAgent.eventList.isSingle()
-                timeInsp = eventList.returnTimeSeries();
-                inferredInspectionRate = 1/mean(diff(timeInsp));
-            else
-                % How should this initial value be set?
-                inferredInspectionRate = 2;
-            end
-        end
-        %}
-        
-        
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
-        
-        function operation = submitOperation(thisAgent, currentPerf, ...
-                solvePerformanceForTime, solveTimeForPerformance, ...
-                perfRange, infra)
+        function operation = submitOperation(self, solver, infra)
         %{
         * Implements agent's decision rule, determines action to submit.
         The action is saved in the submittedAction attribute. Returns the
         time of the submitted action
         
             Input
-                currentPerf: [class double] 
-                solvePerformanceForTime: function handle for solving perf
+                solver: [class Solver] 
+                infra: infrastructure object
             
             Output
                 time: Time of the commited action
@@ -141,21 +97,20 @@ classdef Agent < entities.Player
             
             import dataComponents.Operation
             import dataComponents.Message
-            import managers.Strategy
             import managers.Information
+            import managers.Faculty
             
-            thisAgent.solvePerformanceForTime = solvePerformanceForTime;
-            thisAgent.solveTimeForPerformance = solveTimeForPerformance;
             
-            msg = Message(thisAgent);
-            msg.setTypeRequestedInfo(Information.TIME_VOL_MAINT, ...
-                                     Information.PERF_VOL_MAINT);
             
-            msg.setExtraInfo(Message.MAX_PERF, infra.maxPerf)
+            % Adding extra info to message
+            msg = Faculty.createEmptyMessage(self, Faculty.VOL_MAINT);
+            msg.setExtraInfo(...
+                Message.MAX_PERF, infra.maxPerf, ...
+                Message.SOLVER, solver);
             
-            thisAgent.volMaintAction.decide(msg);
+            self.volMaintStrategy.decide(msg);
             
-            isSens = thisAgent.volMaintAction.isSensitive();
+            isSens = self.volMaintStrategy.isSensitive();
             
             timeMaint = msg.getOutput(Information.TIME_VOL_MAINT);
             perfGoal = msg.getOutput(Information.PERF_VOL_MAINT);
@@ -163,17 +118,19 @@ classdef Agent < entities.Player
             operation = Operation(timeMaint, Operation.VOL_MAINT, isSens, perfGoal);
             
             % Stores Operation object
-            thisAgent.setSubmittedOperation(operation);
+            self.setSubmittedOperation(operation);
             
         end
         
+        function evolve(self, t, bal)
+            self.payoffList.registerBalance(t, bal);
+        end
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
         
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
-        function utility = calculateUtility(thisAgent)
+        function utility = calculateUtility(self)
         %{
         
             Input
@@ -182,12 +139,10 @@ classdef Agent < entities.Player
                 
         %}
             
-           utility = thisAgent.getPresentValue();
+           utility = self.getPresentValue();
            
         end
         
         
-        
     end
-
 end

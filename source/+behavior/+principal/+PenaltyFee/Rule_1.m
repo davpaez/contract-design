@@ -110,28 +110,12 @@ classdef Rule_1 < managers.DecisionRule
                 
         %}
         function mainAlgorithm(~, theMsg)
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import managers.Information
             
             thePrincipal = theMsg.getExecutor();
-            
-            penaltyPayoffs = thePrincipal.payoff.returnPayoffsOfType(Payoff.PENALTY);
-            pmax = thePrincipal.contract.getMaxSumPenalties();
-
-            sumPastPenalties = sum(penaltyPayoffs.value);
 			
-			n = 10;
-			valueSinglePenalty = pmax / n;
-			
-			slack = pmax - sumPastPenalties;
-			
-			assert(slack >= 0)
-            
-			if slack > valueSinglePenalty
-				valuePenaltyFee = valueSinglePenalty;
-			else
-				valuePenaltyFee = slack;
-            end
+            valuePenaltyFee = 50;
             
             theMsg.submitResponse(Information.VALUE_PENALTY_FEE, valuePenaltyFee);
             

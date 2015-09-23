@@ -1,72 +1,67 @@
 classdef ItemSetting < matlab.mixin.Copyable
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         % Type of problem setting
-        VALUE_PARAM   = 'VALUE_PARAM'
+        VALUE_PARAM     = 'VALUE_PARAM'
         PLAYER_ACTION   = 'PLAYER_ACTION'
         
         % Associated with 'type' attribute
         GIVEN           = 'GIVEN'       % Set by the user of program
         CONTROLLED      = 'CONTROLLED'  % Or controlled by some player
         
-            % Controller / Executors
-            PRINCIPAL       = 'PRINCIPAL'
-            AGENT           = 'AGENT'
-            NATURE          = 'NATURE'
+        % Controller / Executors
+        PRINCIPAL       = 'PRINCIPAL'
+        AGENT           = 'AGENT'
+        NATURE          = 'NATURE'
         
         
         %  ------------------- IDENTIFIERS -------------------------
         
         % Management
-        FILE_INFO    = 'FILE_INFO'
+        FILE_INFO    = 'FILE_INFO'  % 
         
         % Problem
         TYPE_EXP        = 'TYPE_EXP'    % Type of experiment
-        TIME_RES        = 'TIME_RES'    % Time resolution
-        DISC_RATE       = 'DISC_RATE'   % Annual discount rate
         
         % Optimization
         NUM_REALIZ      = 'NUM_REALIZ'  % Number of realizations
         MAX_ITER        = 'MAX_ITER'    % Maximum iterations
         TOL             = 'TOL'         % Tolerance
         
-        % Realization
+        % Infrastructure
+        MAX_PERF        = 'MAX_PERF'        % 
+        NULL_PERF       = 'NULL_PERF'       % 
+        INITIAL_PERF    = 'INITIAL_PERF'    % 
+        DEMAND_FNC      = 'DEMAND_FNC'      % How users demand respond to Perf and time
+        CONT_RESP_FNC   = 'CONT_RESP_FNC'   % 
+        SHOCK_RESP_FNC  = 'SHOCK_RESP_FNC'  % 
         
+        % Realization
+        TIME_RES        = 'TIME_RES'    % Time resolution
         
         % Contract
-        CON_DUR         = 'CON_DUR'     % Contract duration
-        PERF_THRESH     = 'PERF_THRESH' % Performance threshold
-        REV             = 'REV'         % Revenue rate
         INV             = 'INV'         % Initial investment
-        CONTRIB         = 'CONTRIB'     % Contributions payment schedule
-        MAX_SUM_PEN     = 'MAX_SUM_PEN'
-        PEN_POLICY      = 'PEN_POLICY'
         
         % Nature
-        NAT_HAZARD      = 'NAT_HAZARD'
-        STRATS_SHOCK    = 'STRATS_SHOCK'
-        
+        NAT_HAZARD      = 'NAT_HAZARD'      % 
+        STRATS_SHOCK    = 'STRATS_SHOCK'    % 
+        CONT_ENV_FORCE  = 'CONT_ENV_FORCE'  % 
         
         % Principal
-        STRATS_INSP     = 'STRATS_INSP'
-        COST_INSP       = 'COST_INSP'
-        PRINCIPAL_UTIL_FNC = 'PRINCIPAL_UTIL_FNC'
+        STRATS_CONTRACT     = 'STRATS_CONTRACT'     %
+        PEN_POLICY      = 'PEN_POLICY'  % 
+        STRATS_INSP         = 'STRATS_INSP'         % 
+        COST_INSP           = 'COST_INSP'           % 
+        PRINCIPAL_UTIL_FNC  = 'PRINCIPAL_UTIL_FNC'  % 
+        
         
         % Agent
-        PART_CONSTR     = 'PART_CONSTR'
-        STRATS_VOL_MAINT    = 'STRATS_VOL_MAINT'
-        STRATS_MAND_MAINT   = 'STRATS_MAND_MAINT'
-        MAINT_COST_FNC      = 'MAINT_COST_FNC'
-        AGENT_UTIL_FNC      = 'AGENT_UTIL_FNC'
+        PART_CONSTR         = 'PART_CONSTR'         % 
+        STRATS_VOL_MAINT    = 'STRATS_VOL_MAINT'    % 
+        STRATS_MAND_MAINT   = 'STRATS_MAND_MAINT'   % 
+        MAINT_COST_FNC      = 'MAINT_COST_FNC'      % 
+        AGENT_UTIL_FNC      = 'AGENT_UTIL_FNC'      % 
         
-        % Infrastructure
-        MAX_PERF        = 'MAX_PERF'
-        NULL_PERF       = 'NULL_PERF'
-        INITIAL_PERF    = 'INITIAL_PERF'
-        DET_RATE        = 'DET_RATE'
-        SHOCK_RESP_FNC  = 'SHOCK_RESP_FNC'
         
     end
     
@@ -109,8 +104,8 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function thisItemSetting = ItemSetting()
-            thisItemSetting.type = thisItemSetting.GIVEN;
+        function self = ItemSetting()
+            self.type = self.GIVEN;
         end
         
         
@@ -136,20 +131,20 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function setIdentifier(thisItemSetting, ident)
-            thisItemSetting.identifier = ident;
+        function setIdentifier(self, ident)
+            self.identifier = ident;
         end
         
         %{
-        % Sets the type attribute of thisItemSetting to GIVEN. It means
+        % Sets the type attribute of self to GIVEN. It means
         that 
             Input
                 
             Output
                 
         %}
-        function setAsGiven(thisItemSetting)
-            thisItemSetting.type = thisItemSetting.GIVEN;
+        function setAsGiven(self)
+            self.type = self.GIVEN;
         end
         
         
@@ -160,9 +155,9 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function setAsControlled(thisItemSetting, controller)
-            thisItemSetting.type = thisItemSetting.CONTROLLED;
-            thisItemSetting.controller = controller;
+        function setAsControlled(self, controller)
+            self.type = self.CONTROLLED;
+            self.controller = controller;
         end
         
         
@@ -173,8 +168,8 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function setValue_NumberSet(thisItemSetting, setName)
-            thisItemSetting.value_NumberSet = setName;            
+        function setValue_NumberSet(self, setName)
+            self.value_NumberSet = setName;
         end
         
         
@@ -185,17 +180,17 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function clearAllAttributes(thisItemSetting)
+        function clearAllAttributes(self)
             
             % Set all attributes to empty except the identifier
-            thisItemSetting.type = [];
-            thisItemSetting.controller = [];
-            thisItemSetting.degreeFreedom = [];
+            self.type = [];
+            self.controller = [];
+            self.degreeFreedom = [];
             
-            thisItemSetting.value = [];
-            thisItemSetting.value_bounds = [];
-            thisItemSetting.value_admitted = [];
-            thisItemSetting.value_of = [];
+            self.value = [];
+            self.value_bounds = [];
+            self.value_admitted = [];
+            self.value_of = [];
         end
 
         
@@ -212,7 +207,7 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function checkValidity(thisItemSetting)
+        function checkValidity(self)
             error('This method has to be defined for those properties of ItemSetting that InputData and Action both share')
             
             % TODO
@@ -229,7 +224,7 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function answer = isControlled(thisItemSetting, controller)
+        function answer = isControlled(self, controller)
             if nargin < 2
                 no_controller_spec = true;
             else
@@ -242,11 +237,11 @@ classdef ItemSetting < matlab.mixin.Copyable
                    'The controller argument is not valid');
             end
             
-            if strcmp(thisItemSetting.type, thisItemSetting.CONTROLLED)
+            if strcmp(self.type, self.CONTROLLED)
                 if no_controller_spec == true
                     answer = true;
                 else
-                    if strcmp(thisItemSetting.controller, controller )
+                    if strcmp(self.controller, controller )
                         answer = true;
                     else
                         answer = false;
@@ -265,8 +260,8 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function answer = isGiven(thisItemSetting)
-            if strcmp(thisItemSetting.type, thisItemSetting.GIVEN)
+        function answer = isGiven(self)
+            if strcmp(self.type, self.GIVEN)
                 answer = true;
             else
                 answer = false;
@@ -281,11 +276,11 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function [indices, n] = getNumberGivenItems(thisItemSetting)
+        function [indices, n] = getNumberGivenItems(self)
             count = 0;
             
-            for i=1:thisItemSetting.getLength()
-                if ~thisItemSetting(i).isEmptyDataObject() && thisItemSetting(i).isGiven()
+            for i=1:self.getLength()
+                if ~self(i).isEmptyDataObject() && self(i).isGiven()
                     count = count + 1;
                     indices(count) = i;
                 end
@@ -301,27 +296,27 @@ classdef ItemSetting < matlab.mixin.Copyable
             Output
                 
         %}
-        function [indices , count] = getNumberControlledItems(thisItemSetting, controller)
+        function [indices , count] = getNumberControlledItems(self, controller)
             if nargin < 2
                 no_controller_spec = true;
             else
                 no_controller_spec = false;
             end
             
-            assert(strcmp(controller, thisItemSetting.PRINCIPAL) || ...
-                   strcmp(controller, thisItemSetting.AGENT), ...
+            assert(strcmp(controller, self.PRINCIPAL) || ...
+                   strcmp(controller, self.AGENT), ...
                    'The controller argument is not valid');
             
             indices = [];
             count = 0;
             
-            for i=1:thisItemSetting.getLength()
+            for i=1:self.getLength()
                 if no_controller_spec == true
-                    logicalTest = ~thisItemSetting(i).isEmptyDataObject() && ...
-                        thisItemSetting(i).isControlled();
+                    logicalTest = ~self(i).isEmptyDataObject() && ...
+                        self(i).isControlled();
                 else
-                    logicalTest = ~thisItemSetting(i).isEmptyDataObject() && ...
-                        thisItemSetting(i).isControlled(controller);
+                    logicalTest = ~self(i).isEmptyDataObject() && ...
+                        self(i).isControlled(controller);
                 end
                 
                 if logicalTest

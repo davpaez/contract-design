@@ -1,6 +1,4 @@
 classdef Realization < matlab.mixin.Copyable
-    %REALIZATION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant)
         
@@ -11,7 +9,6 @@ classdef Realization < matlab.mixin.Copyable
         % Attributes
         % ----------- %
         time = 0
-        
         printStatus = false
         
         % ----------- %
@@ -20,25 +17,26 @@ classdef Realization < matlab.mixin.Copyable
         principal
         agent
         nature
+        infrastructure
         contract
         problem
         
+        paymentSchedule % Payment schedule object
+        demandHistory   % ObservationList object
+        
+        lastOperation % Last operation executed in realization
+        
         fileInfo
         
-        % Function handles
-        fh = struct
-    end
-        
-    %% Static methods
-    methods (Static)
-        
+        solver % Solver object
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
-        function thisRlz = Realization(progSet)
+        function self = Realization(progSet, prob)
         %{
         * Constructor method of Realization class and builder of
         interactions
@@ -55,181 +53,74 @@ classdef Realization < matlab.mixin.Copyable
                 initialPerformance: [class double] performance V at time=0
                 
             Output
-                thisRlz: [class Realization] Realization object
+                self: [class Realization] Realization object
         %}
         
             import entities.*
             import dataComponents.*
             import managers.*
+            import utils.Solver
             
             % Get fileInfo handle
-            thisRlz.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
+            self.fileInfo = progSet.returnItemSetting(ItemSetting.FILE_INFO);
             
-            % Creating local copies of 
-            thisRlz.contract = Contract(progSet);
-            thisRlz.problem = Problem(progSet);
+            % Problem object
+            self.problem = prob;
             
-            % Creating function handles
-            thisRlz.fh.contEnvForce = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            thisRlz.fh.demandRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            thisRlz.fh.revenueRate = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            thisRlz.fh.contResponse = progSet.returnItemSetting(ItemSetting.FILE_INFO);
-            
+            % 
+            self.demandHistory = ObservationList();
+
             % Intial payoffs
+            % TODO Terminar schedule de pagos para contribuciones del
+            % gobierno
             
-                contractDuration = thisRlz.contract.getContractDuration();
-                revenueFlowRate = thisRlz.contract.getRevenue() / contractDuration;
-                
-                % Payoffs principal
-                % Government contributions
-                prinPff = struct();
-                prinPff.value = -thisRlz.contract.getContribution();
-                prinPff.duration = 0;
-                prinPff.type{1} = Payoff.CONTRIBUTION;
-                
-                % Revenue
-                prinPff.value(end+1) = -revenueFlowRate;
-                prinPff.duration(end+1) = contractDuration;
-                prinPff.type{end+1} = Payoff.REVENUE;
-                
-                % Payoffs agent
-                % Government contributions
-                agPff = struct();
-                agPff.value = thisRlz.contract.getContribution();
-                agPff.duration = 0;
-                agPff.type{1} = Payoff.CONTRIBUTION;
-                
-                % Revenue
-                agPff.value(end+1) = revenueFlowRate;
-                agPff.duration(end+1) = contractDuration;
-                agPff.type{end+1} = Payoff.REVENUE;
-                
-                % Investment
-                agPff.value(end+1) = -thisRlz.contract.getInvestment();
-                agPff.duration(end+1) = 0;
-                agPff.type{end+1} = Payoff.INVESTMENT;
             
+            % Construction of principal, agent
+            self.principal = Principal(progSet, self.problem);
+            self.agent = Agent(progSet, self.problem);
+            
+            % Contruction of nature
+            self.nature = Nature(progSet, self.problem);
+            
+            % Construction of infrastructure
+            self.infrastructure = Infrastructure(progSet);
+                        
+            % Creation and distribution of contract
+            con = self.principal.generateContract(progSet, self.infrastructure);
+            
+            self.contract = con;
+            self.principal.receiveContract(con);
+            self.agent.receiveContract(con);
             
             % Initial observation
-            initObs = thisRlz.contract.getInitialPerfObs();
+            initObs = self.infrastructure.getObservation();
             
+            % Realization schedule
+            self.paymentSchedule = self.contract.paymentSchedule;
             
-            % Construction of principal, agent and nature
-            thisRlz.principal = Principal(  progSet, ...
-                                                    thisRlz.contract, ...
-                                                    thisRlz.problem     );
-                                                
-            thisRlz.agent = Agent(  progSet, ...
-                                            thisRlz.contract, ...
-                                            thisRlz.problem     );
-                                        
-            thisRlz.nature = Nature(progSet, ...
-                                            thisRlz.contract);
-            
-            % Construction of INIT event structs for principal and agent            
-            initEventPrincipal = struct();
-            initEventPrincipal.time = 0;
-            initEventPrincipal.type = Event.INIT;
-            initEventPrincipal.obs = initObs;
-            initEventPrincipal.pff = prinPff;
-            
-            initEventAgent = struct();
-            initEventAgent.time = 0;
-            initEventAgent.type = Event.INIT;
-            initEventAgent.obs = initObs;
-            initEventAgent.pff = agPff;
+            % Construction of INIT event for principal and agent  
+            initEventPrincipal = Event(self.time, Event.INIT, initObs, []);
+            initEventAgent = Event(self.time, Event.INIT, initObs, []);
             
             % Registration of INIT events for principal and agent
-            thisRlz.principal.registerEvent(initEventPrincipal);
-            thisRlz.agent.registerEvent(initEventAgent);
+            self.principal.registerEvent(initEventPrincipal);
+            self.agent.registerEvent(initEventAgent);
+            
+            % Continuous solver object
+            self.solver = Solver(progSet, self);
             
         end
         
         
-        function run(thisRlz)
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-            import entities.*
-            import dataComponents.*
-            
-            contractDuration = thisRlz.contract.getContractDuration();
-            
-            % Build interaction
-            
-            while thisRlz.time < contractDuration
-                
-                thisRlz.fileInfo.printLog('   --------------------------------    \n\n');
-                thisRlz.fileInfo.printLog(['Current model time before request: ',num2str(thisRlz.time),'\n']);
-                
-                % Returns earliest submitted operation
-                operation = thisRlz.requestOperations();
-                
-                thisRlz.fileInfo.printLog('Operation requested and returned\n')
-                
-                if operation.time >= contractDuration
-                    break
-                end
-                
-                thisRlz.fileInfo.printLog( ...
-                    ['Performance before operation execution ',num2str(thisRlz.nature.solvePerformanceForTime(operation.time)),'\n']);
-                
-                assert(operation.time > thisRlz.time)
-                
-                
-                
-                % Executes the earliest submitted operation
-                thisRlz.executeOperation(operation);
-                
-                thisRlz.fileInfo.printLog( ...
-                    ['Current model time after request: ',num2str(thisRlz.time),'\n\n']);
-                thisRlz.fileInfo.printLog( ...
-                    'Operation executed\n\n');
-                thisRlz.fileInfo.printLog( ...
-                    ['Performance after operation ',num2str(thisRlz.nature.getCurrentPerformance()),'\n\n'])
-                
-            end
-            
-            thisRlz.finishRealization();
-        end
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
         
-        %% Getter funcions
         
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        function time = getTime(thisRlz)
-        %{
-        * Returns the current time attribute of thisRlz
-        
-            Input
-                None
-                
-            Output
-                time: [class double] Value of time attribute of
-                thisRlz
-        %}
-        
-            time = thisRlz.time;
-        end
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        function setTime(thisRlz, time)
+        function setTime(self, time)
         %{
         * Updates time of the Realization object only
         
@@ -240,13 +131,13 @@ classdef Realization < matlab.mixin.Copyable
                 None
         %}
         
-            if time > thisRlz.time
-                thisRlz.time = time;
+            if time > self.time
+                self.time = time;
             end
         end
         
         
-        function updateTimeAll(thisRlz, newTime)
+        function updateTimeAll(self, newTime)
         %{
         * Updates time of ALL objects of model including Realization
         
@@ -257,15 +148,59 @@ classdef Realization < matlab.mixin.Copyable
                 None
         %}
         
-            thisRlz.setTime(newTime);
+            self.setTime(newTime);
             
-            thisRlz.agent.setTime(newTime);
-            thisRlz.principal.setTime(newTime);
-            thisRlz.nature.setTime(newTime);
+            self.agent.setTime(newTime);
+            self.principal.setTime(newTime);
+            self.nature.setTime(newTime);
         end
         
         
-        function executeOperation(thisRlz, operation)
+        function run(self)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            initialExecutionTime = clock;
+            
+            import entities.*
+            import dataComponents.*
+            
+            contractDuration = self.contract.duration;
+            
+            % Build interaction
+            
+            while self.time < contractDuration
+                
+                % Returns earliest submitted operation
+                operation = self.requestOperations();
+                nextTransaction = self.paymentSchedule.getNextTransaction();
+                
+                earliestTime = getEarliestTime(operation, nextTransaction);
+                
+                if earliestTime >= contractDuration
+                    break
+                end
+                
+                if isempty(nextTransaction)
+                    self.executeOperation(operation);
+                else
+                    if operation.time < nextTransaction.time
+                        self.executeOperation(operation);
+                    else
+                        self.executePayment(nextTransaction);
+                    end
+                end
+            end
+            
+            self.finishRealization();
+        end
+        
+        
+        function executeOperation(self, operation)
         %{
         * Executes operation passed by argument
         %TODO Inform the strategies whether their last output was executed!
@@ -277,42 +212,82 @@ classdef Realization < matlab.mixin.Copyable
         %}
         
             import dataComponents.Operation
+            import dataComponents.Transaction
             
             mandMaintFlag = false;
             
+            % Check operation time makes sense
+            assert(operation.time >= self.time)
+            
             % Evolve the system up to the time of the operation to be
             % executed
-            thisRlz.evolveContinuously(operation.time);
+            if ~isempty(self.lastOperation) && operation.time == self.lastOperation.time
+                self.validateOperationAdjacency(operation);
+            end
+            
+            if operation.time > self.time
+                self.evolveContinuously(operation.time);
+            end
             
             % Execute the operation (execute discrete action)
-            
             switch operation.type
                 case Operation.INSPECTION
                     [timeExecution , mandMaintFlag] = ...
-                        thisRlz.executeInspection(operation);
+                        self.executeInspection(operation);
+                    self.principal.clearSubmittedOperation();
                     
                 case Operation.VOL_MAINT
-                    timeExecution = thisRlz.executeVolMaint(operation);
+                    timeExecution = self.executeVolMaint(operation);
+                    self.agent.clearSubmittedOperation();
                     
                 case Operation.SHOCK
-                    timeExecution = thisRlz.executeShock(operation);
+                    timeExecution = self.executeShock(operation);
+                    self.nature.clearSubmittedOperation();
+                    
             end
             
+%             operation.type
+%             operation.time
+%             disp('')
+            
             % Update time for ALL entities
-            thisRlz.updateTimeAll(timeExecution);
+            self.updateTimeAll(timeExecution);
             
             if mandMaintFlag == true
                 
-                timeExecutionMandMaint = thisRlz.executeMandMaint();
+                timeExecutionMandMaint = self.executeMandMaint();
                 
                 % Update time for ALL entities having executed the
                 % mandatory maintenance
-                thisRlz.updateTimeAll(timeExecutionMandMaint);
+                self.updateTimeAll(timeExecutionMandMaint);
+            end
+            
+            self.lastOperation = operation;
+        end
+        
+        
+        function validateOperationAdjacency(self, operation)
+            import dataComponents.Operation
+            
+            if ~isempty(self.lastOperation)
+                if self.lastOperation.isType(Operation.INSPECTION)
+                    test1 = operation.isType(Operation.MAND_MAINT);
+                    test2 = operation.isType(Operation.SHOCK);
+                    assert(test1 || test2)
+                elseif self.lastOperation.isType(Operation.VOL_MAINT)
+                    assert(operation.isType(Operation.SHOCK))
+                elseif self.lastOperation.isType(Operation.MAND_MAINT)
+                    assert(operation.isType(Operation.SHOCK))
+                elseif self.lastOperation.isType(Operation.SHOCK)
+                    error('No operation can follow a shock immediately')
+                else
+                    error('This line should never be reached')
+                end
             end
         end
         
         
-        function [timeExecution, mandMaintFlag] = executeInspection(thisRlz, operation)
+        function [timeExecution, mandMaintFlag] = executeInspection(self, operation)
         %{
         * Executes inspection operation object passed in argument
         
@@ -326,97 +301,72 @@ classdef Realization < matlab.mixin.Copyable
                 triggered a mandatory maintenance, false otherwise.
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Observation
             import dataComponents.Event
             
             % Inform the Principal that this inspection operation was executed
-            thisRlz.principal.confirmExecutionSubmittedOperation(operation);
+            self.principal.confirmExecutionSubmittedOperation(operation);
             
             timeInspection = operation.time;
             mandMaintFlag = false;
             
             % Creates payoff struct for the Principal
-            inspectionCost = thisRlz.principal.costSingleInspection;
-
-            pffPrincipal = struct();
-            pffPrincipal.value = -inspectionCost;
-            pffPrincipal.type{1} = Payoff.INSPECTION;
+            inspectionCost = self.principal.costSingleInspection;
+            
+            tran = Transaction(...
+                timeInspection, ...
+                inspectionCost, ...
+                Transaction.INSPECTION);
             
             % Creates observation struct
-            perf = thisRlz.nature.solvePerformanceForTime(timeInspection);
-
-            obs = struct();
-            obs.value = perf;
+            perf = self.infrastructure.getPerformance();
             
-            % Normal inspection or detection
-            perfThreshold = thisRlz.contract.getPerfThreshold();
+            obs = Observation(timeInspection, perf);
             
-            if perf >= perfThreshold  % It is a regular inspection
+            % Inspection event
+            inspectionEvent = Event(...
+                timeInspection, ...
+                Event.INSPECTION, ...
+                obs, ...
+                tran);
+            
+            % Register event for principal and agent
+            self.principal.registerEvent(inspectionEvent);
+            self.agent.registerEvent(inspectionEvent);
+            
+            % If there is violation
+            if perf < self.contract.perfThreshold
                 
-                % Inspection event for the principal
-                inspectionEvent_Principal = struct();
-                inspectionEvent_Principal.time = timeInspection;
-                inspectionEvent_Principal.type = Event.INSPECTION;
-                inspectionEvent_Principal.obs = obs;
-                inspectionEvent_Principal.pff = pffPrincipal;
-                
-                thisRlz.principal.registerEvent(inspectionEvent_Principal);
-                
-                % Inspection event for the agent
-                inspectionEvent_Agent = struct();
-                inspectionEvent_Agent.time = timeInspection;
-                inspectionEvent_Agent.type = Event.INSPECTION;
-                inspectionEvent_Agent.obs = obs;
-                
-                % Register the event for the agent
-                thisRlz.agent.registerEvent(inspectionEvent_Agent);
-                
-            else  % It is a detection
                 import dataComponents.Message
                 import managers.Information
-                
-                thisRlz.fileInfo.printLog('Violation detected: DETECTION EVENT\n')
+                import managers.Faculty
                 
                 % Calculates penalty fee from contract
-                msg = Message(thisRlz.principal);
-                msg.setTypeRequestedInfo(Information.VALUE_PENALTY_FEE);
+                msg = Faculty.createEmptyMessage(self.principal, Faculty.PENALTY);
                 msg.setExtraInfo(Message.TIME_DETECTION, timeInspection);
                 
-                thisRlz.contract.penaltyAction.decide(msg);
+                self.contract.penaltyStrategy.decide(msg);
                 
                 penaltyFee = msg.getOutput(Information.VALUE_PENALTY_FEE);
                 
-                thisRlz.fileInfo.printLog(['Penalty imposed: ',num2str(penaltyFee),'\n'])
-                
                 % Appending the income (penalty fee) to the principal's
                 % payoff struct
-                pffPrincipal.value(end+1) = penaltyFee;
-                pffPrincipal.type{end+1} = Payoff.PENALTY;
-                
-                
-                % Creation payoff struct for the agent
-                pffAgent = struct();
-                pffAgent.value = -penaltyFee;
-                pffAgent.type{1} = Payoff.PENALTY;
+                penaltyTran = Transaction(...
+                    timeInspection, ...
+                    penaltyFee, ...
+                    Transaction.PENALTY);
                 
                 % Creates and registers detection event for the principal
-                detectionEvent_Principal = struct();
-                detectionEvent_Principal.time = timeInspection;
-                detectionEvent_Principal.type = Event.DETECTION;
-                detectionEvent_Principal.obs = obs;
-                detectionEvent_Principal.pff = pffPrincipal;
+                detectionEvent = Event(...
+                    timeInspection, ...
+                    Event.DETECTION, ...
+                    obs, ...
+                    penaltyTran);
                 
-                thisRlz.principal.registerEvent(detectionEvent_Principal);
-                
-                % Creates and registers detection event for the agent
-                detectionEvent_Agent = struct();
-                detectionEvent_Agent.time = timeInspection;
-                detectionEvent_Agent.type = Event.DETECTION;
-                detectionEvent_Agent.obs = obs;
-                detectionEvent_Agent.pff = pffAgent;
-                
-                thisRlz.agent.registerEvent(detectionEvent_Agent);
+                % Registers detection event for the principal and agent
+                self.principal.registerEvent(detectionEvent);
+                self.agent.registerEvent(detectionEvent);
                 
                 mandMaintFlag = true;
             end
@@ -425,7 +375,7 @@ classdef Realization < matlab.mixin.Copyable
         end
         
         
-        function timeExecution = executeVolMaint(thisRlz, operation)
+        function timeExecution = executeVolMaint(self, operation)
         %{
         * 
         
@@ -435,50 +385,47 @@ classdef Realization < matlab.mixin.Copyable
                 
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Observation
             import dataComponents.Event
-            
-            % Inform the Agent that this volMaint operation was executed
-            thisRlz.agent.confirmExecutionSubmittedOperation(operation);
             
             timeVolMaint = operation.time;
             perfGoal = operation.perfGoal;
             
-            perfBeforeMaint = thisRlz.nature.solvePerformanceForTime(timeVolMaint);
+            perfBeforeMaint = self.infrastructure.getPerformance();
             
-            % Creates observation struct before and after Maintenance
-            obs = struct();
-            obs.value = [perfBeforeMaint, perfGoal];
+            % Creates observation object before and after Maintenance
+            obs = Observation(timeVolMaint, [perfBeforeMaint, perfGoal]);
             
             % Creates the outcome payoff struct of the agent
-            costMaintenance = thisRlz.agent.maintCostFunction(perfBeforeMaint, perfGoal);
+            costMaintenance = self.agent.maintCostFunction(perfBeforeMaint, perfGoal);
             
-            pffAgent = struct();
-            pffAgent.value = -costMaintenance;
-            pffAgent.type{1} = Payoff.MAINTENANCE;
-            
-            thisRlz.fileInfo.printLog(['Cost voluntary maintenance: ',num2str(costMaintenance),'\n'])
+            maintTransaction = Transaction(...
+                timeVolMaint, ...
+                costMaintenance, ...
+                Transaction.MAINTENANCE);
             
             % Applies maintenance operation to Infrastructure
-            thisRlz.nature.applyOperation(operation);
+            self.nature.applyOperation(operation, self.infrastructure);
             
             % Creates and registers voluntary maintenance event for the
             % agent
-            volMaintEvent_Agent = struct();
-            volMaintEvent_Agent.time = timeVolMaint;
-            volMaintEvent_Agent.type = Event.VOL_MAINT;
-            volMaintEvent_Agent.obs = obs;
-            volMaintEvent_Agent.pff = pffAgent;
+            volMaintEvent_Agent = Event(...
+                timeVolMaint, ...
+                Event.VOL_MAINT, ...
+                obs, ...
+                maintTransaction);
             
-            thisRlz.agent.registerEvent(volMaintEvent_Agent);
+            self.agent.registerEvent(volMaintEvent_Agent);
             
             timeExecution = timeVolMaint;
             
+            % Inform the Agent that this volMaint operation was executed
+            self.agent.confirmExecutionSubmittedOperation(operation);
         end
         
         
-        function timeExecution = executeMandMaint(thisRlz)
+        function timeExecution = executeMandMaint(self)
         %{
         * 
         
@@ -488,29 +435,27 @@ classdef Realization < matlab.mixin.Copyable
                 
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Observation
             import dataComponents.Operation
             import dataComponents.Event
             import dataComponents.Message
             import managers.Information
+            import managers.Faculty
             
-            thisRlz.fileInfo.printLog('MANDATORY MAINTENANCE:\n')
+            timeDetection = self.principal.observationList.getCurrentTime();
+            perfDetection = self.principal.observationList.getCurrentValue();
             
-            timeDetection = thisRlz.principal.observation.getCurrentTime();
-            perfDetection = thisRlz.principal.observation.getCurrentValue();
-            
-            maxPerf = thisRlz.nature.infrastructure.maxPerf;
-            perfThreshold = thisRlz.contract.getPerfThreshold();
+            maxPerf = self.infrastructure.maxPerf;
+            perfThreshold = self.contract.perfThreshold;
             
             % Strategy calculates performance goal
-            msg = Message(thisRlz.agent);
-            msg.setTypeRequestedInfo(Information.PERF_MAND_MAINT);
+            msg = Faculty.createEmptyMessage(self.agent, Faculty.MAND_MAINT);
             msg.setExtraInfo(   Message.MAX_PERF, maxPerf, ...
                                 Message.TIME_DETECTION, timeDetection, ...
                                 Message.PERF_DETECTION, perfDetection);
             
-            thisRlz.agent.mandMaintAction.decide(msg);
+            self.agent.mandMaintStrategy.decide(msg);
             
             deltaPerfAboveThreshold = msg.getOutput(Information.PERF_MAND_MAINT);
             
@@ -521,52 +466,44 @@ classdef Realization < matlab.mixin.Copyable
                 'The value of the performance goal must be within [nullPerf, maxPerf]')
             
             % Creates the outcome payoff object of the agent
-            costMaintenance = thisRlz.agent.maintCostFunction(perfDetection, perfGoal);
-
-            pffAgent = struct();
-            pffAgent.value = -costMaintenance;
-            pffAgent.type{1} = Payoff.MAINTENANCE;
-            
-            thisRlz.fileInfo.printLog(['Cost mandatory maintenance: ',num2str(costMaintenance),'\n'])
+            costMaintenance = self.agent.maintCostFunction(perfDetection, perfGoal);
             
             % Creates maintenance operation object
             mandMaintOperation = Operation(timeDetection, Operation.MAND_MAINT, true, ...
                 perfGoal);
             
             % Applies maintenance operation to Infrastructure
-            thisRlz.nature.applyOperation(mandMaintOperation);
+            self.nature.applyOperation(mandMaintOperation, self.infrastructure);
             
             % Creates observation objects (at current time) for the principal
-            perfAfterMaint = thisRlz.nature.getCurrentPerformance();
+            perfAfterMaint = self.infrastructure.getPerformance();
             assert(perfAfterMaint == perfGoal, ...
                 'The observed performance must be equal to the perfGoal of the applied mandatory maintenance operation');
             
-            obs = struct();
-            obs.value = perfAfterMaint;
+            % Creates observation object before and after Maintenance
+            obs = Observation(timeDetection, [perfDetection, perfGoal]);
             
-            % Creates and registers mandatory maintenance event for the principal
-            mandMaintEvent_Principal = struct();
-            mandMaintEvent_Principal.time = timeDetection;
-            mandMaintEvent_Principal.type = Event.MAND_MAINT;
-            mandMaintEvent_Principal.obs = obs;
-            
-            thisRlz.principal.registerEvent(mandMaintEvent_Principal);
+            % Creates transaction object for concept of mandatory maint
+            trn = Transaction( timeDetection, ...
+                costMaintenance, ...
+                Transaction.MAINTENANCE);
             
             % Creates and registers mandatory maintenance event for the
-            % agent
-            mandMaintEvent_Agent = struct();
-            mandMaintEvent_Agent.time = timeDetection;
-            mandMaintEvent_Agent.type = Event.MAND_MAINT;
-            mandMaintEvent_Agent.obs = obs;
-            mandMaintEvent_Agent.pff = pffAgent;
+            % principal and agent
+            mandMaintEvent = Event(...
+                timeDetection, ...
+                Event.MAND_MAINT, ...
+                obs, ...
+                trn);
             
-            thisRlz.agent.registerEvent(mandMaintEvent_Agent);
+            self.principal.registerEvent(mandMaintEvent);
+            self.agent.registerEvent(mandMaintEvent);
             
             timeExecution = timeDetection;
         end
         
         
-        function timeExecution = executeShock(thisRlz, operation)
+        function timeExecution = executeShock(self, operation)
         %{
         * 
         
@@ -580,31 +517,70 @@ classdef Realization < matlab.mixin.Copyable
             import dataComponents.Event
             
             % Inform Nature that this shock operation was executed
-            thisRlz.nature.confirmExecutionSubmittedOperation(operation);
+            self.nature.confirmExecutionSubmittedOperation(operation);
             
             % Creates observation object
-            perf = thisRlz.nature.solvePerformanceForTime(operation.time);
+            perfBeforeShock = self.infrastructure.getPerformance();
             
-            obs = struct();
-            obs.value = perf;
+            obs = Observation(...
+                operation.time, ...
+                perfBeforeShock);
             
             % Applies shock operation to Infrastructure
-            thisRlz.nature.applyOperation(operation);
+            self.nature.applyOperation(operation, self.infrastructure);
             
             % Creates and registers shock event for the agent
-            shockEvent = struct();
-            shockEvent.time = operation.time;
-            shockEvent.type = Event.SHOCK;
-            shockEvent.obs = obs;
+            shockEvent = Event(...
+                operation.time, ...
+                Event.SHOCK, ...
+                obs, ...
+                []);
             
-            thisRlz.agent.registerEvent(shockEvent);
+            self.agent.registerEvent(shockEvent);
             
             timeExecution = operation.time;
             
         end
         
         
-        function validateOperation(thisRlz, operation)
+        function executePayment(self, transaction)
+        %{
+        * 
+
+            Input
+
+            Output
+
+        %}
+            import dataComponents.Event
+            
+            % Evolve the system up to the time of the operation to be
+            % executed
+            
+            re = 1e-8;
+            if transaction.time > self.time + re
+                self.evolveContinuously(transaction.time);
+            end
+            
+            assert(self.time == transaction.time)
+            
+            [emitter, receiver] = transaction.returnEmitterReceiver(self.principal, self.agent);
+            
+            ev = Event(transaction.time, Event.CONTRIBUTION, [], transaction);
+            
+            % Emitter end receiver register the event
+            if ~isempty(emitter)
+                emitter.registerEvent(ev);
+            end
+            
+            if ~isempty(receiver)
+                receiver.registerEvent(ev);
+            end
+            
+        end
+        
+        
+        function validateOperation(self, operation)
         %{
         * 
         
@@ -614,56 +590,40 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(operation.time > thisRlz.time, ...
-                'This operation must have an execution time greater than the current time in the realization')
+            assert(operation.time >= self.time, ...
+                'This operation must have an execution time greater or equal than the current time in the realization')
         end
         
         
-        function evolveContinuously(thisRlz, tf)
+        function evolveContinuously(self, tf)
         %{
         * 
-        
+            
             Input
-                
             
             Output
-                
+            
         %}
-            %import utils.ContinuousSolver
             
-            fare = 72/10e7;
+            currentPerf = self.infrastructure.getPerformance();
+            currentAgentBalance = self.agent.payoffList.getBalance(); % Current agent's balance
             
-            %  ------ Differential equations for stocks -------
+            [t, y] = self.solver.solveFutureState(self.time, tf, [currentPerf; currentAgentBalance]);
             
-            contEnvForce = @CommonFnc.continuousEnvForce;
-            contRespFun = @CommonFnc.continuousRespFunction;
-            demand = @CommonFnc.demandFunction;
-            revenue = @CommonFnc.revenueRate;
-
-            v_f = @(t,v) contRespFun(   contEnvForce(t), ...
-                                        demand(v, fare), ...
-                                        v, ...
-                                        t);
-
-            d_f = @(v) demand(v, fare);
-
-            ba_f = @(v) revenue(demand(v, fare), fare);
-
-            fun = @(t,x) [  v_f(t,x(1)); ...
-                            d_f(x(1));...
-                            ba_f(x(1))];
+            perf = y(:,1);
+            agentBalance = y(:,2);
             
-            currentPerf = thisRlz.nature.infrastructure.getPerformance();
-            initialDemand = 0;
-            currentAgentBalance = -400;
+            demHist = self.solver.demandFnc(perf);
             
-            [t,x] = ode45(fun, [thisRlz.time, tf], [currentPerf; initialDemand; currentAgentBalance]);
+            self.demandHistory.register(t, demHist);
+            self.agent.evolve(t, agentBalance);
+            self.infrastructure.evolve(t, perf);
             
-            %error('hola')
+            self.updateTimeAll(tf);
         end
         
         
-        function finishRealization(thisRlz)
+        function finishRealization(self)
         %{
         * 
         
@@ -675,39 +635,47 @@ classdef Realization < matlab.mixin.Copyable
             from register a ficticious payoff.
         %}
         
-            import dataComponents.Payoff
+            import dataComponents.Transaction
             import dataComponents.Event
             
-            contractDuration = thisRlz.contract.getContractDuration();
+            contractDuration = self.contract.duration;
             
-            % Final (fictitious) payoff
-            finalPff = struct();
-            finalPff.value = 0;
-            finalPff.duration = 0;
-            finalPff.type{1} = Payoff.FINAL;
+            % Evolve until contract duration
+            self.evolveContinuously(contractDuration);
             
-            % Final event
-            finalEvent = struct();
-            finalEvent.time = contractDuration;
-            finalEvent.type = Event.FINAL;
-            finalEvent.pff = finalPff;
-            
-            % Finalize history infrastructure
-            thisRlz.nature.finalizeHistory(contractDuration);
-            
-            % Register FINAL event for Principal and Agent
-            thisRlz.principal.registerEvent(finalEvent);
-            thisRlz.agent.registerEvent(finalEvent);
+            % Set time for all
+            self.updateTimeAll(contractDuration);
             
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
+        
+        function [emitter, receiver] = getEmitterReceiver(self, transaction)
+            import managers.Information
+            
+            if strcmp(transaction.emitter, Information.PRINCIPAL)
+                emitter = self.principal;
+            elseif strcmp(transaction.emitter, Information.AGENT)
+                emitter = self.agent;
+            else
+                error('Emitter should be either PRINCIPAL or AGENT')
+            end
+            
+            
+            if strcmp(transaction.receiver, Information.PRINCIPAL)
+                receiver = self.principal;
+            elseif strcmp(transaction.receiver, Information.AGENT)
+                receiver = self.agent;
+            else
+                error('Receiver should be either PRINCIPAL or AGENT')
+            end
+            
+        end
         
         
-        function [ua, up] = utilityPlayers(thisRlz)
+        function [ua, up] = utilityPlayers(self)
         %{
         * 
         
@@ -717,12 +685,12 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 
         %}
-            ua = thisRlz.agent.getUtility();
-            up = thisRlz.principal.getUtility();
+            ua = self.agent.getUtility();
+            up = self.principal.getUtility();
         end
         
         
-        function earliestOp = requestOperations(thisRlz)
+        function earliestOp = requestOperations(self)
         %{
         * Requests players to submit their next action. Returns the
         player name and time of the earliest action submitted.
@@ -734,33 +702,29 @@ classdef Realization < matlab.mixin.Copyable
                 earliestOp: [class Operation] Operation object with earliest
                 time
         %}
-            currentPerf = thisRlz.nature.getCurrentPerformance();
+            currentPerf = self.infrastructure.getPerformance();
             
-            maxPerf = thisRlz.nature.infrastructure.maxPerf;
-            nullPerf = thisRlz.nature.infrastructure.nullPerf;
+            maxPerf = self.infrastructure.maxPerf;
+            nullPerf = self.infrastructure.nullPerf;
             
             % Asking players to submit operations
-            operationPrincipal = thisRlz.principal.submitOperation();
-            thisRlz.validateOperation(operationPrincipal);
+            operationPrincipal = self.principal.submitOperation();
+            self.validateOperation(operationPrincipal);
             
-            copyInfra = copy(thisRlz.nature.infrastructure);
-            operationAgent = thisRlz.agent.submitOperation(currentPerf, ...
-                @thisRlz.solvePerformanceForTime, ...
-                @thisRlz.solveTimeForPerformance, ...
-                [nullPerf maxPerf], copyInfra);
-            thisRlz.validateOperation(operationAgent);
+            operationAgent = self.agent.submitOperation(self.solver, self.infrastructure);
+            self.validateOperation(operationAgent);
             
-            operationNature = thisRlz.nature.submitOperation();
-            thisRlz.validateOperation(operationNature);
+            operationNature = self.nature.submitOperation();
+            self.validateOperation(operationNature);
             
             earliestOp = returnEarliestOperation( operationPrincipal, ...
                                                   operationAgent, ...
                                                   operationNature );
-            earliestOp.setAsPending();
+            %earliestOp.setAsPending();
         end
         
         
-        function performance = solvePerformanceForTime(thisRlz, time)
+        function performance = solvePerformanceForTime(self, time)
         %{
         * Solves performance of infrastructure for a given time
         
@@ -771,11 +735,11 @@ classdef Realization < matlab.mixin.Copyable
                 performance: [class double] Performance of infrastructure
                 for a given time
         %}
-            performance = thisRlz.nature.solvePerformanceForTime(time);
+            performance = self.nature.solvePerformanceForTime(time);
         end
         
         
-        function time = solveTimeForPerformance(thisRlz, perf)
+        function time = solveTimeForPerformance(self, perf)
         %{
         * Solves time for a given infrastructure state
         
@@ -786,11 +750,11 @@ classdef Realization < matlab.mixin.Copyable
             Output
                 time: [class double] Time to solve performance for
         %}
-            time = thisRlz.nature.solveTimeForPerformance(perf);
+            time = self.nature.solveTimeForPerformance(perf);
         end
         
         
-        function data = report(thisRlz)
+        function data = report(self)
         %{
         * 
         
@@ -800,26 +764,72 @@ classdef Realization < matlab.mixin.Copyable
                 
         %}
             import dataComponents.Event
+            import dataComponents.Transaction
+            import managers.DataStructure
             
-            [utilityAgent, utilityPrincipal] = thisRlz.utilityPlayers();
-            contractDuration = thisRlz.contract.getContractDuration();
+            [utilityAgent, utilityPrincipal] = self.utilityPlayers();
+            contractDuration = self.contract.duration;
+            perfThreshold = self.contract.perfThreshold;
+            inspection_markers = self.principal.eventList.getMarkersInfo(Event.INSPECTION, self.principal.observationList);
+            detection_markers = self.principal.eventList.getMarkersInfo(Event.DETECTION, self.principal.observationList);
             
-            data = struct(...
-                'ua',                       utilityAgent, ...
-                'up',                       utilityPrincipal, ...
-                'contractDuration',         contractDuration, ...
-                'threshold',                thisRlz.contract.getPerfThreshold(), ...
-                'maxPerf',                  thisRlz.nature.infrastructure.maxPerf, ...
-                'nullPerf',                 thisRlz.nature.infrastructure.nullPerf, ...
-                'perfHistory' ,             thisRlz.nature.infrastructure.history.getData(), ...
-                'inspectionMarker',         thisRlz.principal.eventList.getMarkersInfo(Event.INSPECTION, thisRlz.principal.observation), ...
-                'detectionMarker',          thisRlz.principal.eventList.getMarkersInfo(Event.DETECTION, thisRlz.principal.observation), ...
-                'volMaintMarker',           thisRlz.agent.eventList.getMarkersInfo(Event.VOL_MAINT, thisRlz.agent.observation), ...
-                'shockMarker',              thisRlz.agent.eventList.getMarkersInfo(Event.SHOCK, thisRlz.agent.observation), ...
-                'realPerfMeanValue',        thisRlz.nature.infrastructure.history.getMeanValueHistory(), ...
-                'perceivedPerfMeanValue',   thisRlz.principal.observation.getMeanValueHistory(), ...
-                'balP',                     thisRlz.principal.payoff.getBalanceHistory(contractDuration), ...
-                'balA',                     thisRlz.agent.payoff.getBalanceHistory(contractDuration) );
+            
+            if ~isempty(inspection_markers)
+                num_insp_noviol = length(inspection_markers.time);
+            else
+                num_insp_noviol = 0;
+            end
+            
+            if ~isempty(detection_markers)
+                num_detections = length(detection_markers.time);
+            else
+                num_detections = 0;
+            end
+            
+            total_inspections = num_insp_noviol + num_detections;
+            
+            violationRatio = num_detections / total_inspections;
+            
+            agent_balanceHistory = self.agent.payoffList.getBalanceHistory();
+            principal_balanceHistory = self.principal.payoffList.getBalanceHistory();
+            
+            history_real_mean_perf = self.infrastructure.history.getMeanValueHistory();
+            history_perc_mean_perf = self.principal.observationList.getMeanValueHistory();
+            
+            data = DataStructure();
+            
+            % Double values
+            data.addEntry('ua', 'Agent''s utility', utilityAgent);
+            data.addEntry('up', 'Principal''s utility', utilityPrincipal);
+            data.addEntry('final_ba', 'Final agent''s balance', agent_balanceHistory.balance(end));
+            data.addEntry('final_bp', 'Final principal''s balance', principal_balanceHistory.balance(end));
+            data.addEntry('final_rpmv', 'Final real perf. mean value', history_real_mean_perf.meanvalue(end));
+            data.addEntry('final_ppmv', 'Final perc. perf. mean value', history_perc_mean_perf.meanvalue(end));
+            data.addEntry('contractDuration', 'Contract duration', contractDuration);
+            data.addEntry('threshold', 'Contract duration', perfThreshold);
+            data.addEntry('maxPerf', 'Maximum performance', self.infrastructure.maxPerf);
+            data.addEntry('nullPerf', 'Null performance', self.infrastructure.nullPerf);
+            data.addEntry('numInspNoViol', 'Insp. without violation', num_insp_noviol);
+            data.addEntry('numDetections', 'Insp. with violation', num_detections);
+            data.addEntry('numInspections', 'Total inspections', total_inspections);
+            data.addEntry('violationRatio', 'Observed violation ratio', violationRatio);
+            
+            % Struct values
+            data.addEntry('perfHistory', 'Performance history', self.infrastructure.history.getData());
+            data.addEntry('inspectionMarker', 'Time and perf when inspections occurred', inspection_markers);
+            data.addEntry('detectionMarker', 'Time and perf when detections occurred', detection_markers);
+            data.addEntry('volMaintMarker', 'Time and perf when vol maints occurred', self.agent.eventList.getMarkersInfo(Event.VOL_MAINT, self.agent.observationList));
+            data.addEntry('shockMarker', 'Time and perf when shocks occurred', self.agent.eventList.getMarkersInfo(Event.SHOCK, self.agent.observationList));
+            data.addEntry('realPerfMeanValue', 'History of actual perf mean value', history_real_mean_perf);
+            data.addEntry('perceivedPerfMeanValue', 'History of perceived perf mean value', history_perc_mean_perf);
+            data.addEntry('balA', 'Agent''s balance', agent_balanceHistory);
+            data.addEntry('balP', 'Principal''s balance', principal_balanceHistory);
+            data.addEntry('jumpsMaint_agent', 'Time and balance just before a jump due to maint', self.agent.payoffList.returnPayoffsOfType(Transaction.MAINTENANCE));
+            data.addEntry('jumpsContrib_agent', 'Time and balance just before a jump due to a contribution', self.agent.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
+            data.addEntry('jumpsPenalties_agent', 'Time and balance just before a jump due to a penalty', self.agent.payoffList.returnPayoffsOfType(Transaction.PENALTY));
+            data.addEntry('jumpsInspections_principal', 'Time and balance just before a jump due to an inspection', self.principal.payoffList.returnPayoffsOfType(Transaction.INSPECTION));
+            data.addEntry('jumpsContrib_principal', 'Time and balance just before a jump due to a contribution', self.principal.payoffList.returnPayoffsOfType(Transaction.CONTRIBUTION));
+            data.addEntry('jumpsPenalties_principal', 'Time and balance just before a jump due to a penalty', self.principal.payoffList.returnPayoffsOfType(Transaction.PENALTY));
         end
         
     end
@@ -851,3 +861,15 @@ function [earliestOp, index] = returnEarliestOperation(opPrincipal, opAgent, opN
     earliestOp = opArray{index};
 end
 
+
+function time = getEarliestTime(operation, transaction)
+if isempty(transaction)
+    time = operation.time;
+else
+    if transaction.time <= operation.time
+        time = transaction.time;
+    else
+        time = operation.time;
+    end
+end
+end

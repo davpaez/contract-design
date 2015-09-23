@@ -1,6 +1,4 @@
 classdef Information
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         
@@ -15,24 +13,21 @@ classdef Information
         PERFORMANCE         = 'PERFORMANCE'
         MONEY               = 'MONEY'
         
-        
-        % Types of actions
-        INSPECTION  = 'INSPECTION'
-        VOL_MAINT   = 'VOL_MAINT'
-        MAND_MAINT  = 'MAND_MAINT'
-        SHOCK       = 'SHOCK'
-		%}
+        %}
 		
-		
+        % Types of players in the game
+        PRINCIPAL   =   'PRINCIPAL'
+        AGENT       =   'AGENT'
+        NATURE      =   'NATURE'
+        COURT       =   'COURT'
         
         % Specific type of information related to each action available to
         % a player of the game
             % Contract offer Action
-            CONTRACT_DURATION = 'CONTRACT_DURATION'
-            PAYMENT_SCHEDULE = 'PAYMENT_SCHEDULE'
-            REVENUE_RATE_FUNC = 'REVENUE_RATE_FUNC'
+            CONTRACT_DURATION =     'CONTRACT_DURATION'
             PERFORMANCE_THRESHOLD = 'PERFORMANCE_THRESHOLD'
-            PENALTY_FEE_STRAT = 'PENALTY_FEE_STRAT'
+            PAYMENT_SCHEDULE =      'PAYMENT_SCHEDULE'
+            REVENUE_RATE_FUNC =     'REVENUE_RATE_FUNC'
             
             % Inspection Action
             TIME_INSPECTION     = 'TIME_INSPECTION'
@@ -79,7 +74,6 @@ classdef Information
                 Information.PAYMENT_SCHEDULE, ...
                 Information.REVENUE_RATE_FUNC, ...
                 Information.PERFORMANCE_THRESHOLD, ...
-                Information.PENALTY_FEE_STRAT, ...
                 Information.TIME_INSPECTION, ...
                 Information.TIME_VOL_MAINT, ...
                 Information.PERF_VOL_MAINT, ...

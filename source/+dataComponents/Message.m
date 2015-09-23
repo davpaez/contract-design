@@ -1,12 +1,15 @@
 classdef Message < handle
-    %MESSAGE Summary of this class goes here
-    %   Detailed explanation goes here
+    % 
     
     properties (Constant, Hidden = true)
         MAX_PERF            = 'MAX_PERF'
         
         TIME_DETECTION      = 'TIME_DETECTION'
         PERF_DETECTION      = 'PERF_DETECTION'
+        
+        CURRENT_PERF        = 'CURRENT_PERF'
+        
+        SOLVER              = 'SOLVER'
     end
     
     properties
@@ -42,18 +45,22 @@ classdef Message < handle
             import dataComponents.Message
             
             validTypes = {  Message.MAX_PERF, ...
-                            Message.TIME_DETECTION, ...
-                            Message.PERF_DETECTION};
-             
-             answer = any(strcmp(validTypes, str));
+                Message.TIME_DETECTION, ...
+                Message.PERF_DETECTION, ...
+                Message.CURRENT_PERF, ...
+                Message.SOLVER};
+            
+            answer = any(strcmp(validTypes, str));
         end
         
     end
     
     methods
-        %% Constructor
         
-        function thisMsg = Message(theExecutor)
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
+        
+        function self = Message(theExecutor)
         %{
         
             Input
@@ -61,32 +68,28 @@ classdef Message < handle
             Output
                 
         %}
-            % Check that theExecutor is of class Player
-            isPrincipal = isa(theExecutor,'entities.Principal');
-            isAgent = isa(theExecutor,'entities.Agent');
-            isNature = isa(theExecutor,'entities.Nature');
-            
-            isPlayer = any([isPrincipal, isAgent, isNature]);
-            
-            assert(isPlayer, ...
-                'The parameter passed must be an object of either Principal, Agent or Nature class')
-            
-            thisMsg.executor = theExecutor;
+            if nargin > 0
+                
+                % Check that theExecutor is of class Player
+                isPrincipal = isa(theExecutor,'entities.Principal');
+                isAgent = isa(theExecutor,'entities.Agent');
+                isNature = isa(theExecutor,'entities.Nature');
+                
+                isPlayer = any([isPrincipal, isAgent, isNature]);
+                
+                assert(isPlayer, ...
+                    'The parameter passed must be an object of either Principal, Agent or Nature class')
+                
+                self.executor = theExecutor;
+            end
             
         end
         
         
-        %% Getter functions
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
-        
-        %% Regular methods
-        
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        function ex = getExecutor(thisMsg)
+        function ex = getExecutor(self)
         %{
         
             Input
@@ -94,11 +97,11 @@ classdef Message < handle
             Output
                 
         %}
-            ex = thisMsg.executor;
+            ex = self.executor;
         end
         
         
-        function value = getOutput(thisMsg, typeOutput)
+        function value = getOutput(self, typeOutput)
         %{
         
             Input
@@ -108,17 +111,17 @@ classdef Message < handle
         %}
             import managers.Information
             
-            thisMsg.validate()
+            self.validate()
             
             assert(Information.isValid_TypeInfo(typeOutput), ...
                     'The type of output response specified is not valid.')
             
-            idx = strcmp(thisMsg.typeRequestedInfo, typeOutput);
-            value = thisMsg.valuesResponse{idx};
+            idx = strcmp(self.typeRequestedInfo, typeOutput);
+            value = self.valuesResponse{idx};
         end
         
         
-        function value = getExtraInfo(thisMsg, varargin)
+        function value = getExtraInfo(self, varargin)
         %{
         
             Input
@@ -128,20 +131,18 @@ classdef Message < handle
         %}
             typeExtra = varargin;
             
-            assert(thisMsg.isValid_TypeExtraInput(typeExtra), ...
+            assert(self.isValid_TypeExtraInput(typeExtra), ...
                     'The type extra info specified is not valid.')
             
-            idx = strcmp(thisMsg.typeExtraInfo, typeExtra);
-            value = thisMsg.extraInfo{idx};
+            idx = strcmp(self.typeExtraInfo, typeExtra);
+            value = self.extraInfo{idx};
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        
-        function setTypeRequestedInfo(thisMsg, varargin)
+        function setTypeRequestedInfo(self, typeInfoArray)
         %{
         
             Input
@@ -151,23 +152,22 @@ classdef Message < handle
         %}
             import managers.Information
             
-            cellIdentifiers = varargin;
             % Check valitidy of types of outputs
-            n = length(cellIdentifiers);
+            n = length(typeInfoArray);
             for i=1:n
-                assert(Information.isValid_TypeInfo(cellIdentifiers{i}), ...
+                assert(Information.isValid_TypeInfo(typeInfoArray{i}), ...
                     'The type of output response specified is not valid.')
             end
             
-            assert(length(cellIdentifiers) == length(unique(cellIdentifiers)), ...
+            assert(length(typeInfoArray) == length(unique(typeInfoArray)), ...
                 'The types entered must be unique')
             
-            thisMsg.typeRequestedInfo = cellIdentifiers;
+            self.typeRequestedInfo = typeInfoArray;
             
         end
         
         
-        function setExtraInfo(thisMsg, varargin)
+        function setExtraInfo(self, varargin)
         %{
         
             Input
@@ -183,17 +183,17 @@ classdef Message < handle
             % Check valitidy of types of outputs
             n = length(cellIdentifiers);
             for i=1:n
-                assert(thisMsg.isValid_TypeExtraInput(cellIdentifiers{i}), ...
+                assert(self.isValid_TypeExtraInput(cellIdentifiers{i}), ...
                     'The type extra info specified is not valid.')
             end
             
-            thisMsg.typeExtraInfo = cellIdentifiers;
-            thisMsg.extraInfo = values;
+            self.typeExtraInfo = cellIdentifiers;
+            self.extraInfo = values;
             
         end
         
         
-        function submitResponse(thisMsg, varargin)
+        function submitResponse(self, varargin)
         %{
         
             Input
@@ -201,28 +201,53 @@ classdef Message < handle
             Output
                 
         %}
+            import managers.Information
+            
             cellIdentifiers = varargin(1:2:length(varargin));
             values = varargin(2:2:length(varargin));
             
             n = length(cellIdentifiers);
             for i=1:n
                 varName = cellIdentifiers{i};
-                idx = find(strcmp(thisMsg.typeRequestedInfo, varName));
+                idx = find(strcmp(self.typeRequestedInfo, varName));
                 assert(~isempty(idx), ...
                     'The submitted response type must coincide with the types of the requested info')
                 
+                % Makes sure that if time of action is greater than current
+                % realization time, it must be at least greater than the
+                % current time by at least timeRes
+                % This is done to prevent realization from keep looping
+                % trying to evolve between two timestamps that are
+                % essentially the same.
+                typesWithExecutionTime = {  Information.TIME_INSPECTION, ...
+                    Information.TIME_VOL_MAINT, ...
+                    Information.TIME_SHOCK};
+                
+                answer = any(strcmp(typesWithExecutionTime, varName));
+                
+                if answer == true
+                    timeRes = self.executor.problem.timeRes;
+                    currentTime = self.executor.time;
+                    
+                    values{i} = round(values{i}, 4);
+                    
+                    if values{i} > currentTime
+                        if values{i} < currentTime + timeRes
+                            values{i} = currentTime + timeRes;
+                        end
+                    end
+                end
+                
                 % Assign value
-                thisMsg.valuesResponse{idx} = values{i};
+                self.valuesResponse{idx} = values{i};
             end
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
-        
-        function validate(thisMsg)
+        function validate(self)
         %{
         
             Input
@@ -230,21 +255,21 @@ classdef Message < handle
             Output
                 
         %}
-            if thisMsg.validated == false
+            if self.validated == false
                 % The RequestedInfo array must be non-empty
-                assert(~isempty(thisMsg.typeRequestedInfo), ...
+                assert(~isempty(self.typeRequestedInfo), ...
                     'The types of requested info must be non-empty')
 
                 % Check the length of the value response array
-                assert(length(thisMsg.valuesResponse) == length(thisMsg.typeRequestedInfo), ...
+                assert(length(self.valuesResponse) == length(self.typeRequestedInfo), ...
                     'The length of the value responses array is not valid')
 
                 % No reponse value cell should be empty
-                assert(any(cellfun(@isempty, thisMsg.valuesResponse)) == false, ...
+                assert(any(cellfun(@isempty, self.valuesResponse)) == false, ...
                     'All response values must have been submitted')
                 
                 % Mark as validated
-                thisMsg.validated = true;
+                self.validated = true;
             end
         end 
         

@@ -1,7 +1,12 @@
 %{
+-------------------------------------------------------------
+Experiment 6
+
+
+-------------------------------------------------------------
 
 Description:
-Single and deterministic analysis of the game
+Dispersion analysis of the game
 
 %}
 
@@ -39,8 +44,7 @@ progSet.add(fi);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TYPE_EXP);
-data.setAsGiven();
-data.value = Experiment.DISP;
+data.value = Experiment.SING;
 
 progSet.add(data);
 
@@ -48,17 +52,7 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TIME_RES);
-data.setAsGiven();
-data.value = 1/365;
-
-progSet.add(data);
-
-% 3. Annual discount rate
-data = InputData();
-
-data.setIdentifier(ItemSetting.DISC_RATE);
-data.setAsGiven();
-data.value = 0.04;
+data.value = round(1*(1/365)*(1/10), 4);
 
 progSet.add(data);
 
@@ -68,8 +62,7 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NUM_REALIZ);
-data.setAsGiven();
-data.value = 1000;
+data.value = 500;
 
 progSet.add(data);
 
@@ -79,7 +72,6 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.MAX_ITER);
-data.setAsGiven();
 data.value = 100;
 
 progSet.add(data);
@@ -88,7 +80,6 @@ progSet.add(data);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TOL);
-data.setAsGiven();
 data.value = 0.005;
 
 progSet.add(data);
@@ -102,8 +93,7 @@ progSet.add(data);
 nullp = InputData();
 
 nullp.setIdentifier(ItemSetting.NULL_PERF);
-nullp.setAsGiven();
-nullp.value = 0;
+nullp.value = CommonFnc.null_perf;
 
 progSet.add(nullp);
 
@@ -111,10 +101,14 @@ progSet.add(nullp);
 maxp = InputData();
 
 maxp.setIdentifier(ItemSetting.MAX_PERF);
-maxp.setAsGiven();
-maxp.value = 100;
+maxp.value = CommonFnc.max_perf;
 
 progSet.add(maxp);
+
+
+nullPerf = progSet.returnItemSetting(ItemSetting.NULL_PERF).value;
+maxPerf = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
+
 
 % 108. Initial performance
 % Warning!!!!: The initial performance cannot be less than the null
@@ -122,17 +116,23 @@ progSet.add(maxp);
 data = InputData();
 
 data.setIdentifier(ItemSetting.INITIAL_PERF);
-data.setAsGiven();
-data.value = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
+data.value = CommonFnc.initial_perf;
 
 progSet.add(data);
 
-% 109. Deterioration function
+% 4. Demand function
 fnc = Function();
 
-fnc.setIdentifier(ItemSetting.DET_RATE);
-fnc.setAsGiven();
-fnc.equation = @deteriorationRate;
+fnc.setIdentifier(ItemSetting.DEMAND_FNC);
+fnc.equation = @(v)demandFunction(v, nullPerf, maxPerf);
+
+progSet.add(fnc);
+
+% 109. Continuous response function
+fnc = Function();
+
+fnc.setIdentifier(ItemSetting.CONT_RESP_FNC);
+fnc.equation = @CommonFnc.continuousRespFunction;
 
 progSet.add(fnc);
 
@@ -140,87 +140,23 @@ progSet.add(fnc);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.SHOCK_RESP_FNC);
-fnc.setAsGiven();
 fnc.equation = @(currentPerf, forceValue)CommonFnc.shockResponseFunction( nullp.value, ...
-                                                                maxp.value, ...
-                                                                currentPerf, ...
-                                                                forceValue);
+    maxp.value, ...
+    currentPerf, ...
+    forceValue);
 
 progSet.add(fnc);
 
 
 %% Contract (46 - 60)
 
-% 46. Contract duration
-data = InputData();
-
-data.setIdentifier(ItemSetting.CON_DUR);
-data.setAsControlled(ItemSetting.PRINCIPAL);
-data.value = 25;
-data.setValue_NumberSet(InputData.REAL);
-data.value_LowerBound = 5;
-data.value_UpperBound = 100;
-
-progSet.add(data);
-
-% 47. Performance threshold
-data = InputData();
-
-data.setIdentifier(ItemSetting.PERF_THRESH);
-data.setAsControlled(ItemSetting.PRINCIPAL);
-data.value = 70;
-
-data.setValue_NumberSet(InputData.REAL);
-data.value_LowerBound = progSet.returnItemSetting(ItemSetting.NULL_PERF).value;
-data.value_UpperBound = progSet.returnItemSetting(ItemSetting.MAX_PERF).value;
-
-progSet.add(data);
-
-% 48. Revenue: Tolls
-data = InputData();
-
-data.setIdentifier(ItemSetting.REV);
-data.setAsGiven();
-data.value = 1800;
-
-progSet.add(data);
-
 % 49. Investment
 inv = InputData();
 
 inv.setIdentifier(ItemSetting.INV);
-inv.setAsGiven();
-inv.value = 875;
+inv.value = CommonFnc.agent_initial_balance;
 
 progSet.add(inv);
-
-% 50. Contributions
-data = InputData(); 
-
-data.setIdentifier(ItemSetting.CONTRIB);
-data.setAsGiven();
-data.value = 400;
-
-progSet.add(data);
-
-% 51. Maximum cumulative penalty
-data = InputData();
-
-data.setIdentifier(ItemSetting.MAX_SUM_PEN);
-data.setAsGiven();
-data.value = 400;
-
-progSet.add(data);
-
-% 52. Strategies Penalty fee enforcement action
-action = Action(Action.PENALTY, ItemSetting.PRINCIPAL);
-
-action.setIdentifier(ItemSetting.PEN_POLICY);
-action.setAsGiven();
-action.selectStrategy(1);
-action.setParamsValue_Random();
-
-progSet.add(action);
 
 
 %% Nature (61 - 75)
@@ -229,40 +165,64 @@ progSet.add(action);
 data = InputData();
 
 data.setIdentifier(ItemSetting.NAT_HAZARD);
-data.setAsGiven();
-data.value = false;
+data.value = true;
 
 progSet.add(data);
 
 % 62. Strategies Shock action
-action = Action(Action.SHOCK, ItemSetting.NATURE);
+faculty = Faculty(Faculty.SHOCK);
 
-action.setIdentifier(ItemSetting.STRATS_SHOCK)
-action.setAsGiven();
-action.selectStrategy(1);
-action.setParamsValue_Random();
+faculty.setIdentifier(ItemSetting.STRATS_SHOCK)
+faculty.selectStrategy('Test');
 
-progSet.add(action);
+progSet.add(faculty);
+
+% 63. Continuous environmental force
+fnc = Function();
+
+fnc.setIdentifier(ItemSetting.CONT_ENV_FORCE);
+fnc.equation = @CommonFnc.continuousEnvForce;
+
+progSet.add(fnc);
 
 
 %% Principal (76 - 90)
 
+% 75. Strategies Conctract offer action
+faculty = Faculty(Faculty.CONTRACT_OFFER);
+
+faculty.setIdentifier(ItemSetting.STRATS_CONTRACT);
+faculty.selectStrategy('Simple');
+rule = 'Simple parametrized';
+params = [25, 6e-6, 70]; % [tm, fare, k*]
+faculty.setParams(rule, params);
+
+progSet.add(faculty);
+
+% 52. Strategies Penalty fee enforcement action
+faculty = Faculty(Faculty.PENALTY);
+
+faculty.setIdentifier(ItemSetting.PEN_POLICY);
+faculty.selectStrategy('Fixed');
+
+progSet.add(faculty);
+
 % 76. Strategies Inspection action
-action = Action(Action.INSPECTION, ItemSetting.PRINCIPAL);
+faculty = Faculty(Faculty.INSPECTION);
 
-action.setIdentifier(ItemSetting.STRATS_INSP);
-action.setAsGiven();
-action.selectStrategy(3);
-%action.setParamsValue_Random();
+faculty.setIdentifier(ItemSetting.STRATS_INSP);
+faculty.selectStrategy('ExponentiallyRandom');
+rule = 'Exponentially distributed intervals';
+params = [0.5];
+faculty.setParams(rule, params);
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 77. Cost of single inspection
 data = InputData();
 
 data.setIdentifier(ItemSetting.COST_INSP);
-data.setAsGiven();
-data.value = progSet.returnItemSetting(ItemSetting.INV).value / 1000;
+data.value = CommonFnc.cost_single_inspection;
 
 progSet.add(data);
 
@@ -270,7 +230,6 @@ progSet.add(data);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.PRINCIPAL_UTIL_FNC);
-fnc.setAsGiven();
 fnc.equation = @CommonFnc.principalUtility;
 
 progSet.add(fnc);
@@ -281,37 +240,31 @@ progSet.add(fnc);
 data = InputData();
 
 data.setIdentifier(InputData.PART_CONSTR);
-data.setAsGiven();
 data.value = 120;
 
 progSet.add(data);
 
 % 92. Strategies VoluntaryMaint action
-action = Action(Action.VOL_MAINT, ItemSetting.AGENT);
+faculty = Faculty(Faculty.VOL_MAINT);
 
-action.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
-action.setAsGiven();
-action.selectStrategy(4);
-%action.setParamsValue_Random();
+faculty.setIdentifier(ItemSetting.STRATS_VOL_MAINT);
+faculty.selectStrategy('Perfect maintenance before inspection');
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 93. Strategies MandatoryMaint action
-action = Action(Action.MAND_MAINT, ItemSetting.AGENT);
+faculty = Faculty(Faculty.MAND_MAINT);
 
-action.setIdentifier(ItemSetting.STRATS_MAND_MAINT);
-action.setAsGiven();
-action.selectStrategy(1);
-action.setParamsValue_Random();
+faculty.setIdentifier(ItemSetting.STRATS_MAND_MAINT);
+faculty.selectStrategy('Minimum');
 
-progSet.add(action);
+progSet.add(faculty);
 
 % 95. Maintenance cost function
 fnc = Function();
 
 fnc.setIdentifier(InputData.MAINT_COST_FNC);
-fnc.setAsGiven();
-fnc.equation = @(current, goal)maintenanceCostFunction( inv.value, ...
+fnc.equation = @(current, goal)CommonFnc.maintenanceCostFunction( inv.value, ...
                                                         nullp.value, ...
                                                         maxp.value, ...
                                                         current, ...
@@ -323,7 +276,6 @@ progSet.add(fnc);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.AGENT_UTIL_FNC);
-fnc.setAsGiven();
 fnc.equation = @CommonFnc.agentUtility;
 
 progSet.add(fnc);
@@ -341,28 +293,26 @@ end
 
 %% Auxiliar functions
 
-function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
+function d = demandFunction(v, nullPerf, maxPerf)
+%{
+* Bilinear demand function
 
-    % inv:      Cost of construction: Investment
-    % nullP:    Null performance
-    % maxP:     Max performance
-    % fixedCost:    Fixed (minimum) cost of a maintenance work
-    
-    % Maintenance cost can be at most epsilon times the value
-    % of the construction investment
-    epsilon = 0.2;
-    fixedCost = 4;
-    
-    cost = (  sqrt((goalP-nullP) / (maxP-nullP)) - ...
-              sqrt((currentP-nullP) / (maxP-nullP)))*epsilon*inv + fixedCost;
+    Input
+        v:      Current performance
+        nullPerf:   Minimum performance
+        maxPerf:    Maximum performance
 
-    assert(isreal(cost), 'Cost must be a real number.')
-end
+    Output
+        d:      Rate of demand
+%}
 
-function dydt = deteriorationRate(t,v)
-a = 1.3;
-b = 2.3;
-vi = 100;
+    c = 4;     % Parameter to control concavity
+    a = 2.8e7;   % Demand at maximum performance
 
-dydt = -15;
+    n = length(v);
+    d = zeros(n,1);
+
+    for i=1:n
+        d(i) = ((v(i)-nullPerf)/(maxPerf-nullPerf))^(c)*a;
+    end
 end

@@ -1,61 +1,70 @@
+%{
+# PURPOSE
+
+The contract class contains information that define a contract. It is meant
+to the accessible to all players.
+
+%}
+
 classdef Contract < matlab.mixin.Copyable
-    %CONTRACT Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (GetAccess = public, SetAccess = protected)
-        contractDuration 	% Mission time (years)
-        initialPerf         % Initial performance of infrastructure: Assummed to be equal to MAX_PERF
-        perfThreshold       % Minimum performance required by principal
-        revenue             % Revenue: tolls
-        investment          % Land purchase and construction cost
-        contribution        % Government contributions [nx2] --> [value time]
-        maxSumPenalties     % Maximum possible penalty
-        penaltyAction       % Penalty policy (Strategy object)
+        duration            % Mission time (years)
+        initialPerf         % Initial perf of infrastructure: Assummed to be equal to MAX_PERF
+        perfThreshold       % Minimum perf required by principal
+        revRateFnc          % Function handle of revenue rate
+        paymentSchedule     % Government contributions Array[nx2] --> [time value]
+        penaltyStrategy     % Penalty policy (Strategy object)
     end
     
     methods
-        %% Constructor
-        function thisContract = Contract(progSet)
+        
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
+        
+        function self = Contract(progSet, conDur, contributions, ...
+                revRateFnc, perfThreshold)
+        %{
+        * 
+        
+            Input
+                
+                ps: [nx2 array] time and value of payments from principal
+                to agent
+            Output
+                
+        %}
             
             import managers.*
+            import dataComponents.Transaction
+            import dataComponents.PaymentSchedule
             
             % Contract duration
-            thisContract.contractDuration = progSet.returnItemSetting(ItemSetting.CON_DUR).value;
+            self.duration = conDur;
             
-            % Initial performance
-            thisContract.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
+            % Revenue rate function
+            self.revRateFnc = revRateFnc;
             
             % Performance threshold
-            thisContract.perfThreshold = progSet.returnItemSetting(ItemSetting.PERF_THRESH).value;
+            self.perfThreshold = perfThreshold;
             
-            % Revenue
-            thisContract.revenue = progSet.returnItemSetting(ItemSetting.REV).value;
-            
-            % Investment
-            thisContract.investment = progSet.returnItemSetting(ItemSetting.INV).value;
-            
-            % Contribution
-            thisContract.contribution = progSet.returnItemSetting(ItemSetting.CONTRIB).value;
-            
-            % TODO: Who is making sure that this maximum is respected?
-            % Answer: So far the penalty policy strategies.
-
-            % Maximum sum of penalties
-            thisContract.maxSumPenalties = progSet.returnItemSetting(ItemSetting.MAX_SUM_PEN).value;
+            % Initial performance
+            self.initialPerf = progSet.returnItemSetting(ItemSetting.INITIAL_PERF).value;
             
             % Penalty policy
-            action = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
-            thisContract.penaltyAction = returnCopyAction(action);
+            faculty = progSet.returnItemSetting(ItemSetting.PEN_POLICY);
+            self.penaltyStrategy = faculty.getSelectedStrategy();
             
+            % Create payment schedule object: Investment and Contributions
+            inv = progSet.returnItemSetting(ItemSetting.INV).value;
+            self.createPaymentSchedule(inv, contributions);
         end
         
-        %% Getter functions
         
-        %% Regular methods
+		%% ::::::::::::::::::::    Accessor methods    ::::::::::::::::::::
+        % *****************************************************************
         
-        % ---------- Accessor methods ------------------------------------
-        
-        
+        function obs = getInitialPerfObs(self)
         %{
         * 
         
@@ -64,53 +73,45 @@ classdef Contract < matlab.mixin.Copyable
             Output
                 
         %}
-        function tm = getContractDuration(thisContract)
-            tm = thisContract.contractDuration;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function initPerf = getInitialPerformance(thisContract)
-            initPerf = thisContract.initialPerf;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function obs = getInitialPerfObs(thisContract)
-            initPerf = thisContract.initialPerf;
+            initPerf = self.initialPerf;
             
             obs = struct();
             obs.value = initPerf;
         end
         
         
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
+        
+        function createPaymentSchedule(self, investment, contributions)
         %{
         * 
         
             Input
-                
+                inv: [double] Investment
+                contrib: [nx2 array] time and value of payments from principal
+                to agent
+            
             Output
                 
         %}
-        function r = getRevenue(thisContract)
-            r = thisContract.revenue;
+            import dataComponents.PaymentSchedule
+            import dataComponents.Transaction
+            
+            ps = contributions;
+            
+            % Add agent's investment transaction
+            ps.addTransaction(0, investment, Transaction.INVESTMENT);
+            
+            % Update contract's payment schedule
+            self.paymentSchedule = ps;
         end
         
         
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
+        
+        function answer = isViolation(self, currentPerf)
         %{
         * 
         
@@ -119,98 +120,32 @@ classdef Contract < matlab.mixin.Copyable
             Output
                 
         %}
-        function inv = getInvestment(thisContract)
-            inv = thisContract.investment;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function c = getContribution(thisContract)
-            c = thisContract.contribution;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function maxPenalty = getMaxSumPenalties(thisContract)
-            maxPenalty = thisContract.maxSumPenalties();
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function perfThreshold =getPerfThreshold(thisContract)
-            perfThreshold = thisContract.perfThreshold;
-        end
-        
-        % ---------- Mutator methods -------------------------------------
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function updateTm(thisContract, newTm)
-            thisContract.tm = newTm;
-        end
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function updateThreshold(thisContract, newThreshold)
-            if newThreshold >= 100
-                error('Threshold must be less than 100')
-            end
-            thisContract.thresholdPerf = newThreshold;
-        end
-        
-        % ---------- Informative methods ---------------------------------
-        
-        
-        %{
-        * 
-        
-            Input
-                
-            Output
-                
-        %}
-        function answer = isViolation(thisContract, currentPerf)
-            if currentPerf < thisContract.getThresholdPerf()
+            if currentPerf < self.getThresholdPerf()
                 answer = true;
             else
                 answer = false;
             end
         end
+        
+        
+        function [time, value] = getNextPayment(self, currentTime)
+        %{
+        * 
+        
+            Input
+                
+            Output
+                
+        %}
+            index = find(self.paymentSchedule >= currentTime, 1, 'first');
+            
+            if ~isempty(index)
+                time = self.paymentSchedule(index, 1);
+                value = self.paymentSchedule(index, 2);
+            end
+            
+        end
+        
         
     end
     

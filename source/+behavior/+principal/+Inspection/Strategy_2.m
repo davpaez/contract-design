@@ -1,41 +1,24 @@
-classdef Strategy_2 < managers.InspectionStrategy
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (GetAccess = public, SetAccess = protected)
-        % ----------- %
-        % Attributes
-        % ----------- %
-        
-        
-        % ----------- %
-        % Objects
-        % ----------- %
-        
-        
-    end
+classdef Strategy_2 < managers.Strategy
     
     methods
         %% Constructor
         
-        function thisStrategy = Strategy_2()
-            
-            thisStrategy@managers.InspectionStrategy();
+        function thisStrategy = Strategy_2(theFaculty)
             
             import managers.*
             import behavior.principal.*
-            
-            % Set index
-            thisStrategy.setIndex(2);
+			
+            id = 'ExponentiallyRandom';
+            thisStrategy@managers.Strategy(id, theFaculty.decisionVars);
             
             % Create decision rule objects
             rule_2 = Inspection.Rule_2();
             
+            % Customize parameters properties of rules implemented
+            
+            
             % Initialize cell array of decision rule objects
-            thisStrategy.decisionRuleArray{1} = rule_2;
-            
-            % Populate parameters properties of rules implemented
-            
+            thisStrategy.addDecisionRule(rule_2);
         end
         
     end

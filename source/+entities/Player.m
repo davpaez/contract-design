@@ -1,9 +1,7 @@
 classdef Player < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
-    properties (Constant)
-        
+    properties (Constant, Abstract=true)
+        NAME
     end
     
     properties (GetAccess = public, SetAccess = protected)
@@ -18,17 +16,20 @@ classdef Player < handle
         % ----------- %
         contract      % Instance of contract
         problem
+        
         eventList      % Events known to Agent
-        observation     % % Observation object
-        payoff
+        observationList     % % Observation object
+        payoffList
         
         submittedOperation     % Operation object
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function self = Player(problem)
         %{
         * 
         
@@ -37,45 +38,23 @@ classdef Player < handle
             Output
                 
         %}
-        function thisPlayer = Player(contract, problem)
-            import dataComponents.Event
-            import dataComponents.Payoff
-            import dataComponents.Observation
+            import dataComponents.EventList
+            import dataComponents.PayoffList
+            import dataComponents.ObservationList
             
-            thisPlayer.contract = contract;
-            thisPlayer.problem = problem;
-            thisPlayer.eventList = Event();
-            thisPlayer.observation = Observation();
-            thisPlayer.payoff = Payoff(problem.discountRate);
+            self.problem = problem;
+            self.eventList = EventList();
+            self.observationList = ObservationList();
+            self.payoffList = PayoffList();
         end
         
-        %% Getter functions
         
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
+        function setTime(self, time)
         %{
-        * Returns value of time attribute
-        
-            Input
-                None
-            
-            Output
-                time: [class double] Value of time attribute of thisPlayer
-        %}
-        function time = getTime(thisPlayer)
-            time = thisPlayer.time;
-        end
-        
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
-        %{
-        * Set new time for thisPlayer and adds a PV snapshot
+        * Set new time for self and adds a PV snapshot
         
             Input
                 time: [class double] New value of time
@@ -83,13 +62,25 @@ classdef Player < handle
             Output
                 None
         %}
-        function setTime(thisPlayer, time)
-            if time > thisPlayer.time
-                thisPlayer.time = time;    % Updates time
+            if time > self.time
+                self.time = time;    % Updates time
             end
         end
         
         
+        function receiveContract(self, con)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            self.contract = con;
+        end
+        
+        
+        function idObs = registerObservation(self, time, obs)
         %{
         * 
             Input
@@ -99,18 +90,18 @@ classdef Player < handle
             Output
                 None
         %}
-        function idObs = registerObservation(thisPlayer, time, obs)
             numObs = length(obs.value);
             idObs = zeros(1,numObs);
             for i=1:numObs
-                idObs(i) = thisPlayer.observation.register(time, obs.value(i));
+                idObs(i) = self.observationList.register(time, obs.value(i));
             end
         end
         
         
+        function idPff = registerPayoff(self, time, value, type)
         %{
         * Append newPayoff to the payoff linked-list attribute of
-        thisPlayer
+        self
         
             Input
                 newPayoff: [class Payoff] New payoff object to be appended
@@ -118,132 +109,152 @@ classdef Player < handle
             Output
                 None
         
-        register(thisPayoff, time, value, type, varargin)
         %}
-        function idPff = registerPayoff(thisPlayer, time, pff)
-            numPff = length(pff.value);
-            idPff = zeros(1,numPff);
             
-            if isfield(pff,'duration')
-                for i=1:numPff
-                    idPff(i) = thisPlayer.payoff.register(  time, ...
-                                                            pff.value(i), ...
-                                                            pff.type{i}, ...
-                                                            pff.duration(i));
-                end
-            else
-                for i=1:numPff
-                    idPff(i) = thisPlayer.payoff.register(  time, ...
-                                                            pff.value(i), ...
-                                                            pff.type{i});
-                end
-            end
+            idPff = self.payoffList.registerFlow(time, value, type);
         end
         
         
+        function registerEvent(self, evt)
         %{
         * Registers an Event object to the eventList attribute of
-        thisPlayer. After adding the event, the time of thisPlayer is updated
+        self. After adding the event, the time of self is updated
         to the time of the event just added.
         
             Input
                 oneEvent: [class Event] Event object to be added to the
-                eventList attribute of thisPlayer
+                eventList attribute of self
             
             Output
                 None
         %}
-        function registerEvent(thisPlayer, evt)
+            import managers.Information
+            
             % Input validation
             assert(~isempty(evt), ...
                 'The event object passed as argument must not be empty')
             
             timeNewEvent = evt.time;
             
-            idObs = [];
-            idPff = [];
-            
-            % Register observation in thisPlayer
-            if isfield(evt, 'obs')
-                assert(~isempty(evt.obs), 'The field "obs" cannot be empty.')
-                idObs = thisPlayer.registerObservation(timeNewEvent, evt.obs);
+            % Register observation in self
+            if ~isempty(evt.observation)
+                idObs = self.registerObservation(timeNewEvent, evt.observation);
+            else
+                idObs = [];
             end
             
-            % Register payoff in thisPlayer
-            if isfield(evt, 'pff')
-                assert(~isempty(evt.pff), 'The field "pff" cannot be empty.')
-                idPff = thisPlayer.registerPayoff(timeNewEvent, evt.pff);
+            % Register transaction in self
+            if ~isempty(evt.transaction)
+                [value, role] = evt.transaction.getPayoffValue(self);
+                if ~isempty(role)
+                    idPff = self.registerPayoff(timeNewEvent, value, evt.transaction.type);
+                    evt.transaction.confirmExecutionBy(role);
+                else
+                    idPff = [];
+                end
+            else
+                idPff = [];
             end
             
             % Register event
-            assert(isfield(evt,'type') && ~isempty(evt.type), ...
-                'The field "type" is not well specified.')
-            thisPlayer.eventList.register(timeNewEvent, evt.type, idObs, idPff);
+            self.eventList.register(timeNewEvent, evt.type, idObs, idPff);
             
-            % Clear submitted operation
-            if ~isempty(thisPlayer.submittedOperation) && thisPlayer.submittedOperation.sensitive
-                thisPlayer.clearSubmittedOperation();
-            end
+			% Clear submitted operation
+            %TODO clear submitted operation outside Player
+% 			if ~isempty(self.submittedOperation) && self.submittedOperation.sensitive
+% 				self.clearSubmittedOperation();
+% 			end
+			
+			% Set time of player to the time of the newEvent
+			self.setTime(timeNewEvent);
             
-            % Set time of player to the time of the newEvent
-            thisPlayer.setTime(timeNewEvent);
         end
         
-        function confirmExecutionSubmittedOperation(thisPlayer, operation)
-            assert(~isempty(thisPlayer.submittedOperation), ...
+        
+        function confirmExecutionSubmittedOperation(self, operation)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            assert(~isempty(self.submittedOperation), ...
                 'The attribute submitted operation should not be empty.')
             
-            assert(thisPlayer.submittedOperation.eq(operation), ...
+            assert(self.submittedOperation.eq(operation), ...
                 'The operation executed does not coincide with the operation submitted.')
             
-            thisPlayer.clearSubmittedOperation();
+            self.clearSubmittedOperation();
+        end
+        
+
+        function setSubmittedOperation(self, operation)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            self.submittedOperation = operation;
+        end
+        
+        
+        function clearSubmittedOperation(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            self.submittedOperation = [];
+        end
+        
+        
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
+        
+        function u = getUtility(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            u = self.utilityFunction(self);
+        end
+        
+        
+        function answer = isPrincipal(self)
+        %{
+        * 
+            Input
+                
+            Output
+                
+        %}
+            import entities.Principal
             
+            answer = isa(self, 'Principal');
         end
         
-        %{
         
+        function answer = isAgent(self)
+        %{
+        * 
             Input
                 
             Output
                 
         %}
-        function setSubmittedOperation(thisPlayer, operation)
-            thisPlayer.submittedOperation = operation;
+            import entities.Agent
+            
+            answer = isa(self, 'Agent');
         end
         
-        
-        %{
-        
-            Input
-                
-            Output
-                
-        %}
-        function clearSubmittedOperation(thisPlayer)
-            thisPlayer.submittedOperation = [];
-        end
-        
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-        
-        function u = getUtility(thisPlayer)
-            u = thisPlayer.utilityFunction(thisPlayer);
-        end
         
     end
-    
 end
-
-%% Auxiliar functions
-
-    %{
-    * Description of the auxiliar function
-    
-        Input
-
-        Output
-
-    %}
-

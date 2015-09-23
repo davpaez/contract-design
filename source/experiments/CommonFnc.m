@@ -1,7 +1,14 @@
 classdef CommonFnc
-    %SHAREDPARAMS Summary of this class goes here
-    %   Detailed explanation goes here
     
+    properties (Constant)
+        
+        null_perf = 0
+        max_perf = 100
+        initial_perf = 100
+        agent_initial_balance = 875
+        cost_single_inspection = 875/500
+        
+    end
     methods (Static)
         
         
@@ -10,72 +17,18 @@ classdef CommonFnc
         * Resembles the rain period in Colombia.
         
             Input
-                t:  Time
+                t:  Time (years)
                 
             Output
                 f:  Precipitation [mm/year]
         %}
-            force = (-(51*sin(t*2*pi./0.5 + pi/4))+86)*12;
-        end
-        
-        
-        function r = continuousRespFunction(f, d, v, t)
-        %{
-        * 
-        
-            Input
-                f:  Continuous environmental force
-                d:  Demand
-                v:  Performance
-                t:  Time
-                
-            Output
-                r:  Response
-        %}
-            r = -(f./1000).*20.*(0.5./((v+10)./100));
-            if v <= 0
-                r = 0;
-            end
             
-        end
-        
-        
-        function d = demandFunction(v, fare)
-        %{
-        * Bilinear demand function
-        
-            Input
-                v:      Performance
-                fare:	Unitary price for infrastructure usage
+            A = 612;    % Amplitude
+            f = 2;      % Cycles per year
+            phi = pi/4; % Phase shift (radians)
+            m = 1032;   % Mean value
             
-            Output
-                d:      Rate of demand
-        %}
-            
-            a = 160000;
-            b = 40000;
-            k = 50;
-            
-            if v <= k
-                d = a*v;
-            else
-                d = a*k + b*(v-k);
-            end
-        end
-        
-        
-        function rate = revenueRate(d, fare)
-        %{
-        * 
-        
-            Input
-                d:      Rate of demand
-                fare:	Price received per unit of demand
-            
-            Output
-                rate:   Rate of revenue
-        %}
-            rate = d*fare;
+            force = -A*sin((2*pi*f)*t + phi) + m;
         end
         
         
@@ -92,8 +45,8 @@ classdef CommonFnc
             Output
                 finalPerf:      Performance after shock
         %}
-        minF = 3;
-        maxF = 30;
+        minF = 0;
+        maxF = 70;
 
         assert(forceValue >= 0, 'Force value must be non-negative')
 
@@ -126,6 +79,31 @@ classdef CommonFnc
         end
         end
         
+        function r = continuousRespFunction(f, d, v, t)
+        %{
+        * 
+
+            Input
+                f:  Continuous environmental force
+                d:  Demand
+                v:  Performance
+                t:  Time (years)
+
+            Output
+                r:  Response
+        %}
+
+        a = 1.3;
+        b = 2.3;
+        vi = 100;
+
+        r = -a*b*((vi-v)./a).^((b-1)/b) - 0.01 - 0.6*t; %- (d/28e6)*20*((v^2)/500);
+        if v <= 0
+            r = 0;
+        end
+
+        end
+        
         
         function up = principalUtility(thePrincipal)
         %{
@@ -137,7 +115,18 @@ classdef CommonFnc
             Output
                 up:             Principal's utility
         %}
-            up = thePrincipal.observation.getMeanValue();
+            import dataComponents.Transaction
+            
+            perf_mean = thePrincipal.observationList.getMeanValue();
+            balance = thePrincipal.payoffList.getBalance();
+            sumContrib = abs(thePrincipal.contract.paymentSchedule.getSumTransactions(...
+                Transaction.CONTRIBUTION));
+            
+            if balance >= -sumContrib
+                up = (10*perf_mean - balance - sumContrib)/1000;
+            else
+                up = (10*perf_mean + balance + sumContrib)/1000;
+            end
         end
         
         
@@ -151,12 +140,29 @@ classdef CommonFnc
             Output
                 ua:         Agent's utility
         %}
-            if ~isempty(theAgent.payoff)
-                tm = theAgent.contract.getContractDuration();
-                ua = theAgent.payoff.getNPV(tm);
+            if ~isempty(theAgent.payoffList)
+                ua = theAgent.payoffList.getBalance();
             else
                 ua = 0;
             end
+        end
+        
+        
+        function cost = maintenanceCostFunction(inv, nullP, maxP, currentP, goalP)
+
+            % inv:      Cost of construction: Investment
+            % nullP:    Null performance
+            % maxP:     Max performance
+            % fixedCost:    Fixed (minimum) cost of a maintenance work
+
+            % Maintenance cost can be at most epsilon times the value
+            % of the construction investment
+            epsilon = 0.2;
+            fixedCost = 4;
+
+            cost = ((goalP-currentP) / (maxP-nullP))*epsilon*inv + fixedCost;
+
+            assert(isreal(cost), 'Cost must be a real number.')
         end
         
     end

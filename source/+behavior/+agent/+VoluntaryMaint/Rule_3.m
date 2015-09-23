@@ -113,19 +113,27 @@ classdef Rule_3 < managers.DecisionRule
         %}
         function mainAlgorithm(~, theMsg)
             import managers.Information
+            import dataComponents.Message
             
             theAgent = theMsg.getExecutor();
             
-            perfThreshold = theAgent.contract.getPerfThreshold();
-            currentPerf = theAgent.solvePerformanceForTime(theAgent.time);
+            perfThreshold = theAgent.contract.perfThreshold;
+            contractDuration = theAgent.contract.duration;
+            
+            solver = theMsg.getExtraInfo(Message.SOLVER);
+            
+            currentPerf = solver.realization.infrastructure.getPerformance();
             
             if currentPerf <= perfThreshold
                 timeNextVolMaint = theAgent.time;
             else
-                timeNextVolMaint = theAgent.solveTimeForPerformance(perfThreshold);
+                try
+                    timeNextVolMaint = solver.solveTime(perfThreshold);
+                catch
+                    % If threshold is never reached
+                    timeNextVolMaint = contractDuration;
+                end
             end
-            
-            assert(isreal(timeNextVolMaint), 'This time value must be a real number.')
             
             theMsg.submitResponse(Information.TIME_VOL_MAINT, timeNextVolMaint);
             

@@ -1,28 +1,36 @@
 classdef Problem < matlab.mixin.Copyable
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    % This class saves useful public information
     
     properties
         discountRate
-        
-        
+        demandFnc
+        timeRes
     end
     
     methods
         
-        function thisProblem = Problem(progSettings)
-            
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
+        
+        function self = Problem(progSettings)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
             % Discount rate
-            dicountRateId = managers.ItemSetting.DISC_RATE;
-            thisProblem.discountRate = progSettings.returnItemSetting(dicountRateId).value;
+            import managers.ItemSetting
             
+            item = progSettings.returnItemSetting(ItemSetting.DEMAND_FNC);
+            self.demandFnc = item.equation;
+            
+            item = progSettings.returnItemSetting(ItemSetting.TIME_RES);
+            self.timeRes = item.value;
         end
         
-        function rate = getDiscountRate(thisProblem)
-            rate = thisProblem.discountRate;
-        end
         
     end
-    
 end
 

@@ -1,10 +1,5 @@
 classdef ProgramSettings < matlab.mixin.Copyable
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (Constant, Hidden = true)
-        
-    end
+    % Collection of item settings that define an experiment
     
     properties (GetAccess = public, SetAccess = protected)
         % ----------- %
@@ -12,6 +7,7 @@ classdef ProgramSettings < matlab.mixin.Copyable
         % ----------- %
         writable = false
         settingItems_Number = 0
+        usedItems
         
         % ----------- %
         % Objects
@@ -37,6 +33,14 @@ classdef ProgramSettings < matlab.mixin.Copyable
     methods (Access = protected)
         
         function cpObj = copyElement(obj)
+        %{
+        * 
+            Input
+                setArr: [array of ItemSetting]
+            Output
+                
+        %}
+            
             cpObj = copyElement@matlab.mixin.Copyable(obj);
             if ~isempty(obj.settingArray)
                 n = length(obj.settingArray);
@@ -51,19 +55,22 @@ classdef ProgramSettings < matlab.mixin.Copyable
     
     methods
         %% Constructor
+        
+        function self = ProgramSettings()
         %{
         * 
             Input
-                setArr: [array of ItemSetting]
+                
             Output
                 
         %}
-        function thisProgramSettings = ProgramSettings(setArr)
+            
             
         end
         
         
         %% Getter functions
+        
         function answer = get.determined(thisProgramSetting)
             n = length(thisProgramSetting.settingArray);
             
@@ -80,15 +87,13 @@ classdef ProgramSettings < matlab.mixin.Copyable
         end
         
         
-        
         %% Regular methods
         
         % ----------------------------------------------------------------
         % ---------- Accessor methods ------------------------------------
         % ----------------------------------------------------------------
         
-        
-        function itemSettingObject = returnItemSetting(thisProgramSetting, id)
+        function itemSettingObject = returnItemSetting(self, id)
         %{
         * Returns the ItemSetting object characterized by the id pass as
         argument
@@ -101,15 +106,16 @@ classdef ProgramSettings < matlab.mixin.Copyable
                 itemSettingObject: [class ItemSetting] Found ItemSetting
                 object. If no object is found, an error is raised.
         %}
-            n = thisProgramSetting.getNumberItems();
+            n = self.getNumberItems();
             
             found = false;
             
             for i = 1:n
-                if ~isempty(thisProgramSetting.settingArray{i})
-                    if strcmp(thisProgramSetting.settingArray{i}.identifier, id)
+                if ~isempty(self.settingArray{i})
+                    if strcmp(self.settingArray{i}.identifier, id)
                         found = true;
-                        itemSettingObject = thisProgramSetting.settingArray{i};
+                        itemSettingObject = self.settingArray{i};
+                        self.usedItems(i) = true;
                         break
                     end
                 end
@@ -120,83 +126,88 @@ classdef ProgramSettings < matlab.mixin.Copyable
             end
         end
         
+        
         % ----------------------------------------------------------------
         % ---------- Mutator methods -------------------------------------        
         % ----------------------------------------------------------------
         
-        function lockSettings(thisProgSet)
-            thisProgSet.writable = false;
+        function lockSettings(self)
+            self.writable = false;
             disp('    Problem Settings Write Access: Locked')
+            
+            self.usedItems = false(self.getNumberItems(), 1);
         end
         
-        function unlockSettings(thisProgSet)
-            thisProgSet.writable = true;
+        
+        function unlockSettings(self)
+            self.writable = true;
             disp('    Problem Settings Write Access: Unlocked')
         end
         
-        function add(thisProgSet, item)
+        
+        function add(self, item)
             
             import managers.ItemSetting
             
-            assert(thisProgSet.writable, ...
+            assert(self.writable, ...
                 'The program settings object must be unlocked to be modified.')
             
             % Conditions
             switch item.identifier
                 
                 case ItemSetting.MAX_PERF
-                    assert( item.value > thisProgSet.returnItemSetting(ItemSetting.NULL_PERF).value, ...
+                    assert( item.value > self.returnItemSetting(ItemSetting.NULL_PERF).value, ...
                             'The maximum performance MUST be greater than the Null performance')
                 
                 case ItemSetting.INITIAL_PERF
-                    assert( item.value >= thisProgSet.returnItemSetting(ItemSetting.NULL_PERF).value && ...
-                            item.value <= thisProgSet.returnItemSetting(ItemSetting.MAX_PERF).value, ...
+                    assert( item.value >= self.returnItemSetting(ItemSetting.NULL_PERF).value && ...
+                            item.value <= self.returnItemSetting(ItemSetting.MAX_PERF).value, ...
                             'The initial performance MUST be within the bounds of Null and Max performance')
-                
-                case ItemSetting.PERF_THRESH
-                    assert( item.value >= thisProgSet.returnItemSetting(ItemSetting.NULL_PERF).value && ...
-                            item.value < thisProgSet.returnItemSetting(ItemSetting.MAX_PERF).value, ...
-                            'The performance threshold MUST be within the bounds of Null and Max performance')
                 otherwise
                     disp('')
             end
             
             % Addition
-            thisProgSet.settingArray{end+1} = item;
-            thisProgSet.settingItems_Number = thisProgSet.settingItems_Number + 1;
+            self.settingArray{end+1} = item;
+            self.settingItems_Number = self.settingItems_Number + 1;
             
         end
         
-        function init_UserInput(thisProgSet)
-            n = thisProgSet.settingItems_Number;
+        
+        function init_UserInput(self)
+            n = self.settingItems_Number;
             
             for i=1:n
-                currentObj = thisProgSet.settingArray{i};
+                currentObj = self.settingArray{i};
                 if isa(currentObj, 'managers.Action')
                     currentObj.setParamsValue_UserInput();
                 end
             end
         end
         
-        function init_Random(thisProgramSetting)
+        
+        function init_Random(self)
             n = thisProgSet.settingItems_Number;
             
             for i=1:n
-                currentObj = thisProgramSetting.settingArray{i};
+                currentObj = self.settingArray{i};
                 if isa(currentObj, 'managers.Action')
                     currentObj.setParamsValue_Random();
                 end
             end
         end
         
-        function promptUserSelectRules(thisProgSet)
+        
+        function promptUserSelectRules(self)
             %TODO
         end
+        
         
         % ----------------------------------------------------------------
         % ---------- Informative methods ---------------------------------
         % ----------------------------------------------------------------
         
+        function n = getNumberItems(self)
         %{
         
             Input
@@ -204,11 +215,31 @@ classdef ProgramSettings < matlab.mixin.Copyable
             Output
                 
         %}
-        function n = getNumberItems(thisProgSet)
-            n = thisProgSet.settingItems_Number;
+            
+            n = self.settingItems_Number;
         end
         
-
+        
+        function reportUnusedItems(self)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            
+            n = self.getNumberItems();
+            disp(' ')
+            disp('Settings items not queried within experiment:')
+            for i=1:n
+                if self.usedItems(i) == false
+                    disp(['     ', self.settingArray{i}.identifier])
+                end
+            end
+        end
+        
+        
     end
     
 end

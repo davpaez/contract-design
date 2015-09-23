@@ -1,6 +1,4 @@
 classdef DecisionRule < matlab.mixin.Copyable
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         % Types of rules: Regarding sensitivity to model state
@@ -14,7 +12,6 @@ classdef DecisionRule < matlab.mixin.Copyable
         % Types of values specified as output of a decision rule
         ABSOLUTE_VALUE      = 'ABSOLUTE_VALUE'
         DELTA_VALUE         = 'DELTA_VALUE'
-        
     end
     
     properties
@@ -60,15 +57,9 @@ classdef DecisionRule < matlab.mixin.Copyable
         % ----------- %
         
 		auxRuleArray                % [array of DecisionRule] Array of Decision Rule objects 
-        
-    end
-    
-    properties (Dependent)
-        
     end
     
     methods (Static)
-        
         
         function answer = isValid_Sensitivity(str)
         %{
@@ -142,14 +133,15 @@ classdef DecisionRule < matlab.mixin.Copyable
             end
         end
         
+        
     end
     
     methods
-        %% Constructor
         
-        %% Getter functions
+        %% ::::::::::::::::::::    Getter methods    ::::::::::::::::::::::
+        % *****************************************************************
         
-        function answer = get.determinedRule(thisRule)
+        function answer = get.determinedRule(self)
         %{
         * 
             Input
@@ -157,27 +149,18 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            if isempty(thisRule.determinedRule)
-                answer = thisRule.isDeterminedRule();
+            if isempty(self.determinedRule)
+                answer = self.isDeterminedRule();
             else
-                answer = thisRule.determinedRule;
+                answer = self.determinedRule;
             end
         end
         
         
-        %% Regular methods
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
-        
-        function setIndex(thisRule, index)
+        function setIndex(self, index)
         %{
         * 
             Input
@@ -188,11 +171,11 @@ classdef DecisionRule < matlab.mixin.Copyable
             % Check that index is integer
             assert(rem(index,1) == 0, ...
                 'Index must be integer')
-            thisRule.index = index;
+            self.index = index;
         end
         
         
-        function setName(thisRule, nameStr)
+        function setName(self, nameStr)
         %{
         * 
             Input
@@ -200,11 +183,11 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            thisRule.name = nameStr;
+            self.name = nameStr;
         end
         
         
-        function setTypeRule_Sensitivity(thisRule, typeRule)
+        function setTypeRule_Sensitivity(self, typeRule)
         %{
         * 
             Input
@@ -212,13 +195,13 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(thisRule.isValid_Sensitivity(typeRule),...
+            assert(self.isValid_Sensitivity(typeRule),...
                 'The type entered as argument is not valid');
-            thisRule.typeRule_Sensitivity = typeRule;
+            self.typeRule_Sensitivity = typeRule;
         end
         
         
-        function setTypeRule_Determinacy(thisRule, typeRule)
+        function setTypeRule_Determinacy(self, typeRule)
         %{
         * 
             Input
@@ -226,13 +209,13 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(thisRule.isValid_Determinacy(typeRule),...
+            assert(self.isValid_Determinacy(typeRule),...
                 'The type entered as argument is not valid');
-            thisRule.typeRule_Determinacy = typeRule;
+            self.typeRule_Determinacy = typeRule;
         end
         
         
-        function setTypeRule_Output(thisRule, cell)
+        function setTypeRule_Output(self, cell)
         %{
         * 
             Input
@@ -240,25 +223,25 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(~isempty(thisRule.decisionVars_Number) == true, ...
+            assert(~isempty(self.decisionVars_Number) == true, ...
                 'The number of decision variables has not been set in this rule')
             
             n = length(cell);
             
-            assert(n == thisRule.decisionVars_Number, ...
+            assert(n == self.decisionVars_Number, ...
                 'The number of elements in the attribute typeRule_Output must be equal to the value of the attribute decisionVars_Number')
             
             for i=1:n
                 currentType = cell{i};
-                assert(thisRule.isValid_TypeOutput(currentType), ...
+                assert(self.isValid_TypeOutput(currentType), ...
                     'One type entered as argument is not valid');
             end
             
-            thisRule.typeRule_Output = cell;
+            self.typeRule_Output = cell;
         end
         
         
-        function setDecisionVars_Number(thisRule, number)
+        function setDecisionVars_Number(self, number)
         %{
         * 
             Input
@@ -269,11 +252,24 @@ classdef DecisionRule < matlab.mixin.Copyable
             % Check that index is integer
             assert(rem(number,1) == 0, ...
                 'Number of variables must be represented with an integer value.')
-            thisRule.decisionVars_Number = number;
+            self.decisionVars_Number = number;
         end
         
         
-        function setDecisionVars_TypeInfo(thisRule, cell)
+        function addDecisionVar_TypeInfo(self, type)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            % Make sure the type added is not repeated
+            %TODO
+        end
+        
+        
+        function setDecisionVars_TypeInfo(self, cell)
         %{
         * 
             Input
@@ -284,14 +280,14 @@ classdef DecisionRule < matlab.mixin.Copyable
             import managers.Information
             
             % Check that the attribute decisionVars_Number is non-empty
-            assert(~isempty(thisRule.decisionVars_Number) == true, ...
+            assert(~isempty(self.decisionVars_Number) == true, ...
                 'The number of decision variables has not been set in this rule')
             
             n = length(cell);
             
             % Check that the length of cell coincides with the number of
-            % decision variables of thisRule
-            assert(n == thisRule.decisionVars_Number, ...
+            % decision variables of self
+            assert(n == self.decisionVars_Number, ...
                 'The number of elements in the attribute decisionVars_TypeInfo must be equal to the value of the attribute decisionVars_Number')
             
             for i=1:n
@@ -301,11 +297,11 @@ classdef DecisionRule < matlab.mixin.Copyable
                     'One type entered as argument is not valid type of information. See Information class.')
             end
             
-            thisRule.decisionVars_TypeInfo = cell;
+            self.decisionVars_TypeInfo = cell;
         end
         
         
-        function setAsParametrized(thisRule)
+        function setAsParametrized(self)
         %{
         * 
             Input
@@ -313,11 +309,11 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            thisRule.parametrized = true;
+            self.parametrized = true;
         end
         
         
-        function setParams_Number(thisRule, numberOfParameters)
+        function setParams_Number(self, numberOfParameters)
         %{
         * 
             Input
@@ -326,18 +322,18 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
             % Check that the rule is parametrized
-            assert(thisRule.parametrized == true, ...
+            assert(self.parametrized == true, ...
                 'This rule has not been set as parametrized')
             
             % Check that number of parameters is integer
             assert(rem(numberOfParameters,1) == 0, ...
                 'Number of parameters must be integer')
             
-            thisRule.params_Number = numberOfParameters;
+            self.params_Number = numberOfParameters;
         end
         
         
-        function setParams_Name(thisRule, cell)
+        function setParams_Name(self, cell)
         %{
         * 
             Input
@@ -346,24 +342,24 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
             % Check that the rule is parametrized
-            assert(thisRule.parametrized == true, ...
+            assert(self.parametrized == true, ...
                 'This rule has not been set as parametrized')
             
             % Check that there is a specified number of parameters
-            assert( thisRule.params_Number > 0 , ...
+            assert( self.params_Number > 0 , ...
                 'The number of parameters specified in params_Number must be greater than zero.')
             
             n = length(cell);
             
             % Check that the length of cell coincides with the number of
-            % parameters of thisRule
-            assert(n == thisRule.params_Number, ...
+            % parameters of self
+            assert(n == self.params_Number, ...
                 'Length of cell does not coincide with number of parameters')
-            thisRule.params_Name = cell;
+            self.params_Name = cell;
         end
         
         
-        function setParams_NumberSet(thisRule, cell)
+        function setParams_NumberSet(self, cell)
         %{
         * 
             Input
@@ -372,21 +368,21 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
              % Check that the rule is parametrized
-            assert(thisRule.parametrized == true, ...
+            assert(self.parametrized == true, ...
                 'This rule has not been set as parametrized')
             
             n = length(cell);
             
             % Check that the length of cell coincides with the number of
-            % parameters of thisRule
-            assert(n == thisRule.params_Number, ...
+            % parameters of self
+            assert(n == self.params_Number, ...
                 'Length of cell does not coincide with number of parameters')
             
-            thisRule.params_NumberSet = cell;
+            self.params_NumberSet = cell;
         end
         
         
-        function setParams_LowerBounds(thisRule, rowVector)
+        function setParams_LowerBounds(self, rowVector)
         %{
         * 
             Input
@@ -395,21 +391,21 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
              % Check that the rule is parametrized
-            assert(thisRule.parametrized == true, ...
+            assert(self.parametrized == true, ...
                 'This rule has not been set as parametrized')
             
             n = length(rowVector);
             
             % Check that the length of rowVector coincides with the number of
-            % parameters of thisRule
-            assert(n == thisRule.params_Number, ...
+            % parameters of self
+            assert(n == self.params_Number, ...
                 'Length of rowVector does not coincide with number of parameters')
             
-            thisRule.params_LowerBounds = rowVector;
+            self.params_LowerBounds = rowVector;
         end
         
         
-        function setParams_UpperBounds(thisRule, rowVector)
+        function setParams_UpperBounds(self, rowVector)
         %{
         * 
             Input
@@ -418,17 +414,17 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
              % Check that the rule is parametrized
-            assert(thisRule.parametrized == true, ...
+            assert(self.parametrized == true, ...
                 'This rule has not been set as parametrized')
             
             n = length(rowVector);
             
             % Check that the length of rowVector coincides with the number of
-            % parameters of thisRule
-            assert(n == thisRule.params_Number, ...
+            % parameters of self
+            assert(n == self.params_Number, ...
                 'Length of rowVector does not coincide with number of parameters')
             
-            thisRule.params_UpperBounds = rowVector;
+            self.params_UpperBounds = rowVector;
         end
         
         
@@ -438,7 +434,7 @@ classdef DecisionRule < matlab.mixin.Copyable
         %       - Calling the rule to decide its output
         
         
-        function setParams_Value(thisRule, rowVector)
+        function setParams_Value(self, rowVector)
         %{
         * 
             Input
@@ -447,27 +443,27 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
             % Check that all parameters properties have been set
-            assert(thisRule.areAllParamsPropertiesSet() == true, ...
+            assert(self.areAllParamsPropertiesSet() == true, ...
                 'Not all parameters properties have been set')
             
             n = length(rowVector);
             
             % Check that the length of rowVector coincides with the number of
-            % parameters of thisRule
-            assert(n == thisRule.params_Number, ...
+            % parameters of self
+            assert(n == self.params_Number, ...
                 'Length of rowVector does not coincide with number of parameters')
             
-            if isempty(thisRule.params_Value) || any(thisRule.params_Value ~= rowVector)
+            if isempty(self.params_Value) || any(self.params_Value ~= rowVector)
             
                 % Check compliance for lower bounds
-                comp = thisRule.params_LowerBounds <= ...
+                comp = self.params_LowerBounds <= ...
                     rowVector;
                 lowerBoundsCompliance = all(comp);
                 assert(lowerBoundsCompliance, ...
                     'Parameters passed as arguments violate lower bounds')
 
                 % Check compliance for upper bounds
-                comp = thisRule.params_UpperBounds >= ...
+                comp = self.params_UpperBounds >= ...
                     rowVector;
                 upperBoundsCompliance = all(comp);
                 assert(upperBoundsCompliance, ...
@@ -481,15 +477,18 @@ classdef DecisionRule < matlab.mixin.Copyable
                 % Resets the lastOutput attribute because the value of the
                 % parameters have been changed, therefore the lastOutput will
                 % not be the same and it is no longer needed
-                thisRule.lastOutput = [];
+                self.lastOutput = [];
                 
                 % Updates value of parameters
-                thisRule.params_Value = rowVector;
+                if isempty(self.params_DefaultValue)
+                    self.params_DefaultValue = rowVector;
+                end
+                self.params_Value = rowVector;
             end
         end
         
         
-        function setParamsValue_UserInput(thisRule)
+        function setParamsValue_UserInput(self)
         %{
         * 
             Input
@@ -501,27 +500,27 @@ classdef DecisionRule < matlab.mixin.Copyable
             disp('Seleccion of parameters: ---------------------')
             disp(' ')
             
-            disp(['Class name:      ',class(thisRule)])
+            disp(['Class name:      ',class(self)])
             disp(' ')
             
             disp('Name of parameters:')
-            disp(thisRule.params_Name)
+            disp(self.params_Name)
             
             disp('Number set:')
-            disp(thisRule.params_NumberSet)
+            disp(self.params_NumberSet)
             
             disp('Bounds (Upper and Lower):')
-            disp([thisRule.params_LowerBounds ; thisRule.params_UpperBounds])
+            disp([self.params_LowerBounds ; self.params_UpperBounds])
             
             val = input('Input parameters as a row vector and hit enter:\n');
             
-            thisRule.setParams_Value(val);
+            self.setParams_Value(val);
             
             disp(' ')
         end
         
         
-        function setParamsValue_Random(thisRule)
+        function setParamsValue_Random(self)
         %{
         * 
             Input
@@ -529,15 +528,15 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            if thisRule.parametrized == true
+            if self.parametrized == true
                 
-                numParams = thisRule.params_Number;
+                numParams = self.params_Number;
                 rowVector = zeros(1,numParams);
                 
                 for i=1:numParams
-                    lower = thisRule.params_LowerBounds(i);
-                    upper = thisRule.params_UpperBounds(i);
-                    numberSet = thisRule.params_NumberSet(i);
+                    lower = self.params_LowerBounds(i);
+                    upper = self.params_UpperBounds(i);
+                    numberSet = self.params_NumberSet(i);
                     
                     if strcmp(numberSet, managers.InputData.BOOLEAN)
                         value = round(rand);
@@ -573,13 +572,13 @@ classdef DecisionRule < matlab.mixin.Copyable
                     rowVector(i) = value;
                 end
                 
-                thisRule.setParams_Value(rowVector);
+                self.setParams_Value(rowVector);
                 
             end
         end
         
         
-        function decide(thisRule, theMsg)
+        function decide(self, theMsg)
         %{
         * 
             Input
@@ -587,14 +586,15 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            assert(thisRule.determinedRule == true, ...
+            
+            assert(self.determinedRule == true, ...
                 'The rule must be determined before it can be executed')
             
-            thisRule.mainAlgorithm(theMsg);
+            self.mainAlgorithm(theMsg);
         end
         
         
-        function validateRule(thisRule)
+        function validateRule(self)
         %{
         * 
             Input
@@ -603,25 +603,23 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
             % The rule must be determined to be valid
-            if ~isempty(thisRule.determinedRule)
-                isDet = thisRule.determinedRule;
+            if ~isempty(self.determinedRule)
+                isDet = self.determinedRule;
             else
-                isDet = thisRule.isDeterminedRule();
+                isDet = self.isDeterminedRule();
             end
             assert(isDet == true, ...
                 'The rule must be determined to be valid');
-            thisRule.determinedRule = isDet;
+            self.determinedRule = isDet;
             
             
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
-        
-        function answer = isSensitive(thisRule)
+        function v = getCoverage(self, requiredDecVars)
         %{
         * 
             Input
@@ -629,15 +627,21 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            if strcmp(thisRule.typeRule_Sensitivity, managers.DecisionRule.SENSITIVE)
-                answer = true;
-            else
-                answer = false;
+            ownDecVars = self.decisionVars_TypeInfo;
+            
+            numRequiredDecVars = length(requiredDecVars);
+            numOwnDecVars = length(ownDecVars);
+            
+            v = false(numRequiredDecVars, 1);
+            
+            for i=1:numOwnDecVars
+                answer = strcmp(requiredDecVars, ownDecVars{i});
+                v = or(answer, v);
             end
         end
         
         
-        function answer = isStochastic(thisRule)
+        function answer = isSensitive(self)
         %{
         * 
             Input
@@ -645,15 +649,15 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            if strcmp(thisRule.typeRule_Determinacy, managers.DecisionRule.STOCHASTIC)
+            if strcmp(self.typeRule_Sensitivity, self.SENSITIVE)
                 answer = true;
             else
                 answer = false;
             end
         end
         
-        %{
-        function answer = isDelta(thisRule)
+        
+        function answer = isStochastic(self)
         %{
         * 
             Input
@@ -661,16 +665,15 @@ classdef DecisionRule < matlab.mixin.Copyable
             Output
                 
         %}
-            if strcmp(thisRule.typeRule_Output, managers.DecisionRule.DELTA_VALUE)
+            if strcmp(self.typeRule_Determinacy, managers.DecisionRule.STOCHASTIC)
                 answer = true;
             else
                 answer = false;
             end
         end
-        %}
         
         
-        function answer = areAllParamsPropertiesSet(thisRule)
+        function answer = areAllParamsPropertiesSet(self)
         %{
         * 
             Input
@@ -679,12 +682,12 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
             % Check the state of parameter's properties
-            param = thisRule.parametrized;
-            number = thisRule.params_Number > 0;
-            paramName = ~isempty(thisRule.params_Name);
-            numberSet = ~isempty(thisRule.params_NumberSet);
-            lowerBounds = ~isempty(thisRule.params_LowerBounds);
-            upperBounds = ~isempty(thisRule.params_UpperBounds);
+            param = self.parametrized;
+            number = self.params_Number > 0;
+            paramName = ~isempty(self.params_Name);
+            numberSet = ~isempty(self.params_NumberSet);
+            lowerBounds = ~isempty(self.params_LowerBounds);
+            upperBounds = ~isempty(self.params_UpperBounds);
 
             answer = ...
                 param && ...
@@ -696,7 +699,7 @@ classdef DecisionRule < matlab.mixin.Copyable
         end
         
         
-        function answer = isDeterminedRule(thisRule)
+        function answer = isDeterminedRule(self)
         %{
         * 
             Input
@@ -705,13 +708,13 @@ classdef DecisionRule < matlab.mixin.Copyable
                 
         %}
             % Check if rule is parametrized
-            if thisRule.parametrized == true
+            if self.parametrized == true
                 
                 % Check that:
                 %   * all params properties are set
                 %   * the default values of parameters values are non-empty
-                if thisRule.areAllParamsPropertiesSet() == true && ...
-                    ~isempty(thisRule.params_Value)
+                if self.areAllParamsPropertiesSet() == true && ...
+                    ~isempty(self.params_Value)
                     
                     answer = true;
                 else
@@ -723,22 +726,6 @@ classdef DecisionRule < matlab.mixin.Copyable
             end
         end
         
-        %{
-        function answer = isCurrentlyOutputInvariant(thisRule)
-        %{
-        * 
-            Input
-                
-            Output
-                
-        %}
-            answer = thisRule.determinedRule && ...
-                ~thisRule.isStochastic() && ...
-                ~isempty(thisRule.lastOutput) && ...
-                ~thisRule.isSensitive();
-        end
-        %}
         
     end
-    
 end

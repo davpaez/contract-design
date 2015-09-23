@@ -1,41 +1,24 @@
-classdef Strategy_2 < managers.MandMaintStrategy
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (GetAccess = public, SetAccess = protected)
-        % ----------- %
-        % Attributes
-        % ----------- %
-		
-        
-        % ----------- %
-        % Objects
-        % ----------- %
-        
-        
-    end
+classdef Strategy_2 < managers.Strategy
     
     methods
         %% Constructor
         
-        function thisStrategy = Strategy_2()
-            
-            thisStrategy@managers.MandMaintStrategy();
+        function thisStrategy = Strategy_2(theFaculty)
             
             import managers.*
             import behavior.agent.*
 			
-            % Set index
-            thisStrategy.setIndex(2);
+            id = 'Minimum';
+            thisStrategy@managers.Strategy(id, theFaculty.decisionVars);
             
             % Create decision rule objects
-            rule_2 = MandatoryMaint.Rule_2;
+            rule_2 = MandatoryMaint.Rule_2();
+            
+            % Customize parameters properties of rules implemented
+            
             
             % Initialize cell array of strategy objects
-            thisStrategy.decisionRuleArray{1} = rule_2;
-            
-            % Populate parameters properties of rules implemented
-            
+            thisStrategy.addDecisionRule(rule_2);
         end
         
     end

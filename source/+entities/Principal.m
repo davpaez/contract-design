@@ -1,10 +1,9 @@
 classdef Principal <  entities.Player
-    %PRINCIPAL Summary of this class goes here
-    %   Detailed explanation goes here
-    %{
     
-    %}
-
+    properties (Constant, Hidden = true)
+        NAME = 'PRINCIPAL'
+    end
+    
     properties (GetAccess = public, SetAccess = protected, Hidden = true)
         costSingleInspection
     end
@@ -19,21 +18,16 @@ classdef Principal <  entities.Player
         % ----------- %
         
         % Active strategies
-        inspectionAction     % Strategy object
-    end
-    
-    properties ( Dependent )
-        
-    end
-    
-    methods (Access = protected)
-        
+        contractStrategy      % Strategy object
+        inspectionStrategy    % Strategy object
     end
     
     methods
-        %% Constructor
         
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
         
+        function self = Principal (progSet, problem)
         %{
         
             Input
@@ -41,41 +35,63 @@ classdef Principal <  entities.Player
             Output
                 
         %}
-        function thisPrincipal = Principal (progSet, contract, problem)
             import managers.*
             
             % Creates instance of object of the superclass Player
-            thisPrincipal@entities.Player(contract, problem);
+            self@entities.Player(problem);
             
             % Cost single inspection
             cinsp = progSet.returnItemSetting(ItemSetting.COST_INSP);
-            thisPrincipal.costSingleInspection = cinsp.value;
+            self.costSingleInspection = cinsp.value;
+            
+            % Assigns contract offer strategy attribute
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_CONTRACT);
+            self.contractStrategy = faculty.getSelectedStrategy();
             
             % Assigns inspection strategy attribute
-            action = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
-            thisPrincipal.inspectionAction = returnCopyAction(action);
+            faculty = progSet.returnItemSetting(ItemSetting.STRATS_INSP);
+            self.inspectionStrategy = faculty.getSelectedStrategy();
             
             % Utility function
             fnc = progSet.returnItemSetting(ItemSetting.PRINCIPAL_UTIL_FNC);
-            thisPrincipal.utilityFunction = fnc.equation;
+            self.utilityFunction = fnc.equation;    
             
         end
         
-        %% Getter functions
+        
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
+        
+        function contract = generateContract(self, progSet, infra)
+        %{
+        
+            Input
+                
+            Output
+                
+        %}
+            import dataComponents.Message
+            import dataComponents.Contract
+            import managers.Information
+            import managers.Faculty
+            
+            msg = Faculty.createEmptyMessage(self, Faculty.CONTRACT_OFFER);
+            self.contractStrategy.decide(msg);
+            
+            conDur = msg.getOutput(Information.CONTRACT_DURATION);
+            perfThreshold = msg.getOutput(Information.PERFORMANCE_THRESHOLD);
+            principalContributions = msg.getOutput(Information.PAYMENT_SCHEDULE);
+            revRateFnc = msg.getOutput(Information.REVENUE_RATE_FUNC);
+            
+            assert(infra.nullPerf <= perfThreshold && perfThreshold <= infra.maxPerf, ...
+                'Performance threshold must be withinn [nullPerf, maxPerf] interval.')
+            
+            contract = Contract(progSet, conDur, principalContributions, ...
+                revRateFnc, perfThreshold);
+        end
         
         
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------
-        % ----------------------------------------------------------------
-
-        
+        function operation = submitOperation(self)
         %{
         
             Input
@@ -83,58 +99,30 @@ classdef Principal <  entities.Player
             Output
                 operation: [class Operation] 
         %}
-        function operation = submitOperation(thisPrincipal)
             import dataComponents.Operation
             import dataComponents.Message
+            import dataComponents.Transaction
             import managers.Strategy
             import managers.Information
+            import managers.Faculty
             
-            if isempty(thisPrincipal.submittedOperation)
+            if isempty(self.submittedOperation)
                 
-                msg = Message(thisPrincipal);
-                msg.setTypeRequestedInfo(Information.TIME_INSPECTION);
-                
-                thisPrincipal.inspectionAction.decide(msg);
+                msg = Faculty.createEmptyMessage(self, Faculty.INSPECTION);
+                self.inspectionStrategy.decide(msg);
                 
                 timeNextInspection = msg.getOutput(Information.TIME_INSPECTION);
                 
-                isSens = thisPrincipal.inspectionAction.isSensitive();
+                isSens = self.inspectionStrategy.isSensitive();
                 
                 operation = Operation(timeNextInspection, Operation.INSPECTION, isSens, []);
-                
-                % Stores Operation object
-                thisPrincipal.setSubmittedOperation(operation);
+                self.setSubmittedOperation(operation);
                 
             else
-                operation = thisPrincipal.submittedOperation;
+                operation = self.submittedOperation;
             end
             
         end
         
-        function operation = submitFinalInspection(thisPrincipal)
-            % DELETE method
-            
-            warning('Deprecated. Final inspection is responsability of theinspection strategy.')
-            
-            import dataComponents.Operation
-            
-            finalTimeContract = thisPrincipal.contract.getContractDuration();
-            
-            operation = Operation(finalTimeContract, Operation.INSPECTION, false, [] );
-            thisPrincipal.setSubmittedOperation(operation);
-        end
-        
-        
-        %%
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
-
-        
     end
-    
-    methods (Static)
-        
-    end
-    
 end

@@ -4,12 +4,12 @@
 clear all
 clc
 
-payTest = PayoffTest;
-payTest.run
+obsTest = ObservationListTest();
+obsTest.run
 
 %%
-clear all
-clc
-
-obsTest = ObservationTest;
-obsTest.run
+% clear all
+% clc
+% 
+% payTest = PayoffTest;
+% payTest.run

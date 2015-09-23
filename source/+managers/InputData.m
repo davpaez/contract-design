@@ -1,6 +1,4 @@
 classdef InputData < managers.ItemSetting
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Constant, Hidden = true)
         % Number set: Associated with any 'value' attribute
@@ -67,11 +65,11 @@ classdef InputData < managers.ItemSetting
         
         %% Getter functions
         
-        function answer = get.determined(thisInputData)
+        function answer = get.determined(self)
             answer = false;
             
-            condition = ~thisInputData.isEmptyDataObject() && ...
-                ~isempty(thisInputData.value);
+            condition = ~self.isEmptyDataObject() && ...
+                ~isempty(self.value);
             
             if condition == true
                 answer = true;
@@ -100,8 +98,8 @@ classdef InputData < managers.ItemSetting
                 
         %}
         %TODO Is this useful? The property degreeFreedom should exist?
-        function setAsFree(thisInputData)
-            thisInputData.degreeFreedom = InputData.FREE;
+        function setAsFree(self)
+            self.degreeFreedom = InputData.FREE;
         end
         
         
@@ -116,8 +114,8 @@ classdef InputData < managers.ItemSetting
                 
         %}
         %TODO Is this useful? The property degreeFreedom should exist?
-        function setAsLimited(thisInputData)
-            thisInputData.degreeFreedom = InputData.LIMITED;
+        function setAsLimited(self)
+            self.degreeFreedom = InputData.LIMITED;
         end
         
         % ----------------------------------------------------------------
@@ -131,8 +129,8 @@ classdef InputData < managers.ItemSetting
             Output
                 
         %}
-        function answer = isEmptyDataObject(thisInputData)
-            if isempty(thisInputData.identifier)
+        function answer = isEmptyDataObject(self)
+            if isempty(self.identifier)
                 answer = true;
             else
                 answer = false;
@@ -148,8 +146,8 @@ classdef InputData < managers.ItemSetting
             Output
                 
         %}
-        function answer = isInteger(thisInputData)
-            if strcmp(thisInputData.value_NumberSet, InputData.INTEGER)
+        function answer = isInteger(self)
+            if strcmp(self.value_NumberSet, InputData.INTEGER)
                 answer = true;
             else
                 answer = false;
@@ -165,49 +163,49 @@ classdef InputData < managers.ItemSetting
                 
         %}
         %TODO
-        function checkValidity(thisInputData)
+        function checkValidity(self)
             %
-            if isempty(thisInputData.value)
-                if thisInputData.isGiven()
+            if isempty(self.value)
+                if self.isGiven()
                     error('This inputData is GIVEN, therefore it cannot have an empty value attribute')
                 else % If it is not-given, it must have bounds and  numberset and they must be valid
-                    assert(~isempty(thisInputData.value_LowerBound), ...
+                    assert(~isempty(self.value_LowerBound), ...
                         'The lower bound attribute of this inputData cannot be empty')
-                    assert(~isempty(thisInputData.value_UpperBound), ...
+                    assert(~isempty(self.value_UpperBound), ...
                         'The upper bound attribute of this inputData cannot be empty')
                     
                     
-                    assert(thisInputData.value_LowerBound < thisInputData.value_UpperBound, ...
+                    assert(self.value_LowerBound < self.value_UpperBound, ...
                         'The value bounds of this inputData must hold that lowerBound < upperBound')
                     
-                    assert(~isempty(thisInputData.value_NumberSet), ...
+                    assert(~isempty(self.value_NumberSet), ...
                         'The number set attribute of this inputData cannot be empty')
                 end
                 
             else
-                if thisInputData.isGiven() % It if is given, it must have empty bounds and numberset
-                    assert(isempty(thisInputData.value_LowerBound), ...
+                if self.isGiven() % It if is given, it must have empty bounds and numberset
+                    assert(isempty(self.value_LowerBound), ...
                         'The lower bound attribute of this inputData must be empty')
-                    assert(isempty(thisInputData.value_UpperBound), ...
+                    assert(isempty(self.value_UpperBound), ...
                         'The upper bound attribute of this inputData must be empty')
-                    assert(isempty(thisInputData.value_NumberSet), ...
+                    assert(isempty(self.value_NumberSet), ...
                         'The number set attribute of this inputData must be empty')
                     
                 else % If it is not-given, it must have bounds and  numberset and they must be valid
-                    assert(~isempty(thisInputData.value_LowerBound), ...
+                    assert(~isempty(self.value_LowerBound), ...
                         'The lower bound attribute of this inputData cannot be empty')
-                    assert(~isempty(thisInputData.value_UpperBound), ...
+                    assert(~isempty(self.value_UpperBound), ...
                         'The upper bound attribute of this inputData cannot be empty')
-                    assert(thisInputData.value_LowerBound < thisInputData.value_UpperBound, ...
+                    assert(self.value_LowerBound < self.value_UpperBound, ...
                         'The value bounds of this inputData must hold that lowerBound < upperBound')
                     
-                    boundsCompliance = thisInputData.value >= thisInputData.value_LowerBound && ...
-                        thisInputData.value <= thisInputData.value_UpperBound;
+                    boundsCompliance = self.value >= self.value_LowerBound && ...
+                        self.value <= self.value_UpperBound;
                     
                     assert(boundsCompliance == true, ...
                         'The value attribute does not comply with the bounds of this inputData')
                     
-                    assert(~isempty(thisInputData.value_NumberSet), ...
+                    assert(~isempty(self.value_NumberSet), ...
                         'The number set attribute of this inputData cannot be empty')
                 end
             end

@@ -1,7 +1,18 @@
+%{
+# PURPOSE
+
+An operation object represents an operation or intention of operation 
+performed by either Nature or Player on the infrastructure system. It can 
+be exchanged between clases so that they understand what other classes are 
+doing, or are intending to do on Infrastructure.
+
+Operation objects are not stored as attribute of any player. They are only 
+stransactional objects that do not need to persist beyond its execution.
+
+%}
+
 classdef Operation < managers.TypedClass
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    % 
     properties (Constant, Hidden = true)
         % Types of operations
         INSPECTION  = 'INSPECTION'
@@ -28,9 +39,19 @@ classdef Operation < managers.TypedClass
     end
     
     methods
-        %% Constructor
         
-        function thisOp = Operation(time, type, sens, param)
+        %% ::::::::::::::::::    Constructor method    ::::::::::::::::::::
+        % *****************************************************************
+        
+        function self = Operation(time, type, sens, param)
+        %{
+        * 
+        
+            Input
+            
+            Output
+                
+        %}
             import dataComponents.Operation
             
             listTypes = {  Operation.VOL_MAINT, ...
@@ -38,136 +59,113 @@ classdef Operation < managers.TypedClass
                 Operation.SHOCK, ...
                 Operation.INSPECTION };
             
-            thisOp@managers.TypedClass(listTypes);
+            self@managers.TypedClass(listTypes);
             
             % Validation of Input Data
             assert(time >= 0 , ...
                 'Time argument must be greater or equal than zero')
-            assert(thisOp.isValidType(type) == true, ...
+            assert(self.isValidType(type) == true, ...
                 'The type parameter is not valid')
             assert(islogical(sens), ...
                 'Adaptiveness parameter must be boolean');
             
             isMaintenance = strcmp(type, Operation.VOL_MAINT) || strcmp(type, Operation.MAND_MAINT);
             
-            %{
-            % TODO How to acces the maxPerf and nullPerf information?
-            if isMaintenance == true
-                assert(param <= Infrastructure.MAXPERF && param >= 0, ...
-                'The performance goal must be within the interval [0, Infrastructure.MAXPERF]')                
-            end
-            %}
-            
             % Object construction
-            thisOp.time = time;
-            thisOp.setType(type);
-            thisOp.sensitive = sens;
+            self.time = time;
+            self.setType(type);
+            self.sensitive = sens;
             
             if isMaintenance == true
-                thisOp.perfGoal = param;
+                self.perfGoal = param;
             end
             
             if strcmp(type, Operation.SHOCK)
-                thisOp.forceValue = param;
+                self.forceValue = param;
             end
             
             % Validation of constructed object
-            if thisOp.isType(Operation.INSPECTION)
-                assert(isempty(thisOp.perfGoal) && isempty(thisOp.forceValue), ...
+            if self.isType(Operation.INSPECTION)
+                assert(isempty(self.perfGoal) && isempty(self.forceValue), ...
                     'An inspection operation must have an empty perfGoal and forceValue attributes')
             end
             
-            if thisOp.isDeltaOperation()
-                assert(~isempty(thisOp.perfGoal) || ~isempty(thisOp.forceValue), ...
+            if self.isDeltaOperation()
+                assert(~isempty(self.perfGoal) || ~isempty(self.forceValue), ...
                     'A  delta operation (maintenances or shock) operation  must have a non-empty either perfGoal or forceValue attribute')
             end
             
         end
         
-        %% Getter functions
         
-        %% Regular methods
+        %% ::::::::::::::::::::    Mutator methods    :::::::::::::::::::::
+        % *****************************************************************
         
-        % ----------------------------------------------------------------
-        % ---------- Accessor methods ------------------------------------
-        % ----------------------------------------------------------------
-        
-        
-        
-        % ----------------------------------------------------------------
-        % ---------- Mutator methods -------------------------------------        
-        % ----------------------------------------------------------------
-        
+        function setType(self, type)
         %{
-        * Sets the type attribute of thisOperation if type argument is valid
+        * Sets the type attribute of self if type argument is valid
         
             Input
                 type: [class String] 
             Output
                 answer: [class Boolean]
         %}
-        function setType(thisOp, type)
-            if thisOp.isValidType(type)
-                thisOp.type = type;
+            if self.isValidType(type)
+                self.type = type;
             else
                 error('The type entered as argument is not valid')
             end
         end
         
-        %{
         
+        function setAsPending(self)
+        %{
+        * 
             Input
                 
             Output
                 
         %}
-        
-        function setAsPending(thisOperation)
-            thisOperation.pendingExecution = true;
+            self.pendingExecution = true;
         end
         
         
-        % ----------------------------------------------------------------
-        % ---------- Informative methods ---------------------------------
-        % ----------------------------------------------------------------
+        %% ::::::::::::::::::    Informative methods    :::::::::::::::::::
+        % *****************************************************************
         
+        function answer = isDeltaOperation(self)
         %{
-        
+        * 
             Input
                 
             Output
                 
         %}
-        
-        function answer = isDeltaOperation(thisOperation)
             import dataComponents.Operation
             
-            answer = thisOperation.isType(Operation.VOL_MAINT) || ...
-                thisOperation.isType(Operation.MAND_MAINT) || ...
-                thisOperation.isType(Operation.SHOCK) ;
+            answer = self.isType(Operation.VOL_MAINT) || ...
+                self.isType(Operation.MAND_MAINT) || ...
+                self.isType(Operation.SHOCK) ;
         end
         
         
+        function answer = isType(self, type)
         %{
-        
+        * 
             Input
                 
             Output
                 
         %}
-        function answer = isType(thisOp, type)
+            assert(self.isValidType(type), 'The type entered as argument is not valid')
             
-            assert(thisOp.isValidType(type), 'The type entered as argument is not valid')
-            
-            if strcmp(thisOp.type, type)
+            if strcmp(self.type, type)
                 answer = true;
             else
                 answer = false;
             end
         end
-
         
         
     end
-    
 end

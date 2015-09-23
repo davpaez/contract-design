@@ -4,7 +4,7 @@ classdef Rule_1 < managers.DecisionRule
     Related action: Inspection
     Class name: Rule_1
     Index: 1
-    Name: Fixed inspection interval by parameter
+    Name: Fixed inspection interval with random component
     ID: behavior.principal.inspection.Rule_1
     Type of rule:
         * Sensitive
@@ -33,14 +33,14 @@ classdef Rule_1 < managers.DecisionRule
     
     properties (Constant, Hidden = true)
         % Names or parameters in order
-        INSPECTION_TIME_INTERVAL = 'inspectionTimeInterval'
+        FIXED_TIME_INTERVAL = 'FIXED_TIME_INTERVAL'
+        RANDOM_PART = 'RANDOM_PART'
     end
     
     properties (GetAccess = public, SetAccess = protected)
         % ----------- %
         % Attributes
         % ----------- %
-        
         
         % ----------- %
         % Objects
@@ -61,7 +61,7 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setIndex(1);
             
             % Set name
-            thisRule.setName('Fixed inspection interval by parameter');
+            thisRule.setName('Fixed inspection interval with random component');
             
             % One decision variable: Time of inspection
             thisRule.setDecisionVars_Number(1);
@@ -73,21 +73,21 @@ classdef Rule_1 < managers.DecisionRule
             thisRule.setAsParametrized();
             
             % Set number or parameters
-            thisRule.setParams_Number(1);
+            thisRule.setParams_Number(2);
             
             % Set name of parameters
-            thisRule.setParams_Name({ thisRule.INSPECTION_TIME_INTERVAL });
+            thisRule.setParams_Name({ thisRule.FIXED_TIME_INTERVAL, thisRule.RANDOM_PART });
             
             % Set number set of parameters
-            thisRule.setParams_NumberSet({ InputData.REAL })
+            thisRule.setParams_NumberSet({ InputData.REAL, InputData.REAL })
             
             % Set upper and lower bounds for parameters
-            thisRule.setParams_LowerBounds([ 0.05 ]);
-            thisRule.setParams_UpperBounds([ 5 ]);
+            thisRule.setParams_LowerBounds([ 0.05, 0 ]);
+            thisRule.setParams_UpperBounds([ 5, 1 ]);
             
 			% Set default parameters value
-			thisRule.setParams_Value( [2] );
-            
+			thisRule.setParams_Value( [2, 0.5] );
+			
             % Set as Non-adaptive
             thisRule.setTypeRule_Sensitivity(DecisionRule.SENSITIVE);
             
@@ -96,7 +96,6 @@ classdef Rule_1 < managers.DecisionRule
 			
             % Type of output produced by this rule
             thisRule.setTypeRule_Output({ DecisionRule.ABSOLUTE_VALUE });
-            
         end
         
         %% Getter functions
@@ -134,8 +133,12 @@ classdef Rule_1 < managers.DecisionRule
             
             thePrincipal = theMsg.getExecutor();
             
-            timeInterval = thisRule.params_Value;
-			
+            params = thisRule.params_Value;
+            fixed_part = params(1);
+            random_part = fixed_part * params(2) * (-1+(1-(-1))*rand);
+            
+            timeInterval = fixed_part + random_part ;
+            
             inspEvent = thePrincipal.eventList.getLastEventOfType(Event.INSPECTION);
 			if ~isempty(inspEvent)
 				lastInspectionTime = inspEvent.time;

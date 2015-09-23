@@ -110,21 +110,26 @@ classdef Rule_2 < managers.DecisionRule
             Output
                 
         %}
-        function valuePenaltyFee = mainAlgorithm(thisRule, thePrincipal, inputStructInfo)
-            import dataComponents.Payoff
+        
+        function mainAlgorithm(~, theMsg)
+            import dataComponents.Transaction
+            import managers.Information
             
-            penaltyPayoffs = thePrincipal.payoff.returnPayoffsOfType(Payoff.PENALTY);
-            pmax = thePrincipal.contract.getMaxSumPenalties();
-            tm = thePrincipal.contract.getContractDuration();
+            thePrincipal = theMsg.getExecutor();
+            penaltyPayoffs = thePrincipal.payoffList.returnPayoffsOfType(Transaction.PENALTY);
+            pmax = 500; % Arbitrary value
+            tm = thePrincipal.contract.duration;
 
-            sumPastPenalties = sum(penaltyPayoffs.value);
+            sumPastPenalties = sum(penaltyPayoffs.valueFlow);
             
-			violationTime = inputStructInfo.timeDetection;
+			violationTime = theMsg.getExtraInfo(theMsg.TIME_DETECTION);
 			
             gamma = log(pmax+1)/tm;
             currentNecessarySumPenalties = exp(gamma*violationTime)-1;
             
             valuePenaltyFee = currentNecessarySumPenalties - sumPastPenalties;
+            
+            theMsg.submitResponse(Information.VALUE_PENALTY_FEE, valuePenaltyFee);
             
         end
         

@@ -1,43 +1,26 @@
-classdef Strategy_3 < managers.VolMaintStrategy
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (GetAccess = public, SetAccess = protected)
-        % ----------- %
-        % Attributes
-        % ----------- %
-		
-        
-        % ----------- %
-        % Objects
-        % ----------- %
-        
-        
-    end
+classdef Strategy_3 < managers.Strategy
 	
     methods
         %% Constructor
         
-        function thisStrategy = Strategy_3()
-            
-            thisStrategy@managers.VolMaintStrategy();
+        function thisStrategy = Strategy_3(theFaculty)
             
             import managers.*
             import behavior.agent.*
 			
-            % Set index
-            thisStrategy.setIndex(3);
+            id = 'Perfect maintenance before violation';
+            thisStrategy@managers.Strategy(id, theFaculty.decisionVars);
             
             % Create decision rule objects
             rule_3 = VoluntaryMaint.Rule_3();
             rule_10 = VoluntaryMaint.Rule_10();
             
+            % Customize parameters properties of rules implemented
+            
+            
             % Initialize cell array of strategy objects
-            thisStrategy.decisionRuleArray{1} = rule_3;
-            thisStrategy.decisionRuleArray{2} = rule_10;
-            
-            % Populate parameters properties of rules implemented
-            
+            thisStrategy.addDecisionRule(rule_3);
+            thisStrategy.addDecisionRule(rule_10);
         end
         
     end
