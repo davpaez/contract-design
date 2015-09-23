@@ -16,15 +16,14 @@ addpath('experiments');
 %%
 
 % Experiment 1
-progSettings = ex1.settings();
+progSettings = ex6.settings();
 experim = Experiment(progSettings);
 
 experim.run();
 data1 = experim.report();
 
-
 %%
-
+%{
 % Experiment 5
 progSettings = ex5.settings();
 experim = Experiment(progSettings);
@@ -69,3 +68,4 @@ ylabel('Principal''s utility')
 
 h1 = figure;
 gui.plot_dispersion(h1, data6, {'ua', 'up'});
+%}
