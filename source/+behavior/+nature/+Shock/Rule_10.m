@@ -84,7 +84,7 @@ classdef Rule_10 < managers.DecisionRule
             
             % Set upper and lower bounds for parameters
             thisRule.setParams_LowerBounds([  5 , 0.05 ]);
-            thisRule.setParams_UpperBounds([ 8 , 0.1 ]);
+            thisRule.setParams_UpperBounds([100 , 1 ]);
             
             % Set as Non-adaptive
             thisRule.setTypeRule_Sensitivity(DecisionRule.SENSITIVE);
@@ -96,7 +96,7 @@ classdef Rule_10 < managers.DecisionRule
             thisRule.setTypeRule_Output({ DecisionRule.DELTA_VALUE });
 			
 			% Set default parameters value
-			thisRule.setParams_Value( [7, 0.07] );
+			thisRule.setParams_Value( [10, 0.5] );
         end
         
         %% Getter functions

@@ -45,38 +45,15 @@ classdef CommonFnc
             Output
                 finalPerf:      Performance after shock
         %}
-        minF = 0;
-        maxF = 70;
 
         assert(forceValue >= 0, 'Force value must be non-negative')
-
-        condition = forceValue >= minF + ((maxF-minF) / (maxP-nullP))*(currentPerf-nullP);
-
-        if condition == true
-            finalPerf = nullP;
-        elseif forceValue <= minF
-            finalPerf = currentPerf;
+        
+        if currentPerf/forceValue <= 100/50
+            finalPerf = 0;
         else
-
-            p1 = [nullP , minF , nullP];
-            p2 = [maxP  , maxF , nullP];
-            p3 = [maxP  , minF , maxP ];
-
-            r_12 = p2-p1;
-            r_13 = p3-p1;
-
-            n = cross(r_12, r_13);
-            p = p1;
-
-            finalPerf = (  -n(1)*(currentPerf-p(1)) ...
-                -n(2)*(forceValue -p(2)) ...
-                +n(3)*p(3)                      )/n(3);
-
-            if finalPerf < nullP
-                finalPerf = nullP;
-            end
-
+            finalPerf = currentPerf - 100/50*forceValue;
         end
+        
         end
         
         function r = continuousRespFunction(f, d, v, t)
