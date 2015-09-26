@@ -44,7 +44,7 @@ progSet.add(fi);
 data = InputData();
 
 data.setIdentifier(ItemSetting.TYPE_EXP);
-data.value = Experiment.SING;
+data.value = Experiment.DISP;
 
 progSet.add(data);
 
