@@ -132,7 +132,7 @@ progSet.add(fnc);
 fnc = Function();
 
 fnc.setIdentifier(ItemSetting.CONT_RESP_FNC);
-fnc.equation = @CommonFnc.continuousRespFunction;
+fnc.equation = @continuousRespFunction;
 
 progSet.add(fnc);
 
@@ -295,6 +295,27 @@ end
 
 
 %% Auxiliar functions
+function r = continuousRespFunction(f, d, v, t)
+%{
+* 
+
+    Input
+        f:  Continuous environmental force
+        d:  Demand
+        v:  Performance
+        t:  Time (years)
+
+    Output
+        r:  Response
+%}
+
+r = -17.1556;
+if v <= 0
+    r = 0;
+end
+
+end
+
 
 function d = demandFunction(v, nullPerf, maxPerf)
 %{
