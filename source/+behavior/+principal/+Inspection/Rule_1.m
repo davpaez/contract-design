@@ -83,7 +83,7 @@ classdef Rule_1 < managers.DecisionRule
             
             % Set upper and lower bounds for parameters
             thisRule.setParams_LowerBounds([ 0.05, 0 ]);
-            thisRule.setParams_UpperBounds([ 5, 1 ]);
+            thisRule.setParams_UpperBounds([ 8, 1 ]);
             
 			% Set default parameters value
 			thisRule.setParams_Value( [2, 0.5] );
