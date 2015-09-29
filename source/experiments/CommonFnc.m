@@ -32,7 +32,7 @@ classdef CommonFnc
         end
         
         
-        function finalPerf = shockResponseFunction(nullP, maxP, currentPerf, forceValue)
+        function finalPerf = discreteResponseFunction(nullP, maxP, currentPerf, forceValue)
         %{
         * 
 

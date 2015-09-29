@@ -63,7 +63,7 @@ classdef Infrastructure < matlab.mixin.Copyable
             self.contResponseFnc = fnc.equation;
             
             % Shock response function
-            fnc = progSet.returnItemSetting(ItemSetting.SHOCK_RESP_FNC);
+            fnc = progSet.returnItemSetting(ItemSetting.DISCR_RESP_FNC);
             self.shockResponseFnc = fnc.equation;
         end
         

@@ -34,7 +34,7 @@ classdef ItemSetting < matlab.mixin.Copyable
         INITIAL_PERF    = 'INITIAL_PERF'    % 
         DEMAND_FNC      = 'DEMAND_FNC'      % How users demand respond to Perf and time
         CONT_RESP_FNC   = 'CONT_RESP_FNC'   % 
-        SHOCK_RESP_FNC  = 'SHOCK_RESP_FNC'  % 
+        DISCR_RESP_FNC  = 'DISCR_RESP_FNC'  % 
         
         % Realization
         TIME_RES        = 'TIME_RES'    % Time resolution
