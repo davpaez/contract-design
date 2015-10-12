@@ -1,10 +1,16 @@
-# README #
+# README
 
-### Publications ###
+This is a framework built to simulate the interaction between principal, agent and nature during the operation of an infrastructure system under a concession.
 
-#### European Journal of operational Research (EJOR)
+## How to get started?
 
-The model presented in the paper *A dynamic principal-agent framework for modeling the performance of infrastructure* submitted to the EJOR is freely available. Please follow these instructions:
+1. Download the .zip package or clone the git repository
+2. You must have MATLAB 2014b or later, installed on your system
+3. Set the source folder as the current folder in MATLAB
+4. Run gui.m script to open the graphical user interface
 
-1. Go to the EJOR2015 branch [[Link here]](https://github.com/davpaez/contract-design/tree/EJOR2015)
-2. Clone or download
+## Publications
+
+### European Journal of operational Research (EJOR)
+
+This model was presented in the paper *A dynamic principal-agent framework for modeling the performance of infrastructure* submitted to the EJOR.
