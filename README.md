@@ -13,4 +13,4 @@ This is a framework built to simulate the interaction between principal, agent a
 
 ### European Journal of operational Research (EJOR)
 
-This model was presented in the paper *A dynamic principal-agent framework for modeling the performance of infrastructure* submitted to the EJOR.
+This model was presented in the paper [*A dynamic principal-agent framework for modeling the performance of infrastructure*](https://www.sciencedirect.com/science/article/pii/S0377221716301552) submitted to the EJOR.
